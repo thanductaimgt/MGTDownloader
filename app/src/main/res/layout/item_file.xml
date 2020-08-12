@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/itemRootView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground">
+
+    <ImageView
+            android:contentDescription="@string/file"
+            android:id="@+id/fileIconImgView"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/dir" />
+
+    <TextView
+            android:id="@+id/fileNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:scrollHorizontally="true"
+            android:textSize="@dimen/sizeTextTitle"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/fileSizeTextView"
+            app:layout_constraintEnd_toStartOf="@id/fileTimeTextView"
+            app:layout_constraintStart_toEndOf="@id/fileIconImgView"
+            app:layout_constraintTop_toTopOf="@id/fileIconImgView"
+            tools:text="test-db_master" />
+
+    <TextView
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            android:id="@+id/fileSizeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sizeTextSmall"
+            app:layout_constraintBottom_toBottomOf="@id/fileIconImgView"
+            app:layout_constraintEnd_toStartOf="@id/stroke"
+            app:layout_constraintStart_toStartOf="@id/fileNameTextView"
+            app:layout_constraintTop_toBottomOf="@id/fileNameTextView"
+            tools:text="123.45 MB" />
+
+    <View
+            android:layout_marginBottom="3dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:id="@+id/stroke"
+            app:layout_constraintBottom_toBottomOf="@id/fileSizeTextView"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toEndOf="@id/fileSizeTextView"
+            app:layout_constraintEnd_toStartOf="@id/itemCountTextView"
+            android:background="@drawable/shape_round"
+            android:layout_width="3dp"
+            android:layout_height="0dp"/>
+
+    <TextView
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:id="@+id/itemCountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sizeTextSmall"
+            app:layout_constraintBottom_toBottomOf="@id/fileSizeTextView"
+            app:layout_constraintEnd_toEndOf="@id/fileNameTextView"
+            app:layout_constraintStart_toEndOf="@id/stroke"
+            tools:text="3 item" />
+
+    <ImageView
+            android:id="@+id/downloadImgView"
+            android:layout_width="35dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/download"
+            android:padding="8dp"
+            android:src="@drawable/download"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+            android:id="@+id/fileTimeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="end"
+            android:textSize="@dimen/sizeTextSmall"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/downloadImgView"
+            app:layout_constraintVertical_bias="1"
+            tools:text="Nov 15, 2017\n09:00:00 AM" />
+
+    <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/lightMediumGray"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/fileNameTextView" />
+</androidx.constraintlayout.widget.ConstraintLayout>

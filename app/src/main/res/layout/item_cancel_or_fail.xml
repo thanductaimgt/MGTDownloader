@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/itemRootView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/sizeDownloadItemGap"
+        app:cardCornerRadius="@dimen/sizeRoundCornerRadiusItem">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <include
+            layout="@layout/item_download_base"/>
+
+        <TextView
+                android:id="@+id/downloadedSizeTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/desc_downloaded_size"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@id/urlTitleTextView"
+                app:layout_constraintTop_toBottomOf="@id/timeTextView" />
+
+        <TextView
+                android:layout_marginEnd="8dp"
+                android:id="@+id/downloadedSizeTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/urlTextView"
+                app:layout_constraintTop_toTopOf="@id/downloadedSizeTitleTextView"
+                tools:text="1.23 GB" />
+
+        <ImageView
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:id="@+id/retryImgView"
+                android:layout_width="@dimen/sizeTaskActionButton"
+                android:layout_height="0dp"
+                android:contentDescription="@string/desc_delete"
+                android:padding="7dp"
+                android:src="@drawable/retry"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/deleteImgView"
+                app:layout_constraintTop_toBottomOf="@id/downloadedSizeTextView"
+                app:layout_constraintVertical_bias="1" />
+
+        <ImageView
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:id="@+id/deleteImgView"
+                android:layout_width="@dimen/sizeTaskActionButton"
+                android:layout_height="0dp"
+                android:contentDescription="@string/desc_delete"
+                android:padding="7dp"
+                android:src="@drawable/delete"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/totalSizeTextView"
+                app:layout_constraintVertical_bias="1" />
+
+        <TextView
+                tools:visibility="visible"
+                android:id="@+id/storageStateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="7dp"
+                android:text="@string/desc_deleted_from_storage"
+                android:textColor="@color/lightPrimaryDark"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/downloadedSizeTextView" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

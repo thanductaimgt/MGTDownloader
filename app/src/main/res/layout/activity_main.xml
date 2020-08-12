@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            tools:background="@color/lightBackground"
+            tools:context=".ui.MainActivity">
+
+        <TextView
+                android:id="@+id/networkStateTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/lightCancelButtonBackground"
+                android:padding="4dp"
+                android:text="@string/no_connection"
+                android:textAlignment="center"
+                android:textColor="@color/lightBackground"
+                android:textStyle="bold"
+                android:visibility="invisible"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+        <ImageView
+                android:id="@+id/appIconImgView"
+                android:layout_width="40dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/app_icon"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/networkStateTextView" />
+
+        <TextView
+                android:id="@+id/titleTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="16dp"
+                android:text="@string/app_name"
+                android:textColor="@color/lightPrimary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/appIconImgView"
+                app:layout_constraintEnd_toStartOf="@id/settingsImgView"
+                app:layout_constraintStart_toEndOf="@id/appIconImgView"
+                app:layout_constraintTop_toTopOf="@id/appIconImgView" />
+
+        <ImageView
+                android:id="@+id/settingsImgView"
+                android:layout_width="40dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="6dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/desc_settings"
+                android:padding="10dp"
+                android:src="@drawable/settings"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/networkStateTextView" />
+
+        <TextView
+                android:id="@+id/descTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/desc_app"
+                android:textAlignment="center"
+                android:textColor="@color/lightStrongGray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/appIconImgView" />
+
+        <TextView
+                android:id="@+id/pasteDescTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/desc_paste_url"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/descTextView" />
+
+        <EditText
+                android:id="@+id/urlEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="16dp"
+                android:background="@drawable/shape_edit_text"
+                android:hint="@string/hint_paste_url"
+                android:importantForAutofill="no"
+                android:inputType="textUri"
+                android:paddingStart="40dp"
+                android:paddingEnd="16dp"
+                android:textSize="@dimen/sizeTextNormal"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/pasteDescTextView"
+                tools:text="https://facebook.com/video/19348230934305?timestamp=154893894359489" />
+
+        <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="4dp"
+                android:contentDescription="@string/desc_url"
+                android:padding="9dp"
+                android:src="@drawable/url"
+                app:layout_constraintBottom_toBottomOf="@id/urlEditText"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintStart_toStartOf="@id/urlEditText"
+                app:layout_constraintTop_toTopOf="@id/urlEditText" />
+
+        <TextView
+                android:id="@+id/warningTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textColor="@color/lightErrorText"
+                android:visibility="gone"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/urlEditText"
+                tools:text="@string/cannot_resolve_host"
+                tools:visibility="visible" />
+
+        <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/loadingAnimView"
+                android:layout_width="50dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/warningTextView"
+                app:lottie_enableMergePathsForKitKatAndAbove="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/loading"
+                app:lottie_renderMode="software"
+                tools:visibility="visible" />
+
+        <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/fileIconImgView"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/sizeFileExtensionHeight"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/file"
+                android:src="@drawable/zip"
+                android:visibility="gone"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/fileDescLayout"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/loadingAnimView"
+                tools:visibility="visible" />
+
+        <LinearLayout
+                android:id="@+id/fileDescLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@id/fileIconImgView"
+                app:layout_constraintEnd_toStartOf="@id/editFileNameImgView"
+                app:layout_constraintStart_toEndOf="@id/fileIconImgView"
+                app:layout_constraintTop_toTopOf="@id/fileIconImgView">
+
+            <TextView
+                    android:id="@+id/fileNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:textStyle="bold"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintEnd_toStartOf="@id/guideline"
+                    app:layout_constraintStart_toEndOf="@id/fileIconImgView"
+                    app:layout_constraintTop_toTopOf="@id/fileIconImgView"
+                    tools:text="test_db-master.zip pppppppppppppppppppppppppppp" />
+
+            <TextView
+                    android:id="@+id/fileSizeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintEnd_toStartOf="@id/guideline"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constraintStart_toStartOf="@id/fileNameTextView"
+                    app:layout_constraintTop_toBottomOf="@id/fileNameTextView"
+                    tools:text="34.99 MB" />
+        </LinearLayout>
+
+
+        <ImageView
+                android:id="@+id/editFileNameImgView"
+                android:layout_width="30dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/desc_edit_name"
+                android:padding="4dp"
+                android:src="@drawable/edit"
+                android:visibility="gone"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/viewFileInfoImgView"
+                app:layout_constraintStart_toEndOf="@id/fileDescLayout"
+                app:layout_constraintTop_toTopOf="@id/fileDescLayout"
+                app:layout_goneMarginEnd="16dp"
+                tools:visibility="visible" />
+
+        <ImageView
+                android:id="@+id/viewFileInfoImgView"
+                android:layout_width="30dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="12dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/desc_view_info"
+                android:padding="4dp"
+                android:src="@drawable/info"
+                android:visibility="gone"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/editFileNameImgView"
+                app:layout_constraintTop_toTopOf="@id/editFileNameImgView"
+                tools:visibility="visible" />
+
+        <Button
+                android:id="@+id/downloadButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="16dp"
+                android:text="@string/label_download"
+                app:layout_constraintTop_toBottomOf="@id/fileIconImgView" />
+
+        <Button
+                android:id="@+id/multiThreadDownloadButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:text="@string/label_multi_thread_download"
+                app:layout_constraintTop_toBottomOf="@id/downloadButton" />
+
+        <TextView
+                android:id="@+id/multiThreadDownloadDescTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/desc_multi_thread_download"
+                android:textColor="@color/lightStrongGray"
+                android:textSize="@dimen/sizeTextSmall"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/multiThreadDownloadButton" />
+
+        <TextView
+                android:id="@+id/multiThreadDownloadUnavailableDescTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/desc_not_available_for_unknown_file_size"
+                android:textColor="@color/lightStrongGray"
+                android:textSize="@dimen/sizeTextSmall"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/multiThreadDownloadDescTextView"
+                tools:visibility="visible" />
+
+        <FrameLayout
+                android:id="@+id/showDownloadListLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_top_corners_with_stroke"
+                app:layout_constraintBottom_toTopOf="@id/adView"
+                app:layout_constraintTop_toBottomOf="@id/startDownloadAnimView"
+                app:layout_constraintVertical_bias="1">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/selectable_bg"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:text="@string/desc_download_list"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/sizeTextTitle"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+        </FrameLayout>
+
+        <ImageView
+                android:layout_width="15dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:contentDescription="@string/desc_expand"
+                android:rotation="180"
+                android:src="@drawable/down"
+                app:layout_constraintBottom_toBottomOf="@id/showDownloadListLayout"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="@id/showDownloadListLayout"
+                app:layout_constraintTop_toTopOf="@id/showDownloadListLayout" />
+
+        <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/startDownloadAnimView"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@id/showDownloadListLayout"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/multiThreadDownloadUnavailableDescTextView"
+                app:layout_constraintVertical_bias="1"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:lottie_enableMergePathsForKitKatAndAbove="true"
+                app:lottie_rawRes="@raw/start_download"
+                app:lottie_renderMode="software"
+                app:lottie_repeatCount="1"
+                tools:visibility="visible" />
+
+        <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:adSize="BANNER"
+                app:adUnitId="ca-app-pub-3940256099942544/6300978111"
+                app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_round_top_corners">
+
+    <FrameLayout
+            android:id="@+id/titleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_round_top_corners"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+                android:id="@+id/fileNameTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selectable_bg"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingStart="40dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="12dp"
+                android:scrollHorizontally="true"
+                android:textAlignment="center"
+                android:textSize="@dimen/sizeTextTitle"
+                android:textStyle="bold"
+                tools:text="test_db-master.zipppppppppppppppppppppppppppppppppppppppppppppppppppppppp" />
+
+        <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:contentDescription="@string/desc_collapse"
+                android:src="@drawable/down" />
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/filePathRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/titleLayout"
+            tools:layout_height="40dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/selectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@android:color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/filePathRecyclerView"
+            app:layout_constraintTop_toTopOf="@id/filePathRecyclerView"
+            tools:visibility="visible">
+
+        <ImageView
+                android:id="@+id/selectAllImgView"
+                android:layout_width="30dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:src="@drawable/select_all"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+                android:id="@+id/discardAllImgView"
+                android:layout_width="30dp"
+                android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:src="@drawable/discard_all"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toEndOf="@id/selectAllImgView"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+                android:id="@+id/selectCountTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:scrollHorizontally="true"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/selectAllImgView"
+                app:layout_constraintEnd_toStartOf="@id/downloadAllImgView"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toEndOf="@id/discardAllImgView"
+                app:layout_constraintTop_toTopOf="@id/selectAllImgView"
+                tools:text="2 item" />
+
+        <ImageView
+                android:id="@+id/downloadAllImgView"
+                android:layout_width="30dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:src="@drawable/download"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+            android:layout_gravity="bottom"
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightMediumGray"
+            app:layout_constraintTop_toBottomOf="@id/titleLayout" />
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fileViewRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/filePathRecyclerView" />
+
+    <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightMediumGray"
+            app:layout_constraintTop_toBottomOf="@id/filePathRecyclerView" />
+
+    <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/startDownloadAnimView"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_marginBottom="40dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:lottie_enableMergePathsForKitKatAndAbove="true"
+            app:lottie_rawRes="@raw/start_download"
+            app:lottie_renderMode="software"
+            app:lottie_repeatCount="1"
+            tools:visibility="visible" />
+
+    <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/animView"
+            android:layout_width="64dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_rawRes="@raw/loading" />
+</androidx.constraintlayout.widget.ConstraintLayout>

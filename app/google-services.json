@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "675216657966",
+    "firebase_url": "https://mgt-downloader.firebaseio.com",
+    "project_id": "mgt-downloader",
+    "storage_bucket": "mgt-downloader.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:675216657966:android:9ba6b5d97db191dc3e59bf",
+        "android_client_info": {
+          "package_name": "com.mgt.downloader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "675216657966-2pbvh5sshcg00vfmr719asf270ant1r0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl2X4SEJgkXoFm73Sv5-mevmRswU-nx-8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "675216657966-2pbvh5sshcg00vfmr719asf270ant1r0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="sizePaddingHorizontalRecyclerView">3dp</dimen>
+    <dimen name="sizePaddingVerticalRecyclerView">4dp</dimen>
+    <dimen name="sizeDownloadItemGap">3dp</dimen>
+    <dimen name="sizeRoundCornerRadiusLayout">20dp</dimen>
+    <dimen name="sizeRoundCornerRadiusItem">8dp</dimen>
+    <dimen name="sizeDownloadItemFileIcon">40dp</dimen>
+    <dimen name="sizeTextTitle">16sp</dimen>
+    <dimen name="sizeTextNormal">14sp</dimen>
+    <dimen name="sizeTextSmall">11sp</dimen>
+    <dimen name="sizeTaskActionButton">32dp</dimen>
+    <dimen name="sizeButtonPaddingVertical">12dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="sizeFileExtensionHeight">50dp</dimen>
+    <dimen name="sizeVideoThumbHeight">100dp</dimen>
+</resources>

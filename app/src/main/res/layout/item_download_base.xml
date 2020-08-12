@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+        android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.25" />
+
+    <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/fileIconImgView"
+            android:layout_width="@dimen/sizeDownloadItemFileIcon"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="6dp"
+            android:contentDescription="@string/desc_file"
+            android:scaleType="centerCrop"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/urlTextView"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:src="@drawable/zip" />
+
+    <ImageView
+            app:tint="#aaffffff"
+            android:id="@+id/playIcon"
+            android:layout_width="28dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_play_arrow_black_24dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/fileIconImgView"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="@id/fileIconImgView"
+            app:layout_constraintStart_toStartOf="@id/fileIconImgView"
+            app:layout_constraintTop_toTopOf="@id/fileIconImgView"
+            tools:visibility="visible" />
+
+    <TextView
+            android:id="@+id/fileNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingBottom="6dp"
+            android:scrollHorizontally="true"
+            android:textAlignment="center"
+            android:textSize="@dimen/sizeTextSmall"
+            android:textStyle="bold"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fileIconImgView"
+            tools:text="a very long file name.png" />
+
+    <ImageView
+            android:id="@+id/arrowImgView"
+            android:layout_width="16dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/desc_expand"
+            android:padding="2dp"
+            android:src="@drawable/expand"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+            android:id="@+id/urlTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/desc_url"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/guideline"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteY="27dp" />
+
+    <TextView
+            android:id="@+id/urlTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:scrollHorizontally="true"
+            app:layout_constraintEnd_toStartOf="@id/arrowImgView"
+            app:layout_constraintStart_toEndOf="@id/barrier"
+            app:layout_constraintTop_toTopOf="@id/urlTitleTextView"
+            tools:text="https://youtube.com/view?id=7NF923FJEW09494JF9449JH43F" />
+
+    <TextView
+            android:id="@+id/totalSizeTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/desc_size"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/urlTitleTextView"
+            app:layout_constraintTop_toBottomOf="@id/urlTextView" />
+
+    <TextView
+            android:id="@+id/totalSizeTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/urlTextView"
+            app:layout_constraintTop_toTopOf="@id/totalSizeTitleTextView"
+            tools:text="12.34 GB" />
+
+    <TextView
+            android:id="@+id/timeTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/desc_begin_at"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/urlTitleTextView"
+            app:layout_constraintTop_toBottomOf="@id/totalSizeTitleTextView" />
+
+    <TextView
+            android:id="@+id/timeTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/totalSizeTextView"
+            app:layout_constraintStart_toStartOf="@id/urlTextView"
+            app:layout_constraintTop_toTopOf="@id/timeTitleTextView"
+            tools:text="15 phút trước" />
+
+    <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="urlTitleTextView,totalSizeTitleTextView,timeTitleTextView" />
+</merge>

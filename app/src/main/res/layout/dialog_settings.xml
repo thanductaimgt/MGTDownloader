@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_round_top_corners">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/titleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_round_top_corners"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+                android:id="@+id/settingsImgView"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/selectable_bg"
+                android:contentDescription="@string/desc_settings"
+                android:padding="10dp"
+                android:src="@drawable/settings"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+                android:layout_width="15dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:contentDescription="@string/desc_collapse"
+                android:src="@drawable/down"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/lightMediumGray"
+            app:layout_constraintTop_toBottomOf="@id/titleLayout" />
+
+    <TextView
+            android:id="@+id/settingsDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:text="@string/desc_settings"
+            android:textColor="@color/lightPrimary"
+            android:textSize="@dimen/sizeTextTitle"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/titleLayout" />
+
+    <TextView
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            android:id="@+id/maxDownloadDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/desc_max_concurrent_download_num"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/settingsDescTextView" />
+
+    <TextView
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            android:id="@+id/multiThreadNumDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_thread_num_multi_thread_download"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadDescTextView"
+            app:layout_constraintTop_toBottomOf="@id/maxDownloadDescTextView" />
+
+    <androidx.cardview.widget.CardView
+            app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/maxDownloadSpinnerLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="32dp"
+            app:layout_constraintBottom_toBottomOf="@id/maxDownloadDescTextView"
+            app:layout_constraintStart_toEndOf="@id/barrier"
+            app:layout_constraintTop_toTopOf="@id/maxDownloadDescTextView">
+
+        <Spinner
+                android:id="@+id/maxConcurDownloadNumSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@id/maxDownloadDescTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/maxDownloadDescTextView" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+            app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/multiThreadNumSpinnerLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            app:layout_constraintBottom_toBottomOf="@id/multiThreadNumDescTextView"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadSpinnerLayout"
+            app:layout_constraintTop_toTopOf="@id/multiThreadNumDescTextView">
+
+        <Spinner
+                android:id="@+id/multiThreadDownloadNumSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@id/maxDownloadDescTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/maxDownloadDescTextView" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+            android:id="@+id/statisticsDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@string/desc_statistics"
+            android:textColor="@color/lightPrimary"
+            android:textSize="@dimen/sizeTextTitle"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/settingsDescTextView"
+            app:layout_constraintTop_toBottomOf="@id/multiThreadNumDescTextView" />
+
+    <TextView
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            android:id="@+id/totalDownloadNumDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/desc_total_download_num"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadDescTextView"
+            app:layout_constraintTop_toBottomOf="@id/statisticsDescTextView" />
+
+    <TextView
+            android:id="@+id/totalDownloadNumTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadSpinnerLayout"
+            app:layout_constraintTop_toTopOf="@id/totalDownloadNumDescTextView"
+            tools:text="123" />
+
+    <TextView
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            android:id="@+id/successDownloadNumDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_success_download_num"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadDescTextView"
+            app:layout_constraintTop_toBottomOf="@id/totalDownloadNumDescTextView" />
+
+    <TextView
+            android:id="@+id/successDownloadNumTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadSpinnerLayout"
+            app:layout_constraintTop_toTopOf="@id/successDownloadNumDescTextView"
+            tools:text="120" />
+
+    <TextView
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            android:id="@+id/cancelOrFailDownloadNumDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_cancel_or_fail_download_num"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadDescTextView"
+            app:layout_constraintTop_toBottomOf="@id/successDownloadNumDescTextView" />
+
+    <TextView
+            android:id="@+id/cancelOrFailDownloadNumTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadSpinnerLayout"
+            app:layout_constraintTop_toTopOf="@id/cancelOrFailDownloadNumDescTextView"
+            tools:text="3" />
+
+    <TextView
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
+            android:id="@+id/totalDownloadSizeDescTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_total_download_size"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadDescTextView"
+            app:layout_constraintTop_toBottomOf="@id/cancelOrFailDownloadNumDescTextView" />
+
+    <TextView
+            android:id="@+id/totalDownloadSizeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/maxDownloadSpinnerLayout"
+            app:layout_constraintTop_toTopOf="@id/totalDownloadSizeDescTextView"
+            tools:text="12.66 GB" />
+
+    <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="cancelOrFailDownloadNumDescTextView,maxDownloadDescTextView,successDownloadNumDescTextView,totalDownloadNumDescTextView,totalDownloadSizeDescTextView,multiThreadNumDescTextView" />
+
+    <LinearLayout
+            android:id="@+id/applyLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+                android:id="@+id/applyButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="4dp"
+                android:layout_weight="1"
+                android:text="@string/label_apply" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintGuide_percent="0.75"
+            android:orientation="vertical" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
