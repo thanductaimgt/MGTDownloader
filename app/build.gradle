@@ -15,8 +15,8 @@ android {
         applicationId "com.mgt.downloader"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 10
-        versionName "1.0"
+        versionCode 11
+        versionName "1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -71,13 +71,6 @@ dependencies {
 
     //gson
     implementation 'com.google.code.gson:gson:2.8.5'
-
-    //youtube
-    implementation 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
-
-    //retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
 
     //picasso
     implementation 'com.squareup.picasso:picasso:2.71828'

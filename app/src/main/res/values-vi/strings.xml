@@ -50,7 +50,7 @@
     <string name="desc_statistics">Thống kê</string>
     <string name="desc_details">Chi tiết</string>
     <string name="desc_about">Về ứng dụng này</string>
-    <string name="desc_about_info"><b>Phiên bản:</b> %s\n<b>Nhà phát triển:</b> Tai Than\n<b>Email:</b> thanductaimgt@gmail.com</string>
+    <string name="desc_about_info"><b>Phiên bản:</b> %s\n<b>Nhà phát triển:</b> Tài Thân\n<b>Email:</b> thanductaimgt@gmail.com</string>
     <string name="desc_rate_app"><u>Đánh giá ứng dụng trên CH Play</u></string>
     <string name="desc_max_concurrent_download_num">Số download cùng lúc tối đa:</string>
     <string name="desc_thread_num_multi_thread_download">Số luồng cho một multi-thread download:</string>
@@ -84,7 +84,8 @@
     <string name="item_count">%d item</string>
     <string name="no_connection">Không có kết nối</string>
 
-    <string name="banner_ad_id">ca-app-pub-3940256099942544/6300978111</string>ca-app-pub-3298478237408371/6890259756
-    <string name="banner2_ad_id">ca-app-pub-3940256099942544/6300978111</string>ca-app-pub-3298478237408371/2891213109
-    <string name="banner3_ad_id">ca-app-pub-3940256099942544/6300978111</string>ca-app-pub-3298478237408371/8813607715
+    ca-app-pub-3940256099942544/6300978111
+    <string name="banner_ad_id">ca-app-pub-3298478237408371/6890259756</string>
+    <string name="banner2_ad_id">ca-app-pub-3298478237408371/2891213109</string>
+    <string name="banner3_ad_id">ca-app-pub-3298478237408371/8813607715</string>
 </resources>
