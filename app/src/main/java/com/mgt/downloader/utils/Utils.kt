@@ -177,7 +177,7 @@ object Utils {
     @Throws(Throwable::class)
     fun getDownloadDirPath(): String {
         val downloadDir =
-            File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path}/IDM")
+            File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path}/MGT Downloader")
         if (!downloadDir.exists() && !downloadDir.mkdirs()) {
             throw Throwable("Fail to create directory ${downloadDir.path}")
         }

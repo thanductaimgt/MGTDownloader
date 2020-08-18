@@ -4,6 +4,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/rootView"
         android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,7 +12,6 @@
             android:layout_height="wrap_content"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            tools:background="@color/lightBackground"
             tools:context=".ui.MainActivity">
 
         <TextView
@@ -356,7 +356,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:adSize="BANNER"
-                app:adUnitId="ca-app-pub-3940256099942544/6300978111"
+                app:adUnitId="@string/banner_ad_id"
                 app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

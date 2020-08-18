@@ -62,7 +62,7 @@
     </style>
 
     <style name="AppTheme.SplashTheme" parent="AppTheme.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:windowBackground">@drawable/splash2</item>
     </style>
 
     <style name="ButtonTheme.Cancel" parent="Theme.MaterialComponents.Light">

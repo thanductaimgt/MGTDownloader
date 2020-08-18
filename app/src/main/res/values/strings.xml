@@ -77,4 +77,6 @@
     <string name="press_again_to_exit">Press back again to exit</string>
     <string name="item_count">%d item</string>
     <string name="no_connection">No Internet connection</string>
+
+    <string name="banner_ad_id">ca-app-pub-3298478237408371/6890259756</string>
 </resources>

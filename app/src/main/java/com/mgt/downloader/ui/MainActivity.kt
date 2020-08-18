@@ -232,6 +232,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             override fun onAnimationCancel(p0: Animator?) {
+
             }
 
             override fun onAnimationStart(p0: Animator?) {
@@ -347,6 +348,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.downloadButton -> {
                 afterPermissionRequested = {
                     startDownloadTask(filePreviewInfo)
+                    Utils.hideKeyboard(this, rootView)
                 }
                 requestStoragePermissionsIfNeeded()
             }
@@ -361,6 +363,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         filePreviewInfo,
                         Configurations.multiThreadDownloadNum
                     )
+                    Utils.hideKeyboard(this, rootView)
                 }
                 requestStoragePermissionsIfNeeded()
             }

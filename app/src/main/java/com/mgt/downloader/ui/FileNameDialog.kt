@@ -1,5 +1,6 @@
 package com.mgt.downloader.ui
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -12,12 +13,13 @@ import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.dialog_file_name.view.*
+import com.mgt.downloader.DownloadService
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.FilePreviewInfo
-import com.mgt.downloader.DownloadService
 import com.mgt.downloader.utils.TAG
 import com.mgt.downloader.utils.Utils
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.dialog_file_name.view.*
 import kotlin.math.max
 
 
@@ -136,13 +138,8 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
     override fun onClick(p0: View?) {
         when (p0!!.id) {
             R.id.downloadButton -> startDownloadTaskAndDismiss()
-            R.id.cancelImgView -> clearFocusAndDismiss()
+            R.id.cancelImgView -> dismiss()
         }
-    }
-
-    private fun clearFocusAndDismiss() {
-        view!!.nameEditText.clearFocus()
-        dismiss()
     }
 
     private fun isAnyFileOrDownloadTaskWithSameName(fileName: String): Boolean {
@@ -153,6 +150,11 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
         (activity as MainActivity).startDownloadTask(filePreviewInfo.apply {
             name = view!!.nameEditText.text.toString()
         })
-        clearFocusAndDismiss()
+        dismiss()
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        Utils.hideKeyboard(context!!, (activity as MainActivity).rootView)
+        super.onDismiss(dialog)
     }
 }
