@@ -287,7 +287,7 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
         }
 
         if (!stopCondition(fileName)) {
-            fileName = Utils.generateNewDownloadFileName(fileName, stopCondition)
+            fileName = Utils.generateNewDownloadFileName(context!!, fileName, stopCondition)
         }
 
         val downloadTask = DownloadTask(

@@ -262,10 +262,7 @@ class DownloadService : Service() {
                 elapsedTime = 0
             ).apply {
                 if (downloadTask.partsDownloadedSize.isNotEmpty()) {
-                    if (Utils.isDownloadedFileExist(
-                            downloadTask
-                        )
-                    ) {
+                    if (Utils.isDownloadedFileExist(this@DownloadService, downloadTask)) {
                         downloadedSize = downloadTask.downloadedSize
                         partsDownloadedSize = downloadTask.partsDownloadedSize
                     } else {
@@ -408,7 +405,7 @@ class DownloadService : Service() {
         var connection: HttpURLConnection? = null
         try {
             //resume case
-            val file = Utils.getFile(downloadTask.fileName)
+            val file = Utils.getFile(this, downloadTask.fileName)
             if (isResume && file.exists() && file.isFile
                 && (file.length() < downloadTask.totalSize || downloadTask.totalSize == -1L)
             ) {
@@ -602,13 +599,13 @@ class DownloadService : Service() {
         isResume: Boolean,
         zipNode: ZipNode,
         curDownloadedBytes: Long,
-        parentPath: String = Utils.getDownloadDirPath()
+        parentPath: String = Utils.getDownloadDirPath(this)
     ): Boolean {// return true if connection lost while downloading this zipNode or any of its child, false else
         if (zipNode.size <= curDownloadedBytes) {
             return false
         } else {
             // if top level dir, use downloadTask.fileName
-            val fileName = if (parentPath == Utils.getDownloadDirPath())
+            val fileName = if (parentPath == Utils.getDownloadDirPath(this))
                 downloadTask.fileName
             else Utils.getFileName(
                 zipNode.entry!!.name
@@ -896,7 +893,7 @@ class DownloadService : Service() {
     private fun setImageDownloadTaskThumb(downloadTask: DownloadTask){
         val fileExtension = Utils.getFileExtension(downloadTask.fileName)
         if (fileExtension == "png" || fileExtension == "jpg" || fileExtension == "gif" || fileExtension == "jpeg") {
-            downloadTask.thumbUrl = Utils.getFilePath(downloadTask.fileName)
+            downloadTask.thumbUrl = Utils.getFilePath(this, downloadTask.fileName)
         }
     }
 
@@ -926,7 +923,7 @@ class DownloadService : Service() {
 
             if (connection.responseCode != Constants.HTTP_RANGE_NOT_SATISFIABLE) {
                 input = connection.inputStream
-                output = RandomAccessFile(Utils.getFilePath(downloadTask.fileName), "rw")
+                output = RandomAccessFile(Utils.getFilePath(this, downloadTask.fileName), "rw")
                 output.seek(continuePosition)
                 val data = ByteArray(4096)
 
@@ -1319,7 +1316,7 @@ class DownloadService : Service() {
     }
 
     fun isFileOrDownloadTaskExist(fileName: String): Boolean {
-        return Utils.getFile(fileName)
+        return Utils.getFile(this, fileName)
             .exists() || liveDownloadTasks.value!!.values.any { it.fileName == fileName }
     }
 
@@ -1346,7 +1343,7 @@ class DownloadService : Service() {
                         if (state == DownloadTask.STATE_TEMPORARY_PAUSE) {
                             state = DownloadTask.STATE_PERSISTENT_PAUSED
                         }
-                        Utils.getFileOrDirSize(fileName).let { size ->
+                        Utils.getFileOrDirSize(this@DownloadService, fileName).let { size ->
                             if (size != -1L) {
                                 downloadedSize = size
                             }

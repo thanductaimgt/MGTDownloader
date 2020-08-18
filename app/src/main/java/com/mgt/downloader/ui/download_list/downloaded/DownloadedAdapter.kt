@@ -29,7 +29,7 @@ class DownloadedAdapter(
             val downloadTask = currentList[position]
             itemView.apply {
                 //bind storage state (file deleted?)
-                if (Utils.isDownloadedFileExist(downloadTask)) {
+                if (Utils.isDownloadedFileExist(context, downloadTask)) {
                     storageStateTextView.visibility = View.GONE
                     openFileImgView.visibility = View.VISIBLE
                     openFileImgView.setOnClickListener(fragment as View.OnClickListener)
@@ -58,7 +58,7 @@ class DownloadedAdapter(
 
         override fun onNotSelected(downloadTask: DownloadTask) {
             itemView.apply {
-                if(Utils.isDownloadedFileExist(downloadTask)){
+                if(Utils.isDownloadedFileExist(context, downloadTask)){
                     openFileImgView.visibility = View.VISIBLE
                     retryImgView.visibility = View.GONE
                 }else {

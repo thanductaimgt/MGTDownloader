@@ -1,9 +1,14 @@
 package com.mgt.downloader.ui
 
 import android.app.Dialog
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.pm.PackageInfo
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,9 +21,15 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import kotlinx.android.synthetic.main.dialog_settings.view.*
+import com.google.android.gms.ads.AdRequest
 import com.mgt.downloader.R
-import com.mgt.downloader.utils.*
+import com.mgt.downloader.utils.Configurations
+import com.mgt.downloader.utils.Statistics
+import com.mgt.downloader.utils.TAG
+import com.mgt.downloader.utils.Utils
+import kotlinx.android.synthetic.main.dialog_download_list.adView
+import kotlinx.android.synthetic.main.dialog_settings.*
+import kotlinx.android.synthetic.main.dialog_settings.view.*
 
 
 class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
@@ -48,39 +59,83 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initView(view)
+        initView()
+
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
-    private fun initView(view: View) {
+    private fun initView() {
         // dialog full screen
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        view.apply {
-            titleLayout.setOnClickListener(this@SettingsDialog)
-            applyButton.setOnClickListener(this@SettingsDialog)
+        initSpinner(
+            maxConcurDownloadNumSpinner,
+            Configurations.MAX_CONCUR_DOWNLOAD_NUM_KEY
+        )
+        initSpinner(
+            multiThreadDownloadNumSpinner,
+            Configurations.MULTI_THREAD_DOWNLOAD_NUM_KEY
+        )
 
-            initSpinner(view, maxConcurDownloadNumSpinner, Configurations.MAX_CONCUR_DOWNLOAD_NUM_KEY)
-            initSpinner(view, multiThreadDownloadNumSpinner, Configurations.MULTI_THREAD_DOWNLOAD_NUM_KEY)
+        successDownloadNumTextView.text = Statistics.successDownloadNum.toString()
+        cancelOrFailDownloadNumTextView.text = Statistics.cancelOrFailDownloadNum.toString()
+        totalDownloadNumTextView.text = Statistics.totalDownloadNum.toString()
+        totalDownloadSizeTextView.text = Utils.getFormatFileSize(Statistics.totalDownloadSize)
 
-            successDownloadNumTextView.text = Statistics.successDownloadNum.toString()
-            cancelOrFailDownloadNumTextView.text = Statistics.cancelOrFailDownloadNum.toString()
-            totalDownloadNumTextView.text = Statistics.totalDownloadNum.toString()
-            totalDownloadSizeTextView.text = Utils.getFormatFileSize(Statistics.totalDownloadSize)
+        pathTextView.text = Utils.getDownloadDirPath(context!!)
+
+        val pInfo: PackageInfo =
+            context!!.packageManager.getPackageInfo(context!!.applicationContext.packageName, 0)
+        aboutTextView.text =
+            String.format(getString(R.string.desc_about_info), pInfo.versionName)
+
+        noteTextView.visibility = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) View.VISIBLE else View.GONE
+
+        titleLayout.setOnClickListener(this@SettingsDialog)
+        applyButton.setOnClickListener(this@SettingsDialog)
+        rateTextView.setOnClickListener(this@SettingsDialog)
+    }
+
+    private fun navigateToRateApp() {
+        val packageName = context!!.applicationContext.packageName
+        val uri: Uri = Uri.parse("market://details?id=$packageName")
+        val goToMarket = Intent(Intent.ACTION_VIEW, uri)
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        var flags = Intent.FLAG_ACTIVITY_NO_HISTORY or
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            flags = flags or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+        }
+        goToMarket.addFlags(flags)
+
+        try {
+            startActivity(goToMarket)
+        } catch (e: ActivityNotFoundException) {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
+                )
+            )
         }
     }
 
-    private fun initSpinner(rootView:View, spinner: Spinner, key: String) {
+    private fun initSpinner(spinner: Spinner, key: String) {
         val numbers: List<Int>
         val curValue: Int
         val defaultValue: Int
         when (key) {
             Configurations.MAX_CONCUR_DOWNLOAD_NUM_KEY -> {
-                numbers = (Configurations.MAX_CONCUR_DOWNLOAD_NUM_LOWER_BOUND..Configurations.MAX_CONCUR_DOWNLOAD_NUM_UPPER_BOUND).toList()
+                numbers =
+                    (Configurations.MAX_CONCUR_DOWNLOAD_NUM_LOWER_BOUND..Configurations.MAX_CONCUR_DOWNLOAD_NUM_UPPER_BOUND).toList()
                 curValue = Configurations.maxConcurDownloadNum
                 defaultValue = Configurations.DEFAULT_MAX_CONCUR_DOWNLOAD_NUM
             }
             else -> {
-                numbers = (Configurations.MULTI_THREAD_DOWNLOAD_NUM_LOWER_BOUND..Configurations.MULTI_THREAD_DOWNLOAD_NUM_UPPER_BOUND).toList()
+                numbers =
+                    (Configurations.MULTI_THREAD_DOWNLOAD_NUM_LOWER_BOUND..Configurations.MULTI_THREAD_DOWNLOAD_NUM_UPPER_BOUND).toList()
                 curValue = Configurations.multiThreadDownloadNum
                 defaultValue = Configurations.DEFAULT_MULTI_THREAD_DOWNLOAD_NUM
             }
@@ -106,12 +161,12 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
                 ) {
                     if (spinnerAdapter.getItem(position) == curValue) {
                         changedConfigs.remove(key)
-                        if(changedConfigs.isEmpty()){
-                            rootView.applyLayout.visibility = View.GONE
+                        if (changedConfigs.isEmpty()) {
+                            applyButton.visibility = View.GONE
                         }
                     } else {
                         changedConfigs.add(key)
-                        rootView.applyLayout.visibility = View.VISIBLE
+                        applyButton.visibility = View.VISIBLE
                     }
                 }
             }
@@ -124,6 +179,7 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
                 applyChangedConfigs()
                 dismiss()
             }
+            R.id.rateTextView -> navigateToRateApp()
         }
     }
 
@@ -151,8 +207,16 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
     override fun onResume() {
         super.onResume()
         view?.apply {
-            maxConcurDownloadNumSpinner.setSelection((maxConcurDownloadNumSpinner.adapter as SelectNumberAdapter).getPosition(selectedMaxConcurDownloadNum))
-            multiThreadDownloadNumSpinner.setSelection((multiThreadDownloadNumSpinner.adapter as SelectNumberAdapter).getPosition(selectedMultiThreadDownloadNum))
+            maxConcurDownloadNumSpinner.setSelection(
+                (maxConcurDownloadNumSpinner.adapter as SelectNumberAdapter).getPosition(
+                    selectedMaxConcurDownloadNum
+                )
+            )
+            multiThreadDownloadNumSpinner.setSelection(
+                (multiThreadDownloadNumSpinner.adapter as SelectNumberAdapter).getPosition(
+                    selectedMultiThreadDownloadNum
+                )
+            )
         }
     }
 

@@ -21,6 +21,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
 import com.mgt.downloader.DownloadService
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
@@ -400,7 +401,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             val stopCondition = { newFileName: String ->
                 !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName) ?: false)
             }
-            filePreviewInfo.name = Utils.generateNewDownloadFileName(curFileName, stopCondition)
+            filePreviewInfo.name = Utils.generateNewDownloadFileName(this, curFileName, stopCondition)
         }
         fileNameTextView.text = filePreviewInfo.name
     }
@@ -487,7 +488,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             ?: false)
                     }
                     if (!stopCondition(result.name)) {
-                        result.name = Utils.generateNewDownloadFileName(result.name, stopCondition)
+                        result.name = Utils.generateNewDownloadFileName(this@MainActivity, result.name, stopCondition)
                     }
 
                     this@MainActivity.filePreviewInfo = result
@@ -513,7 +514,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName) ?: false)
                 }
                 if (!stopCondition(result.name)) {
-                    result.name = Utils.generateNewDownloadFileName(result.name, stopCondition)
+                    result.name = Utils.generateNewDownloadFileName(this@MainActivity, result.name, stopCondition)
                 }
             }
         }

@@ -108,7 +108,7 @@ abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener, View
             getString(R.string.label_delete_from_list)
         )
         //check file existence, if exist add two more options
-        if (downloadTasks.any { Utils.isDownloadedFileExist(it) }) {
+        if (downloadTasks.any { Utils.isDownloadedFileExist(context!!, it) }) {
             popupMenu.menu.add(
                 0,
                 Constants.MENU_ITEM_DELETE_FROM_STORAGE,

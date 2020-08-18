@@ -155,7 +155,7 @@ class DownloadedFragment : BaseDownloadListFragment() {
         } else {
             selectCountTextView.text =
                 String.format(getString(R.string.item_count), selectedDownloadTasks.size)
-            if (selectedDownloadTasks.any { Utils.isDownloadedFileExist(it) }) {
+            if (selectedDownloadTasks.any { Utils.isDownloadedFileExist(context!!, it) }) {
                 retryAllImgView.visibility = View.GONE
             } else {
                 retryAllImgView.visibility = View.VISIBLE
@@ -165,7 +165,7 @@ class DownloadedFragment : BaseDownloadListFragment() {
     }
 
     private fun openFile(downloadTask: DownloadTask) {
-        val file = Utils.getFile(downloadTask.fileName)
+        val file = Utils.getFile(context!!, downloadTask.fileName)
 
         if (file.extension == "zip") {
             openZipFile(downloadTask)
@@ -188,7 +188,7 @@ class DownloadedFragment : BaseDownloadListFragment() {
     }
 
     private fun openZipFile(downloadTask: DownloadTask) {
-        val uri = Utils.getFilePath(downloadTask.fileName)
+        val uri = Utils.getFilePath(context!!, downloadTask.fileName)
         val filePreviewInfo = FilePreviewInfo(
             downloadTask.fileName,
             uri,

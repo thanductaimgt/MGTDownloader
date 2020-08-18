@@ -29,13 +29,13 @@ class CancelFailAdapter(
             val downloadTask = currentList[position]
             itemView.apply {
                 //bind storage state (file deleted?)
-                if (Utils.isDownloadedFileExist(downloadTask)) {
+                if (Utils.isDownloadedFileExist(context, downloadTask)) {
                     storageStateTextView.visibility = View.GONE
                     downloadedSizeTextView.text =
                         if (downloadTask.partsDownloadedSize.isNotEmpty()) {
                             Utils.getFormatFileSize(downloadTask.downloadedSize)
                         } else {
-                            Utils.getFileOrDirSize(downloadTask.fileName).let {
+                            Utils.getFileOrDirSize(context, downloadTask.fileName).let {
                                 if (it == -1L) {
                                     context.getString(R.string.desc_unknown_size)
                                 } else {

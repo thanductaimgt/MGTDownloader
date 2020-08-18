@@ -15,6 +15,14 @@
         <include
             layout="@layout/item_download_base"/>
 
+        <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier2"
+                app:barrierDirection="bottom"
+                android:orientation="horizontal"
+                app:constraint_referenced_ids="fileNameTextView, timeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
         <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/progressAnimView"
                 android:layout_width="0dp"
@@ -45,7 +53,7 @@
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fileNameTextView"
+                app:layout_constraintTop_toBottomOf="@id/barrier2"
                 tools:visibility="visible" />
 
         <TextView
@@ -78,7 +86,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
                 android:textAlignment="center"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/pauseResumeImgView"

@@ -48,12 +48,18 @@
     <string name="desc_size">Độ lớn:</string>
     <string name="desc_settings">Cài đặt</string>
     <string name="desc_statistics">Thống kê</string>
+    <string name="desc_details">Chi tiết</string>
+    <string name="desc_about">Về ứng dụng này</string>
+    <string name="desc_about_info"><b>Phiên bản:</b> %s\n<b>Nhà phát triển:</b> Tai Than\n<b>Email:</b> thanductaimgt@gmail.com</string>
+    <string name="desc_rate_app"><u>Đánh giá ứng dụng trên CH Play</u></string>
     <string name="desc_max_concurrent_download_num">Số download cùng lúc tối đa:</string>
     <string name="desc_thread_num_multi_thread_download">Số luồng cho một multi-thread download:</string>
     <string name="desc_total_download_num">Tổng số download:</string>
     <string name="desc_success_download_num">Tổng số download thành công:</string>
     <string name="desc_cancel_or_fail_download_num">Tổng số download lỗi/hủy:</string>
     <string name="desc_total_download_size">Tổng dung lượng download:</string>
+    <string name="desc_download_dir_path">Đường dẫn thư mục download</string>
+    <string name="desc_note_delete_app">Chú ý: nếu định gỡ bỏ ứng dụng này, bạn nên lưu bản sao hoặc di chuyển các file đã tải về sang vị trí khác bên ngoài \"com.mgt.downloader/\" để tránh mất dữ liệu vì thư mục này sẽ bị xóa cùng với ứng dụng</string>
     <string name="desc_default">mặc định</string>
     <string name="desc_not_available_for_unknown_file_size">Không khả dụng khi độ lớn file không xác định</string>
     <string name="desc_swap">Swap</string>
@@ -78,5 +84,7 @@
     <string name="item_count">%d item</string>
     <string name="no_connection">Không có kết nối</string>
 
-    <string name="banner_ad_id">ca-app-pub-3298478237408371/6890259756</string>
+    <string name="banner_ad_id">ca-app-pub-3940256099942544/6300978111</string>ca-app-pub-3298478237408371/6890259756
+    <string name="banner2_ad_id">ca-app-pub-3940256099942544/6300978111</string>ca-app-pub-3298478237408371/2891213109
+    <string name="banner3_ad_id">ca-app-pub-3940256099942544/6300978111</string>ca-app-pub-3298478237408371/8813607715
 </resources>

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Environment
 import android.util.DisplayMetrics
 import android.util.Log
@@ -34,12 +35,12 @@ import kotlin.collections.ArrayList
 
 
 object Utils {
-    fun getFile(fileName: String): File {
-        return File(getFilePath(fileName))
+    fun getFile(context: Context, fileName: String): File {
+        return File(getFilePath(context, fileName))
     }
 
-    fun getFilePath(fileName: String): String {
-        return "${getDownloadDirPath()}/$fileName"
+    fun getFilePath(context: Context, fileName: String): String {
+        return "${getDownloadDirPath(context)}/$fileName"
     }
 
     fun getFileName(uri: String, fileExtension: String? = null): String {
@@ -99,7 +100,7 @@ object Utils {
     }
 
     fun deleteFileOrDir(context: Context, localPath: String): Boolean {
-        val absolutePath = "${getDownloadDirPath()}${File.separator}$localPath"
+        val absolutePath = "${getDownloadDirPath(context)}${File.separator}$localPath"
         val file = File(absolutePath)
         if (file.exists()) {
             if (file.isDirectory) {
@@ -118,12 +119,13 @@ object Utils {
     }
 
     fun generateNewDownloadFileName(
+        context: Context,
         fileName: String,
         stopCondition: (newFileName: String) -> Boolean = { newFileName ->
-            !getFile(newFileName).exists()
+            !getFile(context, newFileName).exists()
         }
     ): String {
-        var file = getFile(fileName)
+        var file = getFile(context, fileName)
         val tail = if (file.extension != "") ".${file.extension}" else ""
         var originalNameWithoutExtension = file.nameWithoutExtension
         var originalNameWithoutExtensionAndNumber = originalNameWithoutExtension
@@ -143,7 +145,7 @@ object Utils {
         }
 
         var newFileNameWithoutExtension = "$originalNameWithoutExtensionAndNumber ($newNumber)"
-        file = getFile("$newFileNameWithoutExtension$tail")
+        file = getFile(context, "$newFileNameWithoutExtension$tail")
 
         while (newNumber > 9 || !stopCondition(file.name)) {
             newNumber++
@@ -160,7 +162,7 @@ object Utils {
             } else {
                 newFileNameWithoutExtension = "$originalNameWithoutExtensionAndNumber ($newNumber)"
             }
-            file = getFile("$newFileNameWithoutExtension$tail")
+            file = getFile(context, "$newFileNameWithoutExtension$tail")
         }
         return "$newFileNameWithoutExtension$tail"
     }
@@ -175,17 +177,21 @@ object Utils {
     }
 
     @Throws(Throwable::class)
-    fun getDownloadDirPath(): String {
-        val downloadDir =
-            File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path}/MGT Downloader")
+    fun getDownloadDirPath(context: Context): String {
+        val downloadDir =File("${ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            context.getExternalFilesDir(null)
+        }else {
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        }!!.path}/MGT Downloader")
+
         if (!downloadDir.exists() && !downloadDir.mkdirs()) {
             throw Throwable("Fail to create directory ${downloadDir.path}")
         }
         return downloadDir.path
     }
 
-    fun isDownloadedFileExist(downloadTask: DownloadTask): Boolean {
-        val file = getFile(downloadTask.fileName)
+    fun isDownloadedFileExist(context: Context, downloadTask: DownloadTask): Boolean {
+        val file = getFile(context, downloadTask.fileName)
         return file.exists() && file.isDirectory == downloadTask.isDirectory
     }
 
@@ -541,9 +547,9 @@ object Utils {
         }
     }
 
-    fun getFileOrDirSize(dirAppLocalPath: String): Long {
+    fun getFileOrDirSize(context: Context, dirAppLocalPath: String): Long {
         return try {
-            val file = getFile(dirAppLocalPath)
+            val file = getFile(context, dirAppLocalPath)
             if (file.isDirectory) {
                 getDirSize(file)
             } else {
