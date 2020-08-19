@@ -76,11 +76,11 @@ class ConnectionLiveData(context: Context) : LiveData<Boolean>() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     inner class NetworkCallback : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network?) {
+        override fun onAvailable(network: Network) {
             postValue(true)
         }
 
-        override fun onLost(network: Network?) {
+        override fun onLost(network: Network) {
             postValue(false)
         }
     }
