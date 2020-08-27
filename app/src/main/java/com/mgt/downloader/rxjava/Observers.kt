@@ -2,7 +2,7 @@ package com.mgt.downloader.rxjava
 
 interface Observer {
     fun onSubscribe(disposable: Disposable)
-    fun onError(throwable: Throwable)
+    fun onError(t: Throwable)
 }
 
 interface StreamObserver<T>:Observer{

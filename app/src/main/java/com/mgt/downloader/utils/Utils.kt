@@ -2,22 +2,18 @@ package com.mgt.downloader.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Environment
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.URLUtil
 import android.widget.ImageView
-import com.squareup.picasso.*
-import com.squareup.picasso.Target
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
+import com.squareup.picasso.*
 import java.io.File
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -104,7 +100,7 @@ object Utils {
         val file = File(absolutePath)
         if (file.exists()) {
             if (file.isDirectory) {
-                file.list().forEach {
+                file.list()?.forEach {
                     if (!deleteFileOrDir(context, "$localPath${File.separator}$it")) {
                         return false
                     }
@@ -178,11 +174,11 @@ object Utils {
 
     @Throws(Throwable::class)
     fun getDownloadDirPath(context: Context): String {
-        val downloadDir =File("${ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            context.getExternalFilesDir(null)
-        }else {
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        }!!.path}/MGT Downloader")
+        val downloadDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            context.getExternalFilesDir(null)!!
+        } else {
+            File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)!!.path}/MGT Downloader")
+        }
 
         if (!downloadDir.exists() && !downloadDir.mkdirs()) {
             throw Throwable("Fail to create directory ${downloadDir.path}")
@@ -323,13 +319,16 @@ object Utils {
     fun isHeader(data: ByteArray, header: Number): Boolean {
         val extraIdBytes =
             when (header) {
-                is Short -> ByteBuffer.allocate(Short.Companion.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN).putShort(
+                is Short -> ByteBuffer.allocate(Short.Companion.SIZE_BYTES)
+                    .order(ByteOrder.LITTLE_ENDIAN).putShort(
                     header
                 )
-                is Int -> ByteBuffer.allocate(Int.Companion.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN).putInt(
+                is Int -> ByteBuffer.allocate(Int.Companion.SIZE_BYTES)
+                    .order(ByteOrder.LITTLE_ENDIAN).putInt(
                     header
                 )
-                else -> ByteBuffer.allocate(Long.Companion.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN).putLong(
+                else -> ByteBuffer.allocate(Long.Companion.SIZE_BYTES)
+                    .order(ByteOrder.LITTLE_ENDIAN).putLong(
                     header as Long
                 )
             }
@@ -564,11 +563,13 @@ object Utils {
 
     private fun getDirSize(directory: File): Long {
         var length: Long = 0
-        for (file in directory.listFiles()) {
-            length += if (file.isFile)
-                file.length()
-            else
-                getDirSize(file)
+        directory.listFiles()?.let {files->
+            for (file in files) {
+                length += if (file.isFile)
+                    file.length()
+                else
+                    getDirSize(file)
+            }
         }
         return length
     }
@@ -577,50 +578,47 @@ object Utils {
         return context.getSharedPreferences(Constants.SHARE_PREFERENCES_NAME, Context.MODE_PRIVATE)
     }
 
-    fun getBlankArrayList(size:Int):ArrayList<Long>{
+    fun getBlankArrayList(size: Int): ArrayList<Long> {
         return ArrayList<Long>(size).apply {
-            for (i in 0 until size){
+            for (i in 0 until size) {
                 add(0)
             }
         }
     }
 
-    private val tikTokPattern = Pattern.compile("^(https?://)?(www\\.)?((vt\\.)?(tiktok)\\.com)/.+\$")
+    private val tikTokPattern =
+        Pattern.compile("^(https?://)?(www\\.)?((vt\\.)?(tiktok)\\.com)/.+\$")
 
-    fun isTikTokUrl(url:String):Boolean{
+    fun isTikTokUrl(url: String): Boolean {
         val matcher = tikTokPattern.matcher(url)
         return matcher.find()
     }
 
-    private val facebookPattern = Pattern.compile("^(https?://)?(www\\.)?(mbasic.facebook|m\\.facebook|facebook|fb)\\.(com|me)/([^/?].+/)?")//video(s|\\.php)[/?].+\$")
+    private val facebookPattern =
+        Pattern.compile("^(https?://)?(www\\.)?(mbasic.facebook|m\\.facebook|facebook|fb)\\.(com|me)/([^/?].+/)?")//video(s|\\.php)[/?].+\$")
 
-    fun isFacebookUrl(url:String):Boolean{
+    fun isFacebookUrl(url: String): Boolean {
         val matcher = facebookPattern.matcher(url)
         return matcher.find()
     }
 
-    fun getFormatRatio(width:Int?, height:Int?):String{
-        return if(width==null||height==null){
+    fun getFormatRatio(width: Int?, height: Int?): String {
+        return if (width == null || height == null) {
             "390:300"
-        }else{
+        } else {
             "$width:$height"
         }
     }
 
-    fun dpToPx(context: Context, dp: Int): Int {
-        return (dp * (context.resources
-            .displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).toInt()
+    fun isSmallerRatio(ratio1: String, ratio2: String): Boolean {
+        val ratio1Float = getRatioFloat(ratio1)
+        val ratio2Float = getRatioFloat(ratio2)
+        return ratio1Float < ratio2Float
     }
 
-    fun isSmallerRatio(ratio1:String, ratio2:String):Boolean{
-        val ratio1Float= getRatioFloat(ratio1)
-        val ratio2Float= getRatioFloat(ratio2)
-        return ratio1Float<ratio2Float
-    }
-
-    private fun getRatioFloat(ratio:String):Float{
+    private fun getRatioFloat(ratio: String): Float {
         val dimens = ratio.split(":")
-        return dimens[0].toInt()/dimens[1].toFloat()
+        return dimens[0].toInt() / dimens[1].toFloat()
     }
 
     fun isNetworkUri(uri: String): Boolean {
@@ -629,7 +627,6 @@ object Utils {
 
     fun isContentUri(localPath: String): Boolean {
         return localPath.startsWith("content://")
-//        return localPath.startsWith("content://")
     }
 
     fun unescapePerlString(oldStr: String): String {
@@ -638,8 +635,8 @@ object Utils {
      * this one need be no bigger, as unescaping shrinks the string
      * here, where in the other one, it grows it.
      */
-        val newstr = StringBuffer(oldStr.length)
-        var saw_backslash = false
+        val newStr = StringBuffer(oldStr.length)
+        var sawBackslash = false
         var i = 0
         while (i < oldStr.length) {
             var cp = oldStr.codePointAt(i)
@@ -647,30 +644,30 @@ object Utils {
                 i++
                 /****WE HATES UTF-16! WE HATES IT FOREVERSES!!! */
             }
-            if (!saw_backslash) {
+            if (!sawBackslash) {
                 if (cp == '\\'.toInt()) {
-                    saw_backslash = true
+                    sawBackslash = true
                 } else {
-                    newstr.append(Character.toChars(cp))
+                    newStr.append(Character.toChars(cp))
                 }
                 i++
                 continue  /* switch */
             }
             if (cp == '\\'.toInt()) {
-                saw_backslash = false
-                newstr.append('\\')
-                newstr.append('\\')
+                sawBackslash = false
+                newStr.append('\\')
+                newStr.append('\\')
                 i++
                 continue  /* switch */
             }
             when (cp.toChar()) {
-                'r' -> newstr.append('\r')
-                'n' -> newstr.append('\n')
+                'r' -> newStr.append('\r')
+                'n' -> newStr.append('\n')
 //                'f' -> newstr.append('\f')
-                'b' -> newstr.append("\\b")
-                't' -> newstr.append('\t')
-                'a' -> newstr.append('\u0007')
-                'e' -> newstr.append('\u001b')
+                'b' -> newStr.append("\\b")
+                't' -> newStr.append('\t')
+                'a' -> newStr.append('\u0007')
+                'e' -> newStr.append('\u001b')
                 'c' -> {
                     if (++i == oldStr.length) {
                         die("trailing \\c")
@@ -681,86 +678,51 @@ object Utils {
                  */if (cp > 0x7f) {
                         die("expected ASCII after \\c")
                     }
-                    newstr.append(Character.toChars(cp xor 64))
+                    newStr.append(Character.toChars(cp xor 64))
                 }
-                '8', '9' -> run{
+                '8', '9' -> run {
                     die("illegal octal digit")
                     --i
-                        if (i + 1 == oldStr.length) {
-                            /* found \0 at end of string */
-                            newstr.append(Character.toChars(0))
-                            return@run /* switch */
-                        }
-                        i++
-                        var digits = 0
-                        var j: Int
-                        j = 0
-                        while (j <= 2) {
-                            if (i + j == oldStr.length) {
-                                break /* for */
-                            }
-                            /* safe because will unread surrogate */
-                            val ch = oldStr[i + j].toInt()
-                            if (ch < '0'.toInt() || ch > '7'.toInt()) {
-                                break /* for */
-                            }
-                            digits++
-                            j++
-                        }
-                        if (digits == 0) {
-                            --i
-                            newstr.append('\u0000')
-                            return@run /* switch */
-                        }
-                        var value = 0
-                        try {
-                            value =
-                                oldStr.substring(i, i + digits).toInt(8)
-                        } catch (nfe: NumberFormatException) {
-                            die("invalid octal value for \\0 escape")
-                        }
-                        newstr.append(Character.toChars(value))
-                        i += digits - 1
-                    }
-                '1', '2', '3', '4', '5', '6', '7' -> run{
-                    --i
-                        if (i + 1 == oldStr.length) {
-                            newstr.append(Character.toChars(0))
-                            return@run
-                        }
-                        i++
-                        var digits = 0
-                        var j: Int
-                        j = 0
-                        while (j <= 2) {
-                            if (i + j == oldStr.length) {
-                                break
-                            }
-                            val ch = oldStr[i + j].toInt()
-                            if (ch < '0'.toInt() || ch > '7'.toInt()) {
-                                break
-                            }
-                            digits++
-                            j++
-                        }
-                        if (digits == 0) {
-                            --i
-                            newstr.append('\u0000')
-                            return@run
-                        }
-                        var value = 0
-                        try {
-                            value =
-                                oldStr.substring(i, i + digits).toInt(8)
-                        } catch (nfe: NumberFormatException) {
-                            die("invalid octal value for \\0 escape")
-                        }
-                        newstr.append(Character.toChars(value))
-                        i += digits - 1
-                }
-                '0' -> run {
                     if (i + 1 == oldStr.length) {
-                        newstr.append(Character.toChars(0))
+                        /* found \0 at end of string */
+                        newStr.append(Character.toChars(0))
+                        return@run /* switch */
+                    }
+                    i++
+                    var digits = 0
+                    var j: Int
+                    j = 0
+                    while (j <= 2) {
+                        if (i + j == oldStr.length) {
+                            break /* for */
+                        }
+                        /* safe because will unread surrogate */
+                        val ch = oldStr[i + j].toInt()
+                        if (ch < '0'.toInt() || ch > '7'.toInt()) {
+                            break /* for */
+                        }
+                        digits++
+                        j++
+                    }
+                    if (digits == 0) {
+                        --i
+                        newStr.append('\u0000')
+                        return@run /* switch */
+                    }
+                    var value = 0
+                    try {
+                        value =
+                            oldStr.substring(i, i + digits).toInt(8)
+                    } catch (nfe: NumberFormatException) {
+                        die("invalid octal value for \\0 escape")
+                    }
+                    newStr.append(Character.toChars(value))
+                    i += digits - 1
+                }
+                '1', '2', '3', '4', '5', '6', '7' -> run {
+                    --i
+                    if (i + 1 == oldStr.length) {
+                        newStr.append(Character.toChars(0))
                         return@run
                     }
                     i++
@@ -780,7 +742,7 @@ object Utils {
                     }
                     if (digits == 0) {
                         --i
-                        newstr.append('\u0000')
+                        newStr.append('\u0000')
                         return@run
                     }
                     var value = 0
@@ -790,7 +752,42 @@ object Utils {
                     } catch (nfe: NumberFormatException) {
                         die("invalid octal value for \\0 escape")
                     }
-                    newstr.append(Character.toChars(value))
+                    newStr.append(Character.toChars(value))
+                    i += digits - 1
+                }
+                '0' -> run {
+                    if (i + 1 == oldStr.length) {
+                        newStr.append(Character.toChars(0))
+                        return@run
+                    }
+                    i++
+                    var digits = 0
+                    var j: Int
+                    j = 0
+                    while (j <= 2) {
+                        if (i + j == oldStr.length) {
+                            break
+                        }
+                        val ch = oldStr[i + j].toInt()
+                        if (ch < '0'.toInt() || ch > '7'.toInt()) {
+                            break
+                        }
+                        digits++
+                        j++
+                    }
+                    if (digits == 0) {
+                        --i
+                        newStr.append('\u0000')
+                        return@run
+                    }
+                    var value = 0
+                    try {
+                        value =
+                            oldStr.substring(i, i + digits).toInt(8)
+                    } catch (nfe: NumberFormatException) {
+                        die("invalid octal value for \\0 escape")
+                    }
+                    newStr.append(Character.toChars(value))
                     i += digits - 1
                 } /* end case '0' */
                 'x' -> {
@@ -844,7 +841,7 @@ object Utils {
                     } catch (nfe: NumberFormatException) {
                         die("invalid hex value for \\x escape")
                     }
-                    newstr.append(Character.toChars(value))
+                    newStr.append(Character.toChars(value))
                     if (saw_brace) {
                         j++
                     }
@@ -872,7 +869,7 @@ object Utils {
                     } catch (nfe: NumberFormatException) {
                         die("invalid hex value for \\u escape")
                     }
-                    newstr.append(Character.toChars(value))
+                    newStr.append(Character.toChars(value))
                     i += j - 1
                 }
                 'U' -> {
@@ -897,22 +894,22 @@ object Utils {
                     } catch (nfe: NumberFormatException) {
                         die("invalid hex value for \\U escape")
                     }
-                    newstr.append(Character.toChars(value))
+                    newStr.append(Character.toChars(value))
                     i += j - 1
                 }
                 else -> {
-                    newstr.append('\\')
-                    newstr.append(Character.toChars(cp))
+                    newStr.append('\\')
+                    newStr.append(Character.toChars(cp))
                 }
             }
-            saw_backslash = false
+            sawBackslash = false
             i++
         }
 
-        /* weird to leave one at the end */if (saw_backslash) {
-            newstr.append('\\')
+        /* weird to leave one at the end */if (sawBackslash) {
+            newStr.append('\\')
         }
-        return newstr.toString()
+        return newStr.toString()
     }
 
     private fun die(foa: String) {
@@ -922,25 +919,6 @@ object Utils {
 
 val Any.TAG: String
     get() = this::class.java.simpleName
-
-//fun InputStream.skipWithAdditionalActionInLoop(numBytes: Long, action: () -> Unit): Long {
-//    if (numBytes <= 0) {
-//        return 0
-//    }
-//    var n = numBytes.toInt()
-//    val bufLen = min(2048, n)
-//    val data = ByteArray(bufLen)
-//    while (n > 0) {
-//        action.invoke()
-//
-//        val r = read(data, 0, min(bufLen, n))
-//        if (r < 0) {
-//            break
-//        }
-//        n -= r
-//    }
-//    return numBytes - n
-//}
 
 fun BitSet.toInt(): Int {
     var res = 0
@@ -963,7 +941,11 @@ private fun Picasso.loadCompat(url: String?): RequestCreator {
     return load(urlToLoad).let { if (!doCache) it.networkPolicy(NetworkPolicy.NO_STORE) else it }
 }
 
-fun Picasso.smartLoad(url: String?, imageView: ImageView, applyConfig: ((requestCreator: RequestCreator) -> Unit)? = null) {
+fun Picasso.smartLoad(
+    url: String?,
+    imageView: ImageView,
+    applyConfig: ((requestCreator: RequestCreator) -> Unit)? = null
+) {
     var requestCreator = loadCompat(url)
     applyConfig?.invoke(requestCreator)
 
@@ -976,41 +958,6 @@ fun Picasso.smartLoad(url: String?, imageView: ImageView, applyConfig: ((request
                 requestCreator.networkPolicy(NetworkPolicy.NO_CACHE)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .into(imageView)
-            }
-        })
-}
-
-fun Picasso.smartLoad(url: String?, target: Target, applyConfig: ((requestCreator: RequestCreator) -> Unit)? = null) {
-    var requestCreator = loadCompat(url)
-    applyConfig?.invoke(requestCreator)
-
-    requestCreator.networkPolicy(NetworkPolicy.OFFLINE)
-        .into(object : Target {
-            override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-                target.onPrepareLoad(placeHolderDrawable)
-            }
-
-            override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
-                requestCreator = Picasso.get().loadCompat(url)
-                applyConfig?.invoke(requestCreator)
-
-                requestCreator.networkPolicy(NetworkPolicy.NO_CACHE)
-                    .memoryPolicy(MemoryPolicy.NO_CACHE)
-                    .into(object : Target {
-                        override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
-
-                        override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
-                            target.onBitmapFailed(e, errorDrawable)
-                        }
-
-                        override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-                            target.onBitmapLoaded(bitmap, from)
-                        }
-                    })
-            }
-
-            override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-                target.onBitmapLoaded(bitmap, from)
             }
         })
 }

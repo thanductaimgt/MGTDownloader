@@ -83,9 +83,7 @@
     <string name="press_again_to_exit">Bấm lần nữa để thoát</string>
     <string name="item_count">%d item</string>
     <string name="no_connection">Không có kết nối</string>
+    <string name="thanks_for_rating">Cảm ơn bạn đã dành thời gian để đánh giá ứng dụng</string>
 
-    ca-app-pub-3940256099942544/6300978111
     <string name="banner_ad_id">ca-app-pub-3298478237408371/6890259756</string>
-    <string name="banner2_ad_id">ca-app-pub-3298478237408371/2891213109</string>
-    <string name="banner3_ad_id">ca-app-pub-3298478237408371/8813607715</string>
 </resources>

@@ -14,20 +14,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import com.google.android.gms.ads.AdRequest
+import com.google.android.play.core.review.ReviewInfo
+import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.utils.Configurations
 import com.mgt.downloader.utils.Statistics
 import com.mgt.downloader.utils.TAG
 import com.mgt.downloader.utils.Utils
-import kotlinx.android.synthetic.main.dialog_download_list.adView
 import kotlinx.android.synthetic.main.dialog_settings.*
 import kotlinx.android.synthetic.main.dialog_settings.view.*
 
@@ -37,6 +34,7 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
     var selectedMaxConcurDownloadNum: Int = 0
     var selectedMultiThreadDownloadNum: Int = 0
     var changedConfigs = HashSet<String>()
+    private var reviewInfo: ReviewInfo? = null
 
     override fun onStart() {
         super.onStart()
@@ -61,8 +59,13 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initView()
 
-        val adRequest = AdRequest.Builder().build()
-        adView.loadAd(adRequest)
+        // pre-load reviewInfo
+        MyApplication.reviewManager.requestReviewFlow()
+            .addOnCompleteListener { request ->
+                if (request.isSuccessful) {
+                    reviewInfo = request.result
+                }
+            }
     }
 
     private fun initView() {
@@ -90,14 +93,26 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
         aboutTextView.text =
             String.format(getString(R.string.desc_about_info), pInfo.versionName)
 
-        noteTextView.visibility = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) View.VISIBLE else View.GONE
+        noteTextView.visibility =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) View.VISIBLE else View.GONE
 
         titleLayout.setOnClickListener(this@SettingsDialog)
         applyButton.setOnClickListener(this@SettingsDialog)
         rateTextView.setOnClickListener(this@SettingsDialog)
     }
 
-    private fun navigateToRateApp() {
+    private fun showInAppRatingBottomSheet() {
+        try {
+            val flow = MyApplication.reviewManager.launchReviewFlow(activity!!, reviewInfo!!)
+            flow.addOnCompleteListener {
+                Toast.makeText(context, R.string.thanks_for_rating, Toast.LENGTH_SHORT).show()
+            }
+        } catch (t: Throwable) {
+            navigateToCHPlay()
+        }
+    }
+
+    private fun navigateToCHPlay() {
         val packageName = context!!.applicationContext.packageName
         val uri: Uri = Uri.parse("market://details?id=$packageName")
         val goToMarket = Intent(Intent.ACTION_VIEW, uri)
@@ -179,7 +194,13 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
                 applyChangedConfigs()
                 dismiss()
             }
-            R.id.rateTextView -> navigateToRateApp()
+            R.id.rateTextView -> {
+                if (reviewInfo != null) {
+                    showInAppRatingBottomSheet()
+                } else {
+                    navigateToCHPlay()
+                }
+            }
         }
     }
 

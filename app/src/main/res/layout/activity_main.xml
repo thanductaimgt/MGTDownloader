@@ -304,7 +304,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/shape_round_top_corners_with_stroke"
-                app:layout_constraintBottom_toTopOf="@id/adView"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/startDownloadAnimView"
                 app:layout_constraintVertical_bias="1">
 
@@ -350,13 +350,5 @@
                 app:lottie_renderMode="software"
                 app:lottie_repeatCount="1"
                 tools:visibility="visible" />
-
-        <com.google.android.gms.ads.AdView
-                android:id="@+id/adView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:adSize="BANNER"
-                app:adUnitId="@string/banner_ad_id"
-                app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

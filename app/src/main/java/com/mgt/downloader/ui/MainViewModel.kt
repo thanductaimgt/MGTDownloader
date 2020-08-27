@@ -15,7 +15,6 @@ import com.mgt.downloader.utils.Utils
 class MainViewModel : ViewModel() {
     @SuppressLint("CheckResult")
     fun getFilePreviewInfo(
-        context: Context,
         url: String,
         observer: SingleObserver<FilePreviewInfo>
     ) {

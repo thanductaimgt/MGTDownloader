@@ -20,8 +20,6 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
 import com.mgt.downloader.DownloadService
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
@@ -76,12 +74,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         viewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(
             MainViewModel::class.java
         )
-        viewModel.getFilePreviewInfo(this, "", object : SingleObserver<FilePreviewInfo> {
+        viewModel.getFilePreviewInfo("", object : SingleObserver<FilePreviewInfo> {
             override fun onSubscribe(disposable: Disposable) {
 
             }
 
-            override fun onError(throwable: Throwable) {
+            override fun onError(t: Throwable) {
             }
 
             override fun onSuccess(result: FilePreviewInfo) {
@@ -108,9 +106,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 liveDownloadService.value?.onDisconnect()
             }
         })
-
-        val adRequest = AdRequest.Builder().build()
-        adView.loadAd(adRequest)
     }
 
     private fun getStartServiceIntent(): Intent {
@@ -186,7 +181,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             if (URLUtil.isValidUrl(url)) {
                 showLoadingAnimation()
                 viewModel.getFilePreviewInfo(
-                    this@MainActivity,
                     url,
                     GetFilePreviewInfoObserver()
                 )
@@ -523,10 +517,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             compositeDisposable.add(disposable)
         }
 
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             hideLoadingAnimation()
             showWarning(getString(R.string.cannot_resolve_host))
-            throwable.printStackTrace()
+            t.printStackTrace()
         }
     }
 }

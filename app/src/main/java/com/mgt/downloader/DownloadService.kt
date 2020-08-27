@@ -6,24 +6,21 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Binder
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
+import android.os.*
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
-import com.mgt.downloader.ui.MainActivity
-import com.mgt.downloader.extractor.TikTokExtractor
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
 import com.mgt.downloader.extractor.FacebookExtractor
+import com.mgt.downloader.extractor.TikTokExtractor
 import com.mgt.downloader.helper.LongObject
 import com.mgt.downloader.helper.StopThreadThrowable
 import com.mgt.downloader.rxjava.*
 import com.mgt.downloader.rxjava.Observable
+import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.utils.*
 import java.io.*
 import java.net.HttpURLConnection
@@ -155,7 +152,7 @@ class DownloadService : Service() {
         val tasksToResumeLater = tasksToResume.drop(Configurations.maxConcurDownloadNum)
 
         tasksToResumeFirst.forEach { resumeDownloadTask(it.fileName) }
-        Handler().postDelayed(
+        Handler(Looper.getMainLooper()).postDelayed(
             { tasksToResumeLater.forEach { resumeDownloadTask(it.fileName) } },
             1000
         )
@@ -289,7 +286,7 @@ class DownloadService : Service() {
 
             }
 
-            override fun onError(throwable: Throwable) {
+            override fun onError(t: Throwable) {
 
             }
 
@@ -1358,9 +1355,9 @@ class DownloadService : Service() {
             this@DownloadService.compositeDisposable.add(disposable)
         }
 
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             Log.e(TAG, "onError")
-            throwable.printStackTrace()
+            t.printStackTrace()
         }
     }
 
@@ -1380,9 +1377,9 @@ class DownloadService : Service() {
             compositeDisposable.add(disposable)
         }
 
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             Utils.log(TAG, "onError: $fileName")
-            throwable.printStackTrace()
+            t.printStackTrace()
         }
     }
 
@@ -1398,9 +1395,9 @@ class DownloadService : Service() {
             compositeDisposable.add(disposable)
         }
 
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             Utils.log(TAG, "onError: $downloadTask")
-            throwable.printStackTrace()
+            t.printStackTrace()
         }
     }
 
@@ -1416,9 +1413,9 @@ class DownloadService : Service() {
             compositeDisposable.add(disposable)
         }
 
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             Utils.log(TAG, "onError: $downloadTasks")
-            throwable.printStackTrace()
+            t.printStackTrace()
         }
     }
 
@@ -1438,10 +1435,10 @@ class DownloadService : Service() {
             this@DownloadService.compositeDisposable.add(disposable)
         }
 
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             callback?.invoke(false)
             Utils.log(TAG, "onError: $fileName")
-            throwable.printStackTrace()
+            t.printStackTrace()
         }
     }
 
@@ -1461,10 +1458,10 @@ class DownloadService : Service() {
             compositeDisposable.add(disposable)
         }
 
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             callback?.invoke(false)
             Utils.log(TAG, "onError: $fileName")
-            throwable.printStackTrace()
+            t.printStackTrace()
         }
     }
 
@@ -1532,9 +1529,9 @@ class DownloadService : Service() {
         }
 
         //call when downloadTask fail
-        override fun onError(throwable: Throwable) {
+        override fun onError(t: Throwable) {
             Log.e(TAG, "onError: $fileName")
-            throwable.printStackTrace()
+            t.printStackTrace()
             //update this downloadTask with fail state in liveDownloadTasks
             liveDownloadTasks.value = liveDownloadTasks.value
 

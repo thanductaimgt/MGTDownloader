@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.multidex.MultiDexApplication
 import androidx.room.Room
 import com.google.android.gms.ads.MobileAds
+import com.google.android.play.core.review.ReviewManager
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
 import com.mgt.downloader.helper.ConnectionLiveData
@@ -28,9 +30,11 @@ class MyApplication : MultiDexApplication() {
         initDownloadExecutorService()
 
         MobileAds.initialize(this)
+        reviewManager = ReviewManagerFactory.create(this)
     }
 
     companion object {
+        lateinit var reviewManager:ReviewManager
         lateinit var database: IDMDatabase
         var isLogEnabled = true
         val zipTreeCaches = HashMap<String, ZipNode>()

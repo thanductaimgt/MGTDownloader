@@ -352,13 +352,5 @@
             android:layout_marginBottom="4dp"
             android:layout_weight="1"
             android:text="@string/label_apply"
-            app:layout_constraintBottom_toTopOf="@id/adView" />
-
-    <com.google.android.gms.ads.AdView
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:adSize="BANNER"
-            app:adUnitId="@string/banner3_ad_id" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
