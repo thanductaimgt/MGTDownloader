@@ -174,7 +174,7 @@ object Utils {
 
     @Throws(Throwable::class)
     fun getDownloadDirPath(context: Context): String {
-        val downloadDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val downloadDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             context.getExternalFilesDir(null)!!
         } else {
             File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)!!.path}/MGT Downloader")
