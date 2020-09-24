@@ -18,6 +18,8 @@ object Configurations {
     var maxConcurDownloadNum = DEFAULT_MAX_CONCUR_DOWNLOAD_NUM
     var multiThreadDownloadNum = DEFAULT_MULTI_THREAD_DOWNLOAD_NUM
 
+    lateinit var requestHeaders: Map<String, String>
+
     fun setMaxConcurDownloadNum(value:Int, mainActivity: MainActivity){
         maxConcurDownloadNum = value
         Utils.getSharePreference(mainActivity).edit().apply {

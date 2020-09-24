@@ -94,7 +94,7 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
             String.format(getString(R.string.desc_about_info), pInfo.versionName)
 
         noteTextView.visibility =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) View.VISIBLE else View.GONE
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) View.VISIBLE else View.GONE
 
         titleLayout.setOnClickListener(this@SettingsDialog)
         applyButton.setOnClickListener(this@SettingsDialog)

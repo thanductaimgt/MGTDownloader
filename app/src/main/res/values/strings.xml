@@ -84,7 +84,4 @@
     <string name="item_count">%d item</string>
     <string name="no_connection">No Internet connection</string>
     <string name="thanks_for_rating">Thank you for spending time to rate this app</string>
-
-<!--    test: ca-app-pub-3940256099942544/6300978111-->
-    <string name="banner_ad_id">ca-app-pub-3298478237408371/6890259756</string>
 </resources>

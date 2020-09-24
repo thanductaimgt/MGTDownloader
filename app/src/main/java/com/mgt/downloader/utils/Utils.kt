@@ -11,6 +11,7 @@ import android.webkit.URLUtil
 import android.widget.ImageView
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
+import com.mgt.downloader.base.BaseExtractor
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.squareup.picasso.*
@@ -174,7 +175,7 @@ object Utils {
 
     @Throws(Throwable::class)
     fun getDownloadDirPath(context: Context): String {
-        val downloadDir = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val downloadDir = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             context.getExternalFilesDir(null)!!
         } else {
             File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)!!.path}/MGT Downloader")
@@ -513,10 +514,13 @@ object Utils {
     ): HttpURLConnection {
         return (URL(fileUri).openConnection() as HttpURLConnection).apply {
             (rangeStart ?: rangeEnd)?.let {
-                setRequestProperty(
+                addRequestProperty(
                     "Range",
                     "bytes=${rangeStart ?: ""}-${rangeEnd ?: ""}"
                 )
+                for (header in Configurations.requestHeaders){
+                    addRequestProperty(header.key, header.value)
+                }
                 readTimeout = 60000
             }
 
