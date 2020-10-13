@@ -16,6 +16,7 @@ import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
 import com.mgt.downloader.extractor.BobaExtractor
 import com.mgt.downloader.extractor.FacebookExtractor
+import com.mgt.downloader.extractor.InstagramExtractor
 import com.mgt.downloader.extractor.TikTokExtractor
 import com.mgt.downloader.helper.LongObject
 import com.mgt.downloader.helper.StopThreadThrowable
@@ -282,8 +283,11 @@ class DownloadService : Service() {
             Utils.isTikTokUrl(url) -> {
                 TikTokExtractor()
             }
-            else -> {
+            Utils.isBobaUrl(url) -> {
                 BobaExtractor()
+            }
+            else -> {
+                InstagramExtractor()
             }
         }.extract(url, object : SingleObserver<FilePreviewInfo> {
             override fun onSubscribe(disposable: Disposable) {
@@ -891,7 +895,7 @@ class DownloadService : Service() {
         }
     }
 
-    private fun setImageDownloadTaskThumb(downloadTask: DownloadTask){
+    private fun setImageDownloadTaskThumb(downloadTask: DownloadTask) {
         val fileExtension = Utils.getFileExtension(downloadTask.fileName)
         if (fileExtension == "png" || fileExtension == "jpg" || fileExtension == "gif" || fileExtension == "jpeg") {
             downloadTask.thumbUrl = Utils.getFilePath(this, downloadTask.fileName)

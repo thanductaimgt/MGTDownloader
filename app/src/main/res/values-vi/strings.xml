@@ -84,4 +84,5 @@
     <string name="item_count">%d item</string>
     <string name="no_connection">Không có kết nối</string>
     <string name="thanks_for_rating">Cảm ơn bạn đã dành thời gian để đánh giá ứng dụng</string>
+    <string name="path_not_available">Không xác định, vui lòng thử lại sau</string>
 </resources>

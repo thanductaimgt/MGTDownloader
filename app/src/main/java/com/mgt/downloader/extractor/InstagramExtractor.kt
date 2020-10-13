@@ -14,20 +14,20 @@ import com.mgt.downloader.utils.Utils
 import org.apache.commons.lang.StringEscapeUtils
 
 
-class BobaExtractor : BaseExtractor {
+class InstagramExtractor : BaseExtractor {
     override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
-        getJsWebContent(url) {html->
+        getJsWebContent(url) { html ->
             SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
                 var data = html
                 var fileName =
-                    data.substring(data.indexOf("property=\"og:title\" content=\"") + 29).let {
-                        it.substring(0, it.indexOf("\""))
+                    data.substring("<title>".let{data.indexOf(it) + it.length}).let {
+                        it.substring(0, it.indexOf("</title>"))
                     }
 
                 var isVideo = true
                 var idx = data.indexOf("<video")
                 if (idx == -1) {
-                    idx = data.indexOf("style=\"background-image:")
+                    idx = data.indexOf("<img")
                     isVideo = false
                 }
 
@@ -41,18 +41,18 @@ class BobaExtractor : BaseExtractor {
                 val height = 840
 
                 if (isVideo) {
-                    thumbUrl = data.substring(data.indexOf("poster=\"") + 8).let {
+                    thumbUrl = data.substring("poster=\"".let{data.indexOf(it) + it.length}).let {
                         StringEscapeUtils.unescapeJava(it.substring(0, it.indexOf("\"")))
                     }
 
-                    downloadUrl = data.substring(data.indexOf("<source src=\"") + 13).let {
+                    downloadUrl = data.substring("src=\"".let{data.indexOf(it) + it.length}).let {
                         StringEscapeUtils.unescapeJava(it.substring(0, it.indexOf("\"")))
                     }
 
                     fileName = "$fileName.mp4"
                 } else {
-                    downloadUrl = data.substring(data.indexOf("url(&quot;") + 10).let {
-                        StringEscapeUtils.unescapeJava(it.substring(0, it.indexOf("&quot;")))
+                    downloadUrl = data.substring("src=\"".let{data.indexOf(it) + it.length}).let {
+                        StringEscapeUtils.unescapeJava(it.substring(0, it.indexOf("\"")))
                     }
                     thumbUrl = downloadUrl
 
@@ -84,42 +84,22 @@ class BobaExtractor : BaseExtractor {
             addJavascriptInterface(MyJavaScriptInterface(onSuccess), "HtmlViewer")
 
             webViewClient = object : WebViewClient() {
-//                private var loadingFinished = true
-//                private var redirect = false
                 private val handler = Handler(Looper.getMainLooper())
 
                 override fun shouldOverrideUrlLoading(
                     view: WebView,
                     urlNewString: String?
                 ): Boolean {
-//                    if (!loadingFinished) {
-//                        redirect = true
-//                    }
-//                    loadingFinished = false
-//                    view.loadUrl(urlNewString!!)
                     return true
                 }
 
-//                override fun onPageStarted(view: WebView?, url: String?, facIcon: Bitmap?) {
-//                    loadingFinished = false
-//                    //SHOW LOADING IF IT ISNT ALREADY VISIBLE
-//                }
-
                 override fun onPageFinished(view: WebView?, url: String?) {
-//                    if (!redirect) {
-//                        loadingFinished = true
-//                    }
-//                    if (loadingFinished && !redirect) {
-//                        //HIDE LOADING IT HAS FINISHED
-                        handler.postDelayed({
-                            loadUrl(
-                                "javascript:window.HtmlViewer.onLoaded" +
-                                        "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
-                            )
-                        }, 3000)
-//                    } else {
-//                        redirect = false
-//                    }
+                    handler.postDelayed({
+                        loadUrl(
+                            "javascript:window.HtmlViewer.onLoaded" +
+                                    "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
+                        )
+                    }, 3000)
                 }
             }
             loadUrl(url)

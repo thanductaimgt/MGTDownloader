@@ -175,16 +175,20 @@ object Utils {
 
     @Throws(Throwable::class)
     fun getDownloadDirPath(context: Context): String {
-        val downloadDir = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-            context.getExternalFilesDir(null)!!
-        } else {
-            File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)!!.path}/MGT Downloader")
-        }
+        return try {
+            val downloadDir = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                context.getExternalFilesDir(null)!!
+            } else {
+                File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)!!.path}/MGT Downloader")
+            }
 
-        if (!downloadDir.exists() && !downloadDir.mkdirs()) {
-            throw Throwable("Fail to create directory ${downloadDir.path}")
+            if (!downloadDir.exists() && !downloadDir.mkdirs()) {
+                throw Throwable("Fail to create directory ${downloadDir.path}")
+            }
+            downloadDir.path
+        } catch (t: Throwable) {
+            context.getString(R.string.path_not_available)
         }
-        return downloadDir.path
     }
 
     fun isDownloadedFileExist(context: Context, downloadTask: DownloadTask): Boolean {
@@ -322,16 +326,16 @@ object Utils {
             when (header) {
                 is Short -> ByteBuffer.allocate(Short.Companion.SIZE_BYTES)
                     .order(ByteOrder.LITTLE_ENDIAN).putShort(
-                    header
-                )
+                        header
+                    )
                 is Int -> ByteBuffer.allocate(Int.Companion.SIZE_BYTES)
                     .order(ByteOrder.LITTLE_ENDIAN).putInt(
-                    header
-                )
+                        header
+                    )
                 else -> ByteBuffer.allocate(Long.Companion.SIZE_BYTES)
                     .order(ByteOrder.LITTLE_ENDIAN).putLong(
-                    header as Long
-                )
+                        header as Long
+                    )
             }
         return data.contentEquals(extraIdBytes.array())
     }
@@ -518,7 +522,7 @@ object Utils {
                     "Range",
                     "bytes=${rangeStart ?: ""}-${rangeEnd ?: ""}"
                 )
-                for (header in Configurations.requestHeaders){
+                for (header in Configurations.requestHeaders) {
                     addRequestProperty(header.key, header.value)
                 }
                 readTimeout = 60000
@@ -567,7 +571,7 @@ object Utils {
 
     private fun getDirSize(directory: File): Long {
         var length: Long = 0
-        directory.listFiles()?.let {files->
+        directory.listFiles()?.let { files ->
             for (file in files) {
                 length += if (file.isFile)
                     file.length()
@@ -611,6 +615,14 @@ object Utils {
 
     fun isBobaUrl(url: String): Boolean {
         val matcher = bobaPattern.matcher(url)
+        return matcher.find()
+    }
+
+    private val instaPattern =
+        Pattern.compile("^(https?://)?(www\\.)?(instagram\\.com)/.+\$")
+
+    fun isInstaUrl(url: String): Boolean {
+        val matcher = instaPattern.matcher(url)
         return matcher.find()
     }
 
