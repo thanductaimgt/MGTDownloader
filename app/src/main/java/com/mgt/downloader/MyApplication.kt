@@ -26,6 +26,7 @@ import java.util.regex.Pattern
 class MyApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
+        appContext = this
         database = Room.databaseBuilder(applicationContext, IDMDatabase::class.java, "IDM_Database")
             .build()
 
@@ -91,6 +92,7 @@ class MyApplication : MultiDexApplication() {
     }
 
     companion object {
+        lateinit var appContext: Context
         lateinit var reviewManager: ReviewManager
         lateinit var database: IDMDatabase
         var isLogEnabled = true

@@ -606,6 +606,14 @@ object Utils {
         return matcher.find()
     }
 
+    private val bobaPattern =
+        Pattern.compile("^(https?://)?(www\\.)?(bo3\\.me)/(s/)?.+\$")
+
+    fun isBobaUrl(url: String): Boolean {
+        val matcher = bobaPattern.matcher(url)
+        return matcher.find()
+    }
+
     fun getFormatRatio(width: Int?, height: Int?): String {
         return if (width == null || height == null) {
             "390:300"

@@ -1,18 +1,25 @@
 package com.mgt.downloader.ui
 
 import android.animation.Animator
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
+import android.webkit.JavascriptInterface
 import android.webkit.URLUtil
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -199,6 +206,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun initView() {
         downloadListDialog =
             DownloadListFragment(
@@ -299,9 +307,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             fileSizeTextView.text =
                 String.format(
-                    "${getString(R.string.desc_size)} ${getString(
-                        R.string.desc_unknown_size
-                    )}"
+                    "${getString(R.string.desc_size)} ${
+                        getString(
+                            R.string.desc_unknown_size
+                        )
+                    }"
                 )
         }
     }
@@ -395,7 +405,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             val stopCondition = { newFileName: String ->
                 !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName) ?: false)
             }
-            filePreviewInfo.name = Utils.generateNewDownloadFileName(this, curFileName, stopCondition)
+            filePreviewInfo.name = Utils.generateNewDownloadFileName(
+                this,
+                curFileName,
+                stopCondition
+            )
         }
         fileNameTextView.text = filePreviewInfo.name
     }
@@ -482,7 +496,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             ?: false)
                     }
                     if (!stopCondition(result.name)) {
-                        result.name = Utils.generateNewDownloadFileName(this@MainActivity, result.name, stopCondition)
+                        result.name = Utils.generateNewDownloadFileName(
+                            this@MainActivity,
+                            result.name,
+                            stopCondition
+                        )
                     }
 
                     this@MainActivity.filePreviewInfo = result
@@ -508,7 +526,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName) ?: false)
                 }
                 if (!stopCondition(result.name)) {
-                    result.name = Utils.generateNewDownloadFileName(this@MainActivity, result.name, stopCondition)
+                    result.name = Utils.generateNewDownloadFileName(
+                        this@MainActivity,
+                        result.name,
+                        stopCondition
+                    )
                 }
             }
         }

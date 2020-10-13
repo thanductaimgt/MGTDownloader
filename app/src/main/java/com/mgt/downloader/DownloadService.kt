@@ -14,6 +14,7 @@ import androidx.lifecycle.MutableLiveData
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
+import com.mgt.downloader.extractor.BobaExtractor
 import com.mgt.downloader.extractor.FacebookExtractor
 import com.mgt.downloader.extractor.TikTokExtractor
 import com.mgt.downloader.helper.LongObject
@@ -275,11 +276,14 @@ class DownloadService : Service() {
 
     private fun getDownloadUrl(url: String, onComplete: (downloadUrl: String) -> Unit) {
         when {
-            Utils.isFacebookUrl(url)->{
+            Utils.isFacebookUrl(url) -> {
                 FacebookExtractor()
             }
-            else -> {//TikTok
+            Utils.isTikTokUrl(url) -> {
                 TikTokExtractor()
+            }
+            else -> {
+                BobaExtractor()
             }
         }.extract(url, object : SingleObserver<FilePreviewInfo> {
             override fun onSubscribe(disposable: Disposable) {

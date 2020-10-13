@@ -7,6 +7,7 @@ import com.mgt.downloader.MyApplication
 import com.mgt.downloader.extractor.OtherFileExtractor
 import com.mgt.downloader.extractor.TikTokExtractor
 import com.mgt.downloader.data_model.FilePreviewInfo
+import com.mgt.downloader.extractor.BobaExtractor
 import com.mgt.downloader.extractor.FacebookExtractor
 import com.mgt.downloader.rxjava.SingleObserver
 import com.mgt.downloader.utils.Utils
@@ -28,8 +29,11 @@ class MainViewModel : ViewModel() {
             Utils.isTikTokUrl(url) -> {
                 TikTokExtractor()
             }
-            Utils.isFacebookUrl(url)->{
+            Utils.isFacebookUrl(url) -> {
                 FacebookExtractor()
+            }
+            Utils.isBobaUrl(url) -> {
+                BobaExtractor()
             }
             else -> {
                 OtherFileExtractor()

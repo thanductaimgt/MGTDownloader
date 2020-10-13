@@ -15,8 +15,8 @@ android {
         applicationId "com.mgt.downloader"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 15
-        versionName "1.5"
+        versionCode 16
+        versionName "1.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -39,23 +39,35 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+//    packagingOptions {
+//        exclude 'META-INF/DEPENDENCIES'
+//        exclude 'META-INF/LICENSE'
+//        exclude 'META-INF/LICENSE.txt'
+//        exclude 'META-INF/license.txt'
+//        exclude 'META-INF/NOTICE'
+//        exclude 'META-INF/NOTICE.txt'
+//        exclude 'META-INF/notice.txt'
+//        exclude 'META-INF/ASL2.0'
+//        exclude 'META-INF/versions/9'
+//        exclude("META-INF/*.kotlin_module")
+//    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test:runner:1.3.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     //lottie
-    implementation "com.airbnb.android:lottie:3.4.2"
+    implementation "com.airbnb.android:lottie:3.4.4"
 
     //material design
-    implementation "com.google.android.material:material:1.3.0-alpha02"
+    implementation "com.google.android.material:material:1.3.0-alpha03"
 
     //room
     def room_version = "2.2.5"
@@ -71,12 +83,12 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
 
     //view model
-    def lifecycle_version = "2.3.0-alpha07"
+    def lifecycle_version = "2.3.0-beta01"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 
     //gson
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     //picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
@@ -91,13 +103,13 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     //firebase
-    implementation 'com.google.firebase:firebase-analytics:17.5.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.2.1'
+    implementation 'com.google.firebase:firebase-analytics:17.6.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
 
     //admob
     implementation 'com.google.android.gms:play-services-ads-lite:19.4.0'
 
     // gg play
-    implementation 'com.google.android.play:core:1.8.0'
+    implementation 'com.google.android.play:core:1.8.2'
     implementation 'com.google.android.play:core-ktx:1.8.1'
 }
