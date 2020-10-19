@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.ads.AdRequest
 import com.mgt.downloader.DownloadService
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
@@ -113,6 +114,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 liveDownloadService.value?.onDisconnect()
             }
         })
+
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
     private fun getStartServiceIntent(): Intent {

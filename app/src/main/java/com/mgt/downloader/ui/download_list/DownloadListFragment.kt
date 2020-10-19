@@ -11,17 +11,13 @@ import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
-import com.google.android.gms.ads.AdRequest
-import kotlinx.android.synthetic.main.dialog_download_list.*
-import kotlinx.android.synthetic.main.dialog_download_list.view.*
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
-import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.base.ContainsSelectableList
+import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.utils.TAG
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.dialog_download_list.adView
-import kotlinx.android.synthetic.main.dialog_download_list.networkStateTextView
+import kotlinx.android.synthetic.main.dialog_download_list.*
+import kotlinx.android.synthetic.main.dialog_download_list.view.*
 
 
 class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
@@ -73,9 +69,6 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
                 networkStateTextView.visibility = View.VISIBLE
             }
         })
-
-        val adRequest = AdRequest.Builder().build()
-        adView.loadAd(adRequest)
     }
 
     private fun initView(view: View) {

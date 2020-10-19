@@ -109,11 +109,4 @@
 
                 />
     </com.google.android.material.tabs.TabLayout>
-
-    <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:adSize="BANNER"
-            app:adUnitId="@string/banner_ad_id" />
 </LinearLayout>

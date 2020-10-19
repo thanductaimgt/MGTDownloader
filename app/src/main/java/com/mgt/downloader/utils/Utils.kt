@@ -15,6 +15,7 @@ import com.mgt.downloader.base.BaseExtractor
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.squareup.picasso.*
+import org.apache.commons.lang.StringEscapeUtils
 import java.io.File
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -626,6 +627,14 @@ object Utils {
         return matcher.find()
     }
 
+    private val twitterPattern =
+        Pattern.compile("^(https?://)?(www\\.)?(twitter\\.com)/.+\$")
+
+    fun isTwitterUrl(url: String): Boolean {
+        val matcher = twitterPattern.matcher(url)
+        return matcher.find()
+    }
+
     fun getFormatRatio(width: Int?, height: Int?): String {
         return if (width == null || height == null) {
             "390:300"
@@ -984,4 +993,10 @@ fun Picasso.smartLoad(
                     .into(imageView)
             }
         })
+}
+
+fun String.findValue(prefix: String, postfix: String):String {
+    return substring(prefix.let { indexOf(it) + it.length }).let {
+        StringEscapeUtils.unescapeJava(it.substring(0, it.indexOf(postfix)))
+    }
 }

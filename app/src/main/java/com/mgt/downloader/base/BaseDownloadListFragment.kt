@@ -208,7 +208,7 @@ abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener, View
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    adapter.notifyDataSetChanged()
+                    removeAllItems()
                 }
             }
         }

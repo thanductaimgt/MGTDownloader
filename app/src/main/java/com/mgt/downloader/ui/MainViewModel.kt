@@ -1,7 +1,6 @@
 package com.mgt.downloader.ui
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.data_model.FilePreviewInfo
@@ -31,6 +30,9 @@ class MainViewModel : ViewModel() {
             }
             Utils.isBobaUrl(url) -> {
                 BobaExtractor()
+            }
+            Utils.isTwitterUrl(url) -> {
+                TwitterExtractor()
             }
             Utils.isInstaUrl(url) -> {
                 InstagramExtractor()

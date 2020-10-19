@@ -14,10 +14,7 @@ import androidx.lifecycle.MutableLiveData
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
-import com.mgt.downloader.extractor.BobaExtractor
-import com.mgt.downloader.extractor.FacebookExtractor
-import com.mgt.downloader.extractor.InstagramExtractor
-import com.mgt.downloader.extractor.TikTokExtractor
+import com.mgt.downloader.extractor.*
 import com.mgt.downloader.helper.LongObject
 import com.mgt.downloader.helper.StopThreadThrowable
 import com.mgt.downloader.rxjava.*
@@ -285,6 +282,9 @@ class DownloadService : Service() {
             }
             Utils.isBobaUrl(url) -> {
                 BobaExtractor()
+            }
+            Utils.isTwitterUrl(url) -> {
+                TwitterExtractor()
             }
             else -> {
                 InstagramExtractor()

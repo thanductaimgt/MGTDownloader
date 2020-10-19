@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.play.core.review.ReviewInfo
+import com.mgt.downloader.BuildConfig
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.utils.Configurations
@@ -102,13 +103,20 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
     }
 
     private fun showInAppRatingBottomSheet() {
-        try {
-            val flow = MyApplication.reviewManager.launchReviewFlow(activity!!, reviewInfo!!)
-            flow.addOnCompleteListener {
-                Toast.makeText(context, R.string.thanks_for_rating, Toast.LENGTH_SHORT).show()
+        val onComplete = {
+            Toast.makeText(context, R.string.thanks_for_rating, Toast.LENGTH_SHORT).show()
+        }
+        if (BuildConfig.DEBUG) {
+            onComplete()
+        } else {
+            try {
+                val flow = MyApplication.reviewManager.launchReviewFlow(activity!!, reviewInfo!!)
+                flow.addOnCompleteListener {
+                    onComplete()
+                }
+            } catch (t: Throwable) {
+                navigateToCHPlay()
             }
-        } catch (t: Throwable) {
-            navigateToCHPlay()
         }
     }
 
