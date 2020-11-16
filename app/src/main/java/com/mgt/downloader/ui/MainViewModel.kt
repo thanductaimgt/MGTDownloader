@@ -22,24 +22,24 @@ class MainViewModel : ViewModel() {
         }
 
         when {
-            Utils.isTikTokUrl(url) -> {
-                TikTokExtractor()
-            }
-            Utils.isFacebookUrl(url) -> {
-                FacebookExtractor()
-            }
-            Utils.isBobaUrl(url) -> {
-                BobaExtractor()
-            }
-            Utils.isTwitterUrl(url) -> {
-                TwitterExtractor()
-            }
-            Utils.isInstaUrl(url) -> {
-                InstagramExtractor()
-            }
-            else -> {
-                OtherFileExtractor()
-            }
+                Utils.isTikTokUrl(url) -> {
+                    TikTokExtractor()
+                }
+                Utils.isFacebookUrl(url) -> {
+                    FacebookExtractor()
+                }
+                Utils.isBobaUrl(url) -> {
+                    BobaExtractor()
+                }
+                Utils.isTwitterUrl(url) -> {
+                    TwitterExtractor()
+                }
+                Utils.isInstaUrl(url) -> {
+                    InstagramExtractor()
+                }
+                else -> {
+                    OtherFileExtractor()
+                }
         }.extract(url, observer)
     }
 }

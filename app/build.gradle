@@ -15,8 +15,8 @@ android {
         applicationId "com.mgt.downloader"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 16
-        versionName "1.6"
+        versionCode 17
+        versionName "1.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -102,11 +102,11 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     //firebase
-    implementation 'com.google.firebase:firebase-analytics:17.6.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:18.0.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
 
     //admob
-    implementation 'com.google.android.gms:play-services-ads-lite:19.4.0'
+    implementation 'com.google.android.gms:play-services-ads-lite:19.5.0'
 
     // gg play
     implementation 'com.google.android.play:core-ktx:1.8.1'

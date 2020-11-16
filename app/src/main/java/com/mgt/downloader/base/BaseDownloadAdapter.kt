@@ -153,7 +153,8 @@ abstract class BaseDownloadAdapter(
 
                     fileIconImgView.layoutParams =
                         (fileIconImgView.layoutParams as ConstraintLayout.LayoutParams).apply {
-                            dimensionRatio = "H,${downloadTask.thumbRatio}"
+                            dimensionRatio =
+                                if (downloadTask.thumbUrl == null) "1:1" else "H,${downloadTask.thumbRatio}"
                         }
                 } else {
                     urlTextView.maxLines = Constants.MAX_LINES_ITEM_COLLAPSED

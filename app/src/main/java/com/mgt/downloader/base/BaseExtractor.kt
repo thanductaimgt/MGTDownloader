@@ -1,13 +1,28 @@
 package com.mgt.downloader.base
 
+import com.google.gson.Gson
+import com.mgt.downloader.MyApplication
+import com.mgt.downloader.data_model.ExtractFields
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObserver
+import com.mgt.downloader.utils.*
+import kotlin.text.format
 
 interface BaseExtractor {
-    fun extract(url:String, observer: SingleObserver<FilePreviewInfo>)
+    fun extract(url: String, observer: SingleObserver<FilePreviewInfo>)
 
-    companion object{
-        const val USER_AGENT =
-            "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36"
+    companion object {
+        fun getRemoteExtractFields(extractorName: String): ExtractFields {
+            val content = Utils.getContent(Constants.API_EXTRACT_FIELDS.format(extractorName))
+            val json = content.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
+
+            return Gson().fromJson(json, ExtractFields::class.java)
+        }
+
+        fun getLocalExtractFields(extractorName: String): ExtractFields {
+            val json =
+                Utils.getContent(MyApplication.appContext.assets.open("extractfields/$extractorName.json"))
+            return Gson().fromJson(json, ExtractFields::class.java)
+        }
     }
 }

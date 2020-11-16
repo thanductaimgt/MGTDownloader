@@ -61,7 +61,7 @@
     <string name="desc_download_dir_path">Đường dẫn thư mục download</string>
     <string name="desc_note_delete_app">Chú ý: nếu định gỡ bỏ ứng dụng này, bạn nên lưu bản sao hoặc di chuyển các file đã tải về sang vị trí khác bên ngoài \"com.mgt.downloader/\" để tránh mất dữ liệu vì thư mục này sẽ bị xóa cùng với ứng dụng</string>
     <string name="desc_default">mặc định</string>
-    <string name="desc_not_available_for_unknown_file_size">Không khả dụng khi độ lớn file không xác định</string>
+    <string name="desc_not_available_for_file">Không khả dụng đối với file này</string>
     <string name="desc_swap">Swap</string>
     <string name="desc_view_info">Xem thông tin</string>
     <string name="desc_edit_name">Đổi tên</string>

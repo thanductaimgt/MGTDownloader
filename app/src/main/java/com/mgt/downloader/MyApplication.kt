@@ -1,11 +1,14 @@
 package com.mgt.downloader
 
 import android.content.Context
+import android.util.Log
 import androidx.multidex.MultiDexApplication
 import androidx.room.Room
 import com.google.android.gms.ads.MobileAds
 import com.google.android.play.core.review.ReviewManager
 import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
 import com.mgt.downloader.helper.ConnectionLiveData
@@ -13,15 +16,11 @@ import com.mgt.downloader.repository.IDMDatabase
 import com.mgt.downloader.rxjava.Disposable
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
-import com.mgt.downloader.utils.Configurations
-import com.mgt.downloader.utils.Statistics
-import com.mgt.downloader.utils.Utils
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import com.mgt.downloader.utils.*
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
+
 
 class MyApplication : MultiDexApplication() {
     override fun onCreate() {
@@ -44,51 +43,25 @@ class MyApplication : MultiDexApplication() {
 
     private fun checkUpdateRequestHeaders() {
         SingleObservable.fromCallable(unboundExecutorService) {
-            getHeaders()
-        }.subscribe(object :SingleObserver<Map<String, String>>{
+            getRequestHeaders()
+        }.subscribe(object : SingleObserver<Map<String, String>> {
             override fun onSubscribe(disposable: Disposable) {
 
             }
 
             override fun onSuccess(result: Map<String, String>) {
+                Log.d(TAG, "Obtained headers: $result")
                 Configurations.requestHeaders = result
             }
         })
     }
 
-    private fun getHeaders():Map<String , String>{
-        val conn = Utils.openConnection("http://dontpad.com/tdtai/mgtdownloader/requestheaders")
+    private fun getRequestHeaders(): Map<String, String> {
+        val streamMap = Utils.getContent(Constants.API_GENERAL_HEADERS)
 
-        var reader: BufferedReader? = null
-        val streamMap = StringBuilder()
-        try {
-            reader =
-                BufferedReader(InputStreamReader(conn.inputStream))
-            var line: String?
-            while (reader.readLine().also { line = it } != null) {
-                streamMap.append("$line\n")
-            }
-        } finally {
-            reader?.close()
-            conn.disconnect()
-        }
-
-        val pattern =
-            Pattern.compile("<textarea((.|\n)*?)</textarea>")
-        val matcher = pattern.matcher(streamMap)
-        val headersRaw = if (matcher.find()) {
-            matcher.group().let {
-                it.substring(it.indexOf('>')+1, it.length - 11)
-            }
-        } else {
-            ""
-        }
-
-        return headersRaw.split("\n").fold(HashMap(), { map, header ->
-            val entry = header.split(':', limit = 2)
-            map[entry[0]] = entry[1]
-            map
-        })
+        val json = streamMap.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
+        val mapType = object : TypeToken<Map<String, Any>>() {}.type
+        return Gson().fromJson(json, mapType)
     }
 
     companion object {
@@ -111,7 +84,7 @@ class MyApplication : MultiDexApplication() {
         ).apply { allowCoreThreadTimeOut(true) }
 
         fun resetDownloadExecutorService() {
-            boundExecutorService.shutdownNow()
+            boundExecutorService.shutdown()
             initDownloadExecutorService()
         }
 

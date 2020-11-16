@@ -49,11 +49,15 @@ object Constants {
 
     const val SHARE_PREFERENCES_NAME = "IDM Share Preferences"
 
-    const val ONE_KB_IN_B:Long = 1000
-    const val ONE_MB_IN_B:Long = 1000*1000
-    const val ONE_GB_IN_B:Long = 1000*1000*1000
+    const val ONE_KB_IN_B = 1000L
+    const val ONE_MB_IN_B = 1000L*1000
+    const val ONE_GB_IN_B = 1000L*1000*1000
 
     const val DOWNLOAD_STATE_SUCCESS = 0
     const val DOWNLOAD_STATE_CANCEL_OR_FAIL = 1
     const val DOWNLOAD_STATE_INTERRUPT = 2
+
+    private const val API_BASE_URL = "http://dontpad.com/tdtai/mgtdownloader"
+    const val API_GENERAL_HEADERS = "$API_BASE_URL/requestheaders"
+    const val API_EXTRACT_FIELDS = "$API_BASE_URL/extractfields/%s"
 }

@@ -7,17 +7,19 @@ import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.widget.ImageView
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
-import com.mgt.downloader.base.BaseExtractor
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.squareup.picasso.*
 import org.apache.commons.lang.StringEscapeUtils
+import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
+import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.ByteBuffer
@@ -82,18 +84,19 @@ object Utils {
     }
 
     fun getFileSize(url: String): Long {
-        val input: InputStream? = null
-        var connection: HttpURLConnection? = null
         return try {
-            connection = openConnection(url)
-            connection.contentLength.toLong()
-        } catch (e: Throwable) {
-            e.printStackTrace()
+            openConnection(url).use {
+                it.contentLength.toLong()
+            }
+        } catch (t: Throwable) {
+            t.printStackTrace()
             Constants.ERROR.toLong()
-        } finally {
-            //close all resources
-            input?.close()
-            connection?.disconnect()
+        }
+    }
+
+    fun isMultipartSupported(url:String):Boolean{
+        return openConnection(url, rangeStart = 0).use {
+            it.responseCode == Constants.HTTP_PARTIAL_CONTENT
         }
     }
 
@@ -513,21 +516,30 @@ object Utils {
     }
 
     fun openConnection(
-        fileUri: String,
+        url: String,
         rangeStart: Long? = null,
-        rangeEnd: Long? = null
+        rangeEnd: Long? = null,
+        timeOut: Int = 60000,
     ): HttpURLConnection {
-        return (URL(fileUri).openConnection() as HttpURLConnection).apply {
+        Log.d(TAG, "connect to url: $url")
+        return (URL(url).openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
             (rangeStart ?: rangeEnd)?.let {
                 addRequestProperty(
                     "Range",
                     "bytes=${rangeStart ?: ""}-${rangeEnd ?: ""}"
                 )
-                for (header in Configurations.requestHeaders) {
-                    addRequestProperty(header.key, header.value)
-                }
-                readTimeout = 60000
             }
+            addRequestProperty(
+                "Cookie",
+                CookieManager.getInstance().getCookie(url)
+            )
+            for (header in Configurations.requestHeaders) {
+                addRequestProperty(header.key, header.value)
+            }
+            readTimeout = timeOut
+
+            Log.d(TAG, "Request headers: $requestProperties")
 
             connect()
             if (responseCode != Constants.HTTP_PARTIAL_CONTENT && responseCode != HttpURLConnection.HTTP_OK && responseCode != Constants.HTTP_RANGE_NOT_SATISFIABLE) {
@@ -535,6 +547,24 @@ object Utils {
                     "$TAG: Server returned HTTP ${responseCode}: $responseMessage"
                 )
             }
+        }
+    }
+
+    fun getContent(url: String): String {
+        return openConnection(url).use {
+            getContent(it.inputStream)
+        }
+    }
+
+    fun getContent(inputStream: InputStream): String {
+        val streamMap = StringBuilder()
+
+        return BufferedReader(InputStreamReader(inputStream)).use { reader ->
+            var line: String?
+            while (reader.readLine().also { line = it } != null) {
+                streamMap.append("$line\n")
+            }
+            streamMap.toString()
         }
     }
 
@@ -995,8 +1025,87 @@ fun Picasso.smartLoad(
         })
 }
 
-fun String.findValue(prefix: String, postfix: String):String {
+fun String.findValue(prefix: String, postfix: String): String {
     return substring(prefix.let { indexOf(it) + it.length }).let {
         StringEscapeUtils.unescapeJava(it.substring(0, it.indexOf(postfix)))
+    }
+}
+
+/**
+ * Only prefix could be regex.
+ *
+ * Be careful with ( and )
+ */
+fun StringBuilder.findValue(prefix: String, postfix: String, default: String?): String? {
+    return findValue(this, prefix, postfix, default)
+}
+
+/**
+ * Only prefix could be regex.
+ *
+ * Be careful with ( and )
+ */
+fun <T : String?> String.findValue(
+    prefix: String?,
+    postfix: String?,
+    default: T,
+    unescape: Boolean = true
+): T {
+    return findValue(this, prefix, postfix, default, unescape)
+}
+
+private fun <T : String?> findValue(
+    input: CharSequence,
+    prefix: String?,
+    postfix: String?,
+    default: T,
+    unescape: Boolean = true
+): T {
+    if (prefix == null || postfix == null) return default
+    try {
+        val pattern = Pattern.compile("$prefix(?<target>(.|\n)*?)$postfix")
+        val matcher = pattern.matcher(input)
+        return if (matcher.find()) {
+            var valueEscaped = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                matcher.group("target")
+            } else {
+                matcher.group(matcher.groupCount())
+            }!!
+            try {
+                valueEscaped = Utils.unescapePerlString(valueEscaped)
+                if (unescape) {
+                    valueEscaped = valueEscaped.unescapeJava()
+                    valueEscaped = valueEscaped.unescapeHtml()
+                }
+                valueEscaped
+            } catch (t: Throwable) {
+                valueEscaped
+            }
+        } else {
+            default
+        } as T
+    } catch (t: Throwable) {
+        t.printStackTrace()
+        return default
+    }
+}
+
+fun String.unescapeJava(): String {
+    return StringEscapeUtils.unescapeJava(this)
+}
+
+fun String.unescapeHtml(): String {
+    return StringEscapeUtils.unescapeHtml(this)
+}
+
+fun String.format(vararg args: Any?): String {
+    return String.format(this, args)
+}
+
+inline fun <T> HttpURLConnection.use(block: (conn: HttpURLConnection) -> T): T {
+    try {
+        return block(this)
+    } finally {
+        disconnect()
     }
 }

@@ -11,36 +11,27 @@ class BobaExtractor : JsWebExtractor() {
         url: String,
         webContent: String
     ):FilePreviewInfo {
-        var data = webContent
-        var fileName = data.findValue("property=\"og:title\" content=\"", "\"")
+        var fileName = webContent.findValue("property=\"og:title\"(.*?)content=\"", "\"", default = "Boba story")
 
-        var isVideo = true
-        var idx = data.indexOf("<video")
-        if (idx == -1) {
-            idx = data.indexOf("style=\"background-image:")
-            isVideo = false
-        }
+        val isVideo = webContent.indexOf("<video(.*?)>")!=-1
 
-        data = data.substring(idx)
-
-        //Grab content URL (video file)
-        val downloadUrl: String
-        val thumbUrl: String?
-
-        val width = 473
-        val height = 840
+        val thumbUrl:String?
+        val downloadUrl:String
 
         if (isVideo) {
-            thumbUrl = data.findValue("poster=\"", "\"")
-            downloadUrl = data.findValue("<source src=\"", "\"")
+            thumbUrl = webContent.findValue("poster=\"", "\"", default = null)
+            downloadUrl = webContent.findValue("<source(.*?)src=\"", "\"", default = null)!!
             fileName = "$fileName.mp4"
         } else {
-            downloadUrl = data.findValue("url(&quot;", "\"")
+            downloadUrl = webContent.findValue("style=\"(.*?)background-image:(.*?)url[(]&quot;", "&quot;[)]", null)!!
             thumbUrl = downloadUrl
             fileName = "$fileName.jpg"
         }
 
-        val fileSize = -1L;//Utils.getFileSize(url)
+        val width = 473
+        val height = 840
+
+        val fileSize = Utils.getFileSize(url)
 
         return FilePreviewInfo(
             fileName,

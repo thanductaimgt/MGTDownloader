@@ -62,7 +62,7 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initView(view)
 
-        MyApplication.liveConnection.observe(viewLifecycleOwner, Observer { isConnected->
+        MyApplication.liveConnection.observe(viewLifecycleOwner, { isConnected->
             if(isConnected){
                 networkStateTextView.visibility = View.GONE
             }else{

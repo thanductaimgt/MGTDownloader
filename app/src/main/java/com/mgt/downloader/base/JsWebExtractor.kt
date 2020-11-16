@@ -15,7 +15,7 @@ import com.mgt.downloader.rxjava.SingleObserver
 abstract class JsWebExtractor : BaseExtractor {
     open val waitTime = 5000L
 
-    final override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
+    override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
         getJsWebContent(url) { webContent ->
             SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
                 extract(url, webContent)
@@ -25,14 +25,14 @@ abstract class JsWebExtractor : BaseExtractor {
 
     abstract fun extract(url: String, webContent: String): FilePreviewInfo
 
-    private fun getJsWebContent(url: String, onSuccess: ((html: String) -> Any)?) {
+    protected fun getJsWebContent(url: String, onSuccess: ((html: String) -> Any)?) {
         WebView(MyApplication.appContext)
             .apply {
                 settings.apply {
                     javaScriptEnabled = true
                     domStorageEnabled = true
                 }
-                addJavascriptInterface(MyJavaScriptInterface(onSuccess), "HtmlViewer")
+                addJavascriptInterface(MyJavaScriptInterface(this@JsWebExtractor, onSuccess), "HtmlViewer")
 
                 webViewClient = object : WebViewClient() {
                     private var loadingFinished = true
@@ -77,10 +77,23 @@ abstract class JsWebExtractor : BaseExtractor {
             }
     }
 
-    private class MyJavaScriptInterface(private val onSuccess: ((html: String) -> Any)?) {
+    private class MyJavaScriptInterface(private val extractor: JsWebExtractor, private val onSuccess: ((html: String) -> Any)?) {
+        private var isFirstLoad = true
+        private val handler = Handler(Looper.getMainLooper())
+        private lateinit var runnable: Runnable
+
         @JavascriptInterface
         fun onLoaded(html: String?) {
-            html?.let { onSuccess?.invoke(it) }
+            if (isFirstLoad) {
+                isFirstLoad = false
+                runnable = Runnable { html?.let { onSuccess?.invoke(it) } }
+                handler.postDelayed(runnable, 2000)
+                return
+            }
+            handler.removeCallbacks(runnable)
+            html?.let {
+                onSuccess?.invoke(it)
+            }
         }
     }
 }

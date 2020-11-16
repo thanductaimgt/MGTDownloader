@@ -1,0 +1,21 @@
+{
+  "title": {
+    "prefix": "<p><span>",
+    "postfix": "</span></p>",
+    "default": "TikTok video"
+  },
+  "thumbUrl": {
+    "prefix": "<img(.*?)src=\"",
+    "postfix": "\""
+  },
+  "downloadUrl": {
+    "prefix": "<a(.*?)href='",
+    "postfix": "</span></span></a>"
+  },
+  "width": {
+    "default": "473"
+  },
+  "height": {
+    "default": "840"
+  }
+}

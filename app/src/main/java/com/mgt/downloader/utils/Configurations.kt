@@ -18,7 +18,7 @@ object Configurations {
     var maxConcurDownloadNum = DEFAULT_MAX_CONCUR_DOWNLOAD_NUM
     var multiThreadDownloadNum = DEFAULT_MULTI_THREAD_DOWNLOAD_NUM
 
-    lateinit var requestHeaders: Map<String, String>
+    var requestHeaders:Map<String, String> = HashMap()
 
     fun setMaxConcurDownloadNum(value:Int, mainActivity: MainActivity){
         maxConcurDownloadNum = value

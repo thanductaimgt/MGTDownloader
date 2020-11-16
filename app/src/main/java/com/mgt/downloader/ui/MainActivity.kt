@@ -7,19 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
-import android.webkit.JavascriptInterface
 import android.webkit.URLUtil
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -82,17 +76,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         viewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(
             MainViewModel::class.java
         )
-        viewModel.getFilePreviewInfo("", object : SingleObserver<FilePreviewInfo> {
-            override fun onSubscribe(disposable: Disposable) {
-
-            }
-
-            override fun onError(t: Throwable) {
-            }
-
-            override fun onSuccess(result: FilePreviewInfo) {
-            }
-        })
 
         initView()
 
@@ -187,7 +170,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             val url = editable.toString()
             downloadButton.isEnabled = false
             multiThreadDownloadButton.isEnabled = false
-            multiThreadDownloadUnavailableDescTextView.visibility = View.GONE
+            downloadUnavailableTextView.visibility = View.GONE
 
             if (URLUtil.isValidUrl(url)) {
                 showLoadingAnimation()
@@ -248,7 +231,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         downloadButton.isEnabled = false
         multiThreadDownloadButton.isEnabled = false
-        multiThreadDownloadUnavailableDescTextView.visibility = View.GONE
+        downloadUnavailableTextView.visibility = View.GONE
 
         showDownloadListLayout.setOnClickListener(this)
         downloadButton.setOnClickListener(this)
@@ -509,10 +492,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                     this@MainActivity.filePreviewInfo = result
                     downloadButton.isEnabled = true
-                    if (result.size != -1L) {
+                    if (result.size != -1L && result.isMultipartSupported) {
                         multiThreadDownloadButton.isEnabled = true
                     } else {
-                        multiThreadDownloadUnavailableDescTextView.visibility = View.VISIBLE
+                        downloadUnavailableTextView.visibility = View.VISIBLE
                     }
 
                     showFilePreview(result)

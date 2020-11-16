@@ -61,7 +61,7 @@
     <string name="desc_download_dir_path">Download folder path</string>
     <string name="desc_note_delete_app">Important note: if you intend to remove this app, consider to backup or move all downloaded files to other location outside \"com.mgt.downloader/\" to prevent data loss as this folder will be deleted together with the application</string>
     <string name="desc_default">default</string>
-    <string name="desc_not_available_for_unknown_file_size">Not available for unknown-size file</string>
+    <string name="desc_not_available_for_file">Not available for this file</string>
     <string name="desc_swap">Swap</string>
     <string name="desc_view_info">View details</string>
     <string name="desc_edit_name">Change file name</string>

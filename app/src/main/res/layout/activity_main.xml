@@ -283,13 +283,13 @@
                 app:layout_constraintTop_toBottomOf="@id/multiThreadDownloadButton" />
 
         <TextView
-                android:id="@+id/multiThreadDownloadUnavailableDescTextView"
+                android:id="@+id/downloadUnavailableTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/desc_not_available_for_unknown_file_size"
+                android:text="@string/desc_not_available_for_file"
                 android:textColor="@color/lightStrongGray"
                 android:textSize="@dimen/sizeTextSmall"
                 android:visibility="gone"
@@ -343,7 +343,7 @@
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/multiThreadDownloadUnavailableDescTextView"
+                app:layout_constraintTop_toBottomOf="@id/downloadUnavailableTextView"
                 app:layout_constraintVertical_bias="1"
                 app:layout_constraintVertical_chainStyle="packed"
                 app:lottie_enableMergePathsForKitKatAndAbove="true"

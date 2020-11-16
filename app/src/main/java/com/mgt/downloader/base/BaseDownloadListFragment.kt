@@ -16,7 +16,8 @@ import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener, View.OnLongClickListener,
+abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener,
+    View.OnLongClickListener,
     ContainsSelectableList {
     abstract val adapter: BaseDownloadAdapter
     protected var downloadService: DownloadService? = null
@@ -30,11 +31,11 @@ abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener, View
 //        observeDownloadTasks()
         (activity!! as MainActivity).liveDownloadService.observe(
             viewLifecycleOwner,
-            androidx.lifecycle.Observer { downloadService ->
+            { downloadService ->
                 this.downloadService = downloadService
                 this.downloadService?.liveDownloadTasks?.observe(
                     viewLifecycleOwner,
-                    androidx.lifecycle.Observer { downloadTasks ->
+                    { downloadTasks ->
                         onDownloadListChange(downloadTasks)
                     })
             })
@@ -61,11 +62,11 @@ abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener, View
             R.id.selectAllImgView -> {
                 selectAllItems()
             }
-            else->onClickView(view)
+            else -> onClickView(view)
         }
     }
 
-    open fun onClickView(view: View){
+    open fun onClickView(view: View) {
 
     }
 
@@ -213,4 +214,4 @@ abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener, View
             }
         }
     }
-    }
+}

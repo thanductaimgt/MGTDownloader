@@ -9,5 +9,6 @@ data class FilePreviewInfo(
     var centralDirSize: Int = -1,
     var isLocalFile: Boolean = false,
     var thumbUri: String? = null,
-    var thumbRatio: String = "1:1"
+    var thumbRatio: String = "1:1",
+    var isMultipartSupported: Boolean = true
 )
