@@ -9,14 +9,22 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file("D:\\MyFolder\\keystore\\boba.jks")
+            storePassword "tai144708101998"
+            keyAlias "keyboba"
+            keyPassword "tai144708101998"
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
     defaultConfig {
         applicationId "com.mgt.downloader"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 17
-        versionName "1.7"
+        versionCode 18
+        versionName "1.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -24,6 +32,9 @@ android {
         release {
             resValue 'string', 'banner_ad_id', '"ca-app-pub-3298478237408371/6890259756"'
 
+            signingConfig signingConfigs.release
+
+            debuggable false
             minifyEnabled true
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -102,8 +113,8 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     //firebase
-    implementation 'com.google.firebase:firebase-analytics:18.0.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
+//    implementation 'com.google.firebase:firebase-analytics:18.0.0'
+//    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
 
     //admob
     implementation 'com.google.android.gms:play-services-ads-lite:19.5.0'

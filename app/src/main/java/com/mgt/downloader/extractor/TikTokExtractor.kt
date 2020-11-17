@@ -41,6 +41,7 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
 
     override fun extract(url: String, webContent: String): FilePreviewInfo {
         return try {
+            logD(TAG, remoteExtractFields.toString())
             getFilePreviewInfo(url, webContent, remoteExtractFields)
         } catch (t: Throwable) {
             logE(TAG, "parse remote fields fail")

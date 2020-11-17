@@ -176,7 +176,6 @@ object Utils {
         return if (resourceId != 0) resourceId else R.drawable.file
     }
 
-    @Throws(Throwable::class)
     fun getDownloadDirPath(context: Context): String {
         return try {
             val downloadDir = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {

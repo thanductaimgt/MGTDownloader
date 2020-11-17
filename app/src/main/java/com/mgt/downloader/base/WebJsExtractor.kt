@@ -3,7 +3,6 @@ package com.mgt.downloader.base
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
-import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.mgt.downloader.MyApplication
@@ -75,25 +74,5 @@ abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDispo
                 }
                 loadUrl(url)
             }
-    }
-
-    private class MyJavaScriptInterface(private val onSuccess: ((html: String) -> Any)?) {
-        private var isFirstLoad = true
-        private val handler = Handler(Looper.getMainLooper())
-        private lateinit var runnable: Runnable
-
-        @JavascriptInterface
-        fun onLoaded(html: String?) {
-            if (isFirstLoad) {
-                isFirstLoad = false
-                runnable = Runnable { html?.let { onSuccess?.invoke(it) } }
-                handler.postDelayed(runnable, 2000)
-                return
-            }
-            handler.removeCallbacks(runnable)
-            html?.let {
-                onSuccess?.invoke(it)
-            }
-        }
     }
 }
