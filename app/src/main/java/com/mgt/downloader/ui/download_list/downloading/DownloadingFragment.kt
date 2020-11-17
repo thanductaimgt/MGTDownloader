@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_downloading.*
 import com.mgt.downloader.R
-import com.mgt.downloader.base.BaseDownloadListFragment
+import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 
-class DownloadingFragment : BaseDownloadListFragment() {
+class DownloadingFragment : BaseDownloadFragment() {
     override lateinit var adapter: DownloadingAdapter
 
     override fun onCreateView(

@@ -7,14 +7,14 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.*
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
+import com.mgt.downloader.base.HasDisposable
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
-import com.mgt.downloader.extractor.*
+import com.mgt.downloader.extractor.ExtractorManager
 import com.mgt.downloader.helper.LongObject
 import com.mgt.downloader.helper.StopThreadThrowable
 import com.mgt.downloader.rxjava.*
@@ -36,11 +36,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 
-class DownloadService : Service() {
+class DownloadService : Service(), HasDisposable {
     //allow bind to this service
     private val binder = DownloadBinder()
 
-    private val compositeDisposable = CompositeDisposable()
+    override val compositeDisposable = CompositeDisposable()
     private var activeDownloadTaskObservables = ConcurrentHashMap<String, Observable>()
 
     //single access point to all tasks, ui can observe and update ui when this value change
@@ -48,7 +48,7 @@ class DownloadService : Service() {
     val liveDownloadTasks = MutableLiveData<HashMap<String, DownloadTask>>(HashMap())
 
     override fun onCreate() {
-        Utils.log(TAG, "onCreate")
+        logD(TAG, "onCreate")
         super.onCreate()
 
         // get all download tasks from database
@@ -123,12 +123,12 @@ class DownloadService : Service() {
 
     //allow binding
     override fun onBind(intent: Intent): IBinder? {
-        Utils.log(TAG, "onBind")
+        logD(TAG, "onBind")
         return binder
     }
 
     override fun onDestroy() {
-        Utils.log(TAG, "onDestroy")
+        logD(TAG, "onDestroy")
         //dispose all observers before destroyed
         this.compositeDisposable.clear()
     }
@@ -271,34 +271,10 @@ class DownloadService : Service() {
         )
     }
 
-
     private fun getDownloadUrl(url: String, onComplete: (downloadUrl: String) -> Unit) {
-        when {
-            Utils.isFacebookUrl(url) -> {
-                FacebookExtractor()
-            }
-            Utils.isTikTokUrl(url) -> {
-                TikTokExtractor()
-            }
-            Utils.isBobaUrl(url) -> {
-                BobaExtractor()
-            }
-            Utils.isTwitterUrl(url) -> {
-                TwitterExtractor()
-            }
-            else -> {
-                InstagramExtractor()
-            }
-        }.extract(url, object : SingleObserver<FilePreviewInfo> {
-            override fun onSubscribe(disposable: Disposable) {
-
-            }
-
-            override fun onError(t: Throwable) {
-
-            }
-
+        ExtractorManager.create(this, url).extract(url, object : SingleObserver<FilePreviewInfo>(this) {
             override fun onSuccess(result: FilePreviewInfo) {
+                super.onSuccess(result)
                 onComplete(result.downloadUri)
             }
         })
@@ -403,7 +379,7 @@ class DownloadService : Service() {
         emitter: StreamEmitter<DownloadTask>,
         isResume: Boolean
     ) {
-        Utils.log(TAG, "executeFileDownloadTask: $downloadTask")
+        logD(TAG, "executeFileDownloadTask: $downloadTask")
 
         var input: InputStream? = null
         var output: OutputStream? = null
@@ -420,7 +396,7 @@ class DownloadService : Service() {
 
             connection = Utils.openConnection(downloadTask.downloadUrl, downloadTask.downloadedSize)
 
-            Utils.log(TAG, "readTimeout: ${connection.readTimeout}")
+            logD(TAG, "readTimeout: ${connection.readTimeout}")
 
             var prevTimePoint = System.currentTimeMillis()
 
@@ -435,7 +411,7 @@ class DownloadService : Service() {
 //                    downloadTask.totalSize = connection.contentLength.toLong()
                     emitter.onNext(null)
 
-                    Utils.log(TAG, "fileLength: ${downloadTask.totalSize}, task: $downloadTask")
+                    logD(TAG, "fileLength: ${downloadTask.totalSize}, task: $downloadTask")
 
                     //skip to downloadedSize, while skipping check if user press pause and handle
                     skipDownloadedBytes(input, downloadTask, emitter)
@@ -518,7 +494,7 @@ class DownloadService : Service() {
             emitter.onError(e)
             MyApplication.database.downloadTaskDao().insertDownloadTask(downloadTask)
         } finally {
-            Utils.log(TAG, "finally block")
+            logD(TAG, "finally block")
 
             //close all resources
             output?.close()
@@ -780,7 +756,7 @@ class DownloadService : Service() {
                 } catch (t: StopThreadThrowable) {
                     return true
                 } finally {
-                    Utils.log(TAG, "inner finally block")
+                    logD(TAG, "inner finally block")
 
                     inputStream?.close()
                     outputStream?.close()
@@ -803,8 +779,8 @@ class DownloadService : Service() {
         val lessWorkThreadNum = (moreWorkDownloadSize * threadNum - downloadTask.totalSize).toInt()
         val moreWorkThreadNum = threadNum - lessWorkThreadNum
 
-        Utils.log(TAG, "lesswork: $lessWorkThreadNum, $lessWorkDownloadSize")
-        Utils.log(TAG, "morework: $moreWorkThreadNum, $moreWorkDownloadSize")
+        logD(TAG, "lesswork: $lessWorkThreadNum, $lessWorkDownloadSize")
+        logD(TAG, "morework: $moreWorkThreadNum, $moreWorkDownloadSize")
 
         var numThreadComplete = 0
         var overallDownloadState = Constants.DOWNLOAD_STATE_SUCCESS
@@ -912,7 +888,7 @@ class DownloadService : Service() {
         lastDownloadedSize: LongObject,
         onComplete: (downloadState: Int) -> Any?
     ) {
-        Utils.log(
+        logD(
             TAG,
             "executeMultiThreadFileDownloadTaskInternal: threadIndex $threadIndex $downloadTask"
         )
@@ -954,7 +930,7 @@ class DownloadService : Service() {
                         ).toLong()
 
                         if (lastPublishedProgress != curProgress) {
-                            Utils.log(
+                            logD(
                                 TAG,
                                 "thread $threadIndex: onNext, last: $lastPublishedProgress, cur:$curProgress; $downloadTask"
                             )
@@ -987,14 +963,14 @@ class DownloadService : Service() {
             }
             onComplete(Constants.DOWNLOAD_STATE_SUCCESS)
         } catch (e: StopThreadThrowable) {
-            Utils.log(TAG, "threadIndex $threadIndex: StopThreadThowable")
+            logD(TAG, "threadIndex $threadIndex: StopThreadThowable")
             onComplete(Constants.DOWNLOAD_STATE_INTERRUPT)
         } catch (e: Throwable) {
-            Utils.log(TAG, "thread $threadIndex error")
+            logD(TAG, "thread $threadIndex error")
             e.printStackTrace()
             onComplete(Constants.DOWNLOAD_STATE_CANCEL_OR_FAIL)
         } finally {
-            Utils.log(TAG, "thread $threadIndex finally block: $downloadTask")
+            logD(TAG, "thread $threadIndex finally block: $downloadTask")
 
             //close all resources
             output?.close()
@@ -1072,7 +1048,7 @@ class DownloadService : Service() {
                 downloadTask.state = DownloadTask.STATE_CANCEL_OR_FAIL
                 emitter.onError(throwable)
             } finally {
-                Utils.log(TAG, "outer finally block")
+                logD(TAG, "outer finally block")
 
                 inputStream?.close()
                 connection?.disconnect()
@@ -1261,7 +1237,7 @@ class DownloadService : Service() {
 
                 return 30 + fileNameLength + extraFieldLength + zipNode.entry!!.compressedSize.toInt()
             } finally {
-                Utils.log(TAG, "inner finally block")
+                logD(TAG, "inner finally block")
 
                 outputStream?.close()
             }
@@ -1274,12 +1250,12 @@ class DownloadService : Service() {
     ) {
         //if user press pause ...
         if (downloadTask.state == DownloadTask.STATE_TEMPORARY_PAUSE) {
-            Utils.log(TAG, "threadIndex $threadIndex: pause")
+            logD(TAG, "threadIndex $threadIndex: pause")
             synchronized(emitter) {
-                Utils.log(TAG, "threadIndex $threadIndex: synchronized")
+                logD(TAG, "threadIndex $threadIndex: synchronized")
                 if (downloadTask.state == DownloadTask.STATE_TEMPORARY_PAUSE) {
                     //emit pause state
-                    Utils.log(TAG, "onNext pause")
+                    logD(TAG, "onNext pause")
                     emitter.onNext(downloadTask)
 
                     //copy this download task, set state to STATE_PERSISTENT_PAUSED, save to database
@@ -1298,11 +1274,11 @@ class DownloadService : Service() {
                     }
 
                     //emit resume state
-                    Utils.log(TAG, "onNext resume")
+                    logD(TAG, "onNext resume")
                     emitter.onNext(downloadTask)
                 }
             }
-            Utils.log(TAG, "threadIndex $threadIndex: resume")
+            logD(TAG, "threadIndex $threadIndex: resume")
         }
 
         if (downloadTask.state == DownloadTask.STATE_PERSISTENT_PAUSED) {
@@ -1334,13 +1310,16 @@ class DownloadService : Service() {
         return -1
     }
 
-    //observers
+    /**
+     * Observers
+     */
 
     //observer for reading all download tasks from database
     inner class GetDownloadTasksObserver :
-        SingleObserver<List<DownloadTask>> {
+        SingleObserver<List<DownloadTask>>(this) {
         override fun onSuccess(result: List<DownloadTask>) {
-            Utils.log(TAG, "onSuccess: $result")
+            logD(TAG, "onSuccess: $result")
+            super.onSuccess(result)
             // transform result from List to HashMap
             liveDownloadTasks.value = HashMap<String, DownloadTask>().apply {
                 result.forEach {
@@ -1358,14 +1337,9 @@ class DownloadService : Service() {
             }
         }
 
-        override fun onSubscribe(disposable: Disposable) {
-            Utils.log(TAG, "onSubscribe")
-            this@DownloadService.compositeDisposable.add(disposable)
-        }
-
         override fun onError(t: Throwable) {
-            Log.e(TAG, "onError")
-            t.printStackTrace()
+            logE(TAG, "onError")
+            super.onError(t)
         }
     }
 
@@ -1373,57 +1347,60 @@ class DownloadService : Service() {
     inner class GetDownloadTaskObserver(
         private val fileName: String,
         private val callback: (downloadTask: DownloadTask) -> Unit
-    ) : SingleObserver<DownloadTask> {
+    ) : SingleObserver<DownloadTask>(this) {
         override fun onSuccess(result: DownloadTask) {
-            Utils.log(TAG, "onSuccess: $result")
+            logD(TAG, "onSuccess: $result")
+            super.onSuccess(result)
             //return result to callback
             callback.invoke(result)
         }
 
         override fun onSubscribe(disposable: Disposable) {
-            Utils.log(TAG, "onSubscribe: $fileName")
-            compositeDisposable.add(disposable)
+            logD(TAG, "onSubscribe: $fileName")
+            super.onSubscribe(disposable)
         }
 
         override fun onError(t: Throwable) {
-            Utils.log(TAG, "onError: $fileName")
-            t.printStackTrace()
+            logE(TAG, "onError: $fileName")
+            super.onError(t)
         }
     }
 
     //observer for inserting a download task to database
     inner class InsertDownloadTaskObserver(private val downloadTask: DownloadTask) :
-        CompletableObserver {
+        CompletableObserver(this) {
         override fun onComplete() {
-            Utils.log(TAG, "onComplete: $downloadTask")
+            logD(TAG, "onComplete: $downloadTask")
+            super.onComplete()
         }
 
         override fun onSubscribe(disposable: Disposable) {
-            Utils.log(TAG, "onSubscribe: $downloadTask")
-            compositeDisposable.add(disposable)
+            super.onSubscribe(disposable)
+            logD(TAG, "onSubscribe: $downloadTask")
         }
 
         override fun onError(t: Throwable) {
-            Utils.log(TAG, "onError: $downloadTask")
-            t.printStackTrace()
+            logE(TAG, "onError: $downloadTask")
+            super.onError(t)
         }
     }
 
     //observer for inserting a download task to database
     inner class InsertDownloadTasksObserver(private val downloadTasks: List<DownloadTask>) :
-        CompletableObserver {
+        CompletableObserver(this) {
         override fun onComplete() {
-            Utils.log(TAG, "onComplete: $downloadTasks")
+            logD(TAG, "onComplete: $downloadTasks")
+            super.onComplete()
         }
 
         override fun onSubscribe(disposable: Disposable) {
-            Utils.log(TAG, "onSubscribe: $downloadTasks")
-            compositeDisposable.add(disposable)
+            logD(TAG, "onSubscribe: $downloadTasks")
+            super.onSubscribe(disposable)
         }
 
         override fun onError(t: Throwable) {
-            Utils.log(TAG, "onError: $downloadTasks")
-            t.printStackTrace()
+            logE(TAG, "onError: $downloadTasks")
+            super.onError(t)
         }
     }
 
@@ -1431,22 +1408,22 @@ class DownloadService : Service() {
     inner class DeleteDownloadTaskObserver(
         private val fileName: String,
         private val callback: ((isSuccess: Boolean) -> Unit)? = null
-    ) :
-        CompletableObserver {
+    ) : CompletableObserver(this) {
         override fun onComplete() {
+            logD(TAG, "onComplete: $fileName")
+            super.onComplete()
             callback?.invoke(true)
-            Utils.log(TAG, "onComplete: $fileName")
         }
 
         override fun onSubscribe(disposable: Disposable) {
-            Utils.log(TAG, "onSubscribe: $fileName")
-            this@DownloadService.compositeDisposable.add(disposable)
+            logD(TAG, "onSubscribe: $fileName")
+            super.onSubscribe(disposable)
         }
 
         override fun onError(t: Throwable) {
+            logE(TAG, "onError: $fileName")
+            super.onError(t)
             callback?.invoke(false)
-            Utils.log(TAG, "onError: $fileName")
-            t.printStackTrace()
         }
     }
 
@@ -1454,42 +1431,42 @@ class DownloadService : Service() {
     inner class DeleteFileOrDirObserver(
         private val fileName: String,
         private val callback: ((isSuccess: Boolean) -> Unit)? = null
-    ) :
-        CompletableObserver {
+    ) : CompletableObserver(this) {
         override fun onComplete() {
+            logD(TAG, "onComplete: $fileName")
+            super.onComplete()
             callback?.invoke(true)
-            Utils.log(TAG, "onComplete: $fileName")
         }
 
         override fun onSubscribe(disposable: Disposable) {
-            Utils.log(TAG, "onSubscribe: $fileName")
-            compositeDisposable.add(disposable)
+            logD(TAG, "onSubscribe: $fileName")
+            super.onSubscribe(disposable)
         }
 
         override fun onError(t: Throwable) {
+            logE(TAG, "onError: $fileName")
+            super.onError(t)
             callback?.invoke(false)
-            Utils.log(TAG, "onError: $fileName")
-            t.printStackTrace()
         }
     }
 
     //observer for executing a download task
 //    inner class ExecuteDownloadTaskObserver(private val fileName: String) : FlowableSubscriber<null> {
 //        override fun onSubscribe(s: Subscription) {
-//            Utils.log(TAG, "onSubscribe: $fileName")
+//            logD(TAG, "onSubscribe: $fileName")
 //            downloadDisposables[fileName] = s
 //        }
 //
 //        //call whenever downloadTask change (progress, state, ...)
 //        override fun onNext(null: null) {
-//            Utils.log(TAG, "onNext: ${liveDownloadTasks.value!![fileName]}")
+//            logD(TAG, "onNext: ${liveDownloadTasks.value!![fileName]}")
 //            //notify observers
 //            liveDownloadTasks.value = liveDownloadTasks.value
 //        }
 //
 //        //call when downloadTask success
 //        override fun onComplete() {
-//            Utils.log(TAG, "onComplete: $fileName")
+//            logD(TAG, "onComplete: $fileName")
 //            //update this downloadTask with success state in liveDownloadTasks
 //            liveDownloadTasks.value = liveDownloadTasks.value!!.apply {
 //                get(fileName)!!.state = DownloadTask.STATE_SUCCESS
@@ -1507,15 +1484,15 @@ class DownloadService : Service() {
 //        }
 //    }
     inner class ExecuteDownloadTaskObserver(private val fileName: String) :
-        StreamObserver<DownloadTask> {
+        StreamObserver<DownloadTask>(this) {
         override fun onSubscribe(disposable: Disposable) {
-            Utils.log(TAG, "onSubscribe: $fileName")
-            this@DownloadService.compositeDisposable.add(disposable)
+            logD(TAG, "onSubscribe: $fileName")
+            super.onSubscribe(disposable)
         }
 
         //call whenever downloadTask change (progress, state, ...)
         override fun onNext(item: DownloadTask?) {
-            Utils.log(TAG, "onNext: $item")
+            logD(TAG, "onNext: $item")
             if (item != null) {
                 liveDownloadTasks.value = liveDownloadTasks.value!!.apply { set(fileName, item) }
             } else {
@@ -1525,7 +1502,8 @@ class DownloadService : Service() {
 
         //call when downloadTask success
         override fun onComplete() {
-            Utils.log(TAG, "onComplete: $fileName")
+            logD(TAG, "onComplete: $fileName")
+            super.onComplete()
             //update this downloadTask with success state in liveDownloadTasks
             liveDownloadTasks.value = liveDownloadTasks.value
 
@@ -1538,8 +1516,8 @@ class DownloadService : Service() {
 
         //call when downloadTask fail
         override fun onError(t: Throwable) {
-            Log.e(TAG, "onError: $fileName")
-            t.printStackTrace()
+            logE(TAG, "onError: $fileName")
+            super.onError(t)
             //update this downloadTask with fail state in liveDownloadTasks
             liveDownloadTasks.value = liveDownloadTasks.value
 
@@ -1553,7 +1531,7 @@ class DownloadService : Service() {
 
     inner class DownloadBinder : Binder() {
         fun getService(): DownloadService {
-            Utils.log(TAG, "getService")
+            logD(TAG, "getService")
             return this@DownloadService
         }
     }

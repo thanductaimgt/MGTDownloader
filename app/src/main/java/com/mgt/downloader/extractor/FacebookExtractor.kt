@@ -1,13 +1,14 @@
 package com.mgt.downloader.extractor
 
-import com.mgt.downloader.base.HtmlWebExtractor
+import com.mgt.downloader.base.HasDisposable
+import com.mgt.downloader.base.WebHtmlExtractor
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.utils.Utils
 import com.mgt.downloader.utils.findValue
 import com.mgt.downloader.utils.unescapeJava
 
 
-class FacebookExtractor : HtmlWebExtractor() {
+class FacebookExtractor(hasDisposable: HasDisposable) : WebHtmlExtractor(hasDisposable) {
     override fun extract(url: String):FilePreviewInfo {
         val webContent = getHtmlContent(url)!!
 

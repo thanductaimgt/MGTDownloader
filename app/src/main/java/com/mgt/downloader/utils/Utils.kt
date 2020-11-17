@@ -10,7 +10,6 @@ import android.view.inputmethod.InputMethodManager
 import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.widget.ImageView
-import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
@@ -94,7 +93,7 @@ object Utils {
         }
     }
 
-    fun isMultipartSupported(url:String):Boolean{
+    fun isMultipartSupported(url: String): Boolean {
         return openConnection(url, rangeStart = 0).use {
             it.responseCode == Constants.HTTP_PARTIAL_CONTENT
         }
@@ -135,13 +134,13 @@ object Utils {
         if (originalNameWithoutExtension.length >= 4) {
             val fourLastElement =
                 originalNameWithoutExtension.takeLast(4)
-            log(TAG, "originalNameWithoutExtension: $originalNameWithoutExtensionAndNumber")
-            log(TAG, "fourLastElement: $fourLastElement")
+            logD(TAG, "originalNameWithoutExtension: $originalNameWithoutExtensionAndNumber")
+            logD(TAG, "fourLastElement: $fourLastElement")
             if (fourLastElement.matches(Regex(" \\([1-9]\\)"))) {
                 originalNameWithoutExtensionAndNumber = originalNameWithoutExtension.dropLast(4)
                 newNumber = fourLastElement[2].toString().toInt() + 1
-                log(TAG, "originalNameWithoutExtension new: $originalNameWithoutExtensionAndNumber")
-                log(TAG, "count: $newNumber")
+                logD(TAG, "originalNameWithoutExtension new: $originalNameWithoutExtensionAndNumber")
+                logD(TAG, "count: $newNumber")
             }
         }
 
@@ -519,9 +518,9 @@ object Utils {
         url: String,
         rangeStart: Long? = null,
         rangeEnd: Long? = null,
-        timeOut: Int = 60000,
+        timeOut: Int = 10000,
     ): HttpURLConnection {
-        Log.d(TAG, "connect to url: $url")
+        logD(TAG, "connect to url: $url")
         return (URL(url).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             (rangeStart ?: rangeEnd)?.let {
@@ -539,7 +538,7 @@ object Utils {
             }
             readTimeout = timeOut
 
-            Log.d(TAG, "Request headers: $requestProperties")
+            logD(TAG, "Request headers: $requestProperties")
 
             connect()
             if (responseCode != Constants.HTTP_PARTIAL_CONTENT && responseCode != HttpURLConnection.HTTP_OK && responseCode != Constants.HTTP_RANGE_NOT_SATISFIABLE) {
@@ -579,12 +578,6 @@ object Utils {
         imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     }
 
-    fun log(tag: String, message: String) {
-        if (MyApplication.isLogEnabled) {
-            Log.d(tag, message)
-        }
-    }
-
     fun getFileOrDirSize(context: Context, dirAppLocalPath: String): Long {
         return try {
             val file = getFile(context, dirAppLocalPath)
@@ -594,7 +587,7 @@ object Utils {
                 file.length()
             }
         } catch (t: Throwable) {
-            log(TAG, "getFileOrDirSize fail")
+            logD(TAG, "getFileOrDirSize fail")
             t.printStackTrace()
             -1
         }
@@ -1107,5 +1100,17 @@ inline fun <T> HttpURLConnection.use(block: (conn: HttpURLConnection) -> T): T {
         return block(this)
     } finally {
         disconnect()
+    }
+}
+
+fun logD(tag: String, message: String) {
+    if (com.mgt.downloader.BuildConfig.DEBUG) {
+        Log.d(tag, message)
+    }
+}
+
+fun logE(tag: String, message: String) {
+    if (com.mgt.downloader.BuildConfig.DEBUG) {
+        Log.e(tag, message)
     }
 }

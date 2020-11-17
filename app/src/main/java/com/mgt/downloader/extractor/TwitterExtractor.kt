@@ -1,13 +1,13 @@
 package com.mgt.downloader.extractor
 
-import com.mgt.downloader.base.JsWebExtractor
+import com.mgt.downloader.base.HasDisposable
+import com.mgt.downloader.base.WebJsExtractor
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.utils.Utils
 import com.mgt.downloader.utils.findValue
-import org.apache.commons.lang.StringEscapeUtils
 
 
-class TwitterExtractor : JsWebExtractor() {
+class TwitterExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable) {
     override fun extract(
         url: String,
         webContent: String

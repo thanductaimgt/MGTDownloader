@@ -1,7 +1,6 @@
 package com.mgt.downloader.base
 
 import com.mgt.downloader.MyApplication
-import com.mgt.downloader.base.BaseExtractor
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
@@ -11,7 +10,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 
 
-abstract class HtmlWebExtractor : BaseExtractor {
+abstract class WebHtmlExtractor(hasDisposable: HasDisposable) : Extractor(hasDisposable) {
     final override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
         SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
             extract(url)

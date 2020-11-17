@@ -1,13 +1,14 @@
 package com.mgt.downloader.extractor
 
 import com.mgt.downloader.MyApplication
-import com.mgt.downloader.base.BaseExtractor
+import com.mgt.downloader.base.Extractor
+import com.mgt.downloader.base.HasDisposable
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
 import com.mgt.downloader.utils.Utils
 
-class OtherFileExtractor : BaseExtractor {
+class OtherFileExtractor(hasDisposable: HasDisposable) : Extractor(hasDisposable) {
     override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
         SingleObservable.zip(
             SingleObservable.fromCallable(MyApplication.unboundExecutorService) {

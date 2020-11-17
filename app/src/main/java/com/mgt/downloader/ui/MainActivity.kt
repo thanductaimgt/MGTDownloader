@@ -19,17 +19,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.ads.AdRequest
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.mgt.downloader.DownloadService
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.factory.ViewModelFactory
-import com.mgt.downloader.rxjava.CompositeDisposable
-import com.mgt.downloader.rxjava.Disposable
+import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
 import com.mgt.downloader.ui.download_list.DownloadListFragment
 import com.mgt.downloader.ui.view_file.ViewFileDialog
@@ -46,13 +46,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     var liveDownloadService = MutableLiveData<DownloadService>()
     private val serviceConnection = DownloadServiceConnection()
     private lateinit var filePreviewInfo: FilePreviewInfo
-    private val compositeDisposable = CompositeDisposable()
     private lateinit var viewModel: MainViewModel
 
     private var afterPermissionRequested: (() -> Any?)? = null
 
     override fun onNewIntent(intent: Intent) {
-        Utils.log(TAG, "onNewIntent")
+        logD(TAG, "onNewIntent")
         super.onNewIntent(intent)
 //        this.intent.putExtra(Constants.MESSAGE, intent.getStringExtra(Constants.MESSAGE))
         intent.extras?.let { this.intent.putExtras(it) }
@@ -86,9 +85,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         try {
             startService(getStartServiceIntent())
         } catch (t: Throwable) {
+            t.printStackTrace()
         }
 
-        MyApplication.liveConnection.observe(this, Observer { isConnected ->
+        MyApplication.liveConnection.observe(this, { isConnected ->
             if (isConnected) {
                 networkStateTextView.visibility = View.INVISIBLE
                 liveDownloadService.value?.onReconnect()
@@ -100,6 +100,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         val adRequest = AdRequest.Builder().build()
         adView.loadAd(adRequest)
+
+        checkUpdateRequestHeaders()
+    }
+
+    private fun checkUpdateRequestHeaders() {
+        SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
+            getRequestHeaders()
+        }.subscribe(object : SingleObserver<Map<String, String>>(viewModel) {
+            override fun onSuccess(result: Map<String, String>) {
+                logD(TAG, "Obtained headers: $result")
+                super.onSuccess(result)
+                Configurations.requestHeaders = result
+            }
+        })
+    }
+
+    private fun getRequestHeaders(): Map<String, String> {
+        val streamMap = Utils.getContent(Constants.API_GENERAL_HEADERS)
+
+        val json = streamMap.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
+        val mapType = object : TypeToken<Map<String, Any>>() {}.type
+        return Gson().fromJson(json, mapType)
     }
 
     private fun getStartServiceIntent(): Intent {
@@ -176,7 +198,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 showLoadingAnimation()
                 viewModel.getFilePreviewInfo(
                     url,
-                    GetFilePreviewInfoObserver()
+                    filePreviewInfoObserver
                 )
             } else if (url != "") {
                 showWarning(getString(R.string.desc_invalid_url))
@@ -381,7 +403,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     fun startDownloadTask(downloadTask: DownloadTask) {
-        Utils.log(TAG, "startDownloadTask")
+        logD(TAG, "startDownloadTask")
 
         liveDownloadService.value!!.executeDownloadTask(downloadTask, false)
     }
@@ -402,6 +424,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         // if any download task in progress, continue service in foreground, else stop service
         if (liveDownloadService.value?.isAnyActiveDownloadTask()
             == true
@@ -413,10 +436,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             stopService(getStartServiceIntent())
         }
 
-        compositeDisposable.clear()
         urlEditText?.removeTextChangedListener(textWatcher)
-
-        super.onDestroy()
     }
 
     fun showSettingsDialog() {
@@ -438,7 +458,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     inner class DownloadServiceConnection : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
-            Utils.log(TAG, "onServiceConnected")
+            logD(TAG, "onServiceConnected")
             liveDownloadService.value = (binder as DownloadService.DownloadBinder).getService()
 
             //open app from notification
@@ -453,23 +473,56 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            Utils.log(TAG, "onServiceDisconnected")
+            logD(TAG, "onServiceDisconnected")
             liveDownloadService.value = null
         }
     }
 
-    inner class GetFilePreviewInfoObserver : SingleObserver<FilePreviewInfo> {
-        override fun onSuccess(result: FilePreviewInfo) {
-            result.name = result.name.replace('/', '|')
+    val filePreviewInfoObserver by lazy {
+        object : SingleObserver<FilePreviewInfo>(viewModel) {
+            override fun onSuccess(result: FilePreviewInfo) {
+                super.onSuccess(result)
+                result.name = result.name.replace('/', '|')
 
-            if (result.displayUri == urlEditText.text.toString()) {
-                hideLoadingAnimation()
-                hideWarning()
-                hideFilePreview()
+                if (result.displayUri == urlEditText.text.toString()) {
+                    hideLoadingAnimation()
+                    hideWarning()
+                    hideFilePreview()
 
-                if (result.size == Constants.ERROR.toLong()) {
-                    showWarning(getString(R.string.cannot_resolve_host))
-                } else {
+                    if (result.size == Constants.ERROR.toLong()) {
+                        showWarning(getString(R.string.cannot_resolve_host))
+                    } else {
+                        //get cached size
+                        if (result.size == -1L) {
+                            result.size =
+                                liveDownloadService.value!!.getFileSizeOfDownloadedTask(result.displayUri)
+                        }
+
+                        MyApplication.fileInfoCaches[result.displayUri] = result.copy()
+
+                        val stopCondition = { newFileName: String ->
+                            !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName)
+                                ?: false)
+                        }
+                        if (!stopCondition(result.name)) {
+                            result.name = Utils.generateNewDownloadFileName(
+                                this@MainActivity,
+                                result.name,
+                                stopCondition
+                            )
+                        }
+
+                        this@MainActivity.filePreviewInfo = result
+                        downloadButton.isEnabled = true
+                        if (result.size != -1L && result.isMultipartSupported) {
+                            multiThreadDownloadButton.isEnabled = true
+                        } else {
+                            downloadUnavailableTextView.visibility = View.VISIBLE
+                        }
+
+                        showFilePreview(result)
+                    }
+                } else if (result.size != Constants.ERROR.toLong() && result.centralDirOffset != Constants.ERROR && result.centralDirSize != Constants.ERROR) {
                     //get cached size
                     if (result.size == -1L) {
                         result.size =
@@ -489,47 +542,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             stopCondition
                         )
                     }
-
-                    this@MainActivity.filePreviewInfo = result
-                    downloadButton.isEnabled = true
-                    if (result.size != -1L && result.isMultipartSupported) {
-                        multiThreadDownloadButton.isEnabled = true
-                    } else {
-                        downloadUnavailableTextView.visibility = View.VISIBLE
-                    }
-
-                    showFilePreview(result)
-                }
-            } else if (result.size != Constants.ERROR.toLong() && result.centralDirOffset != Constants.ERROR && result.centralDirSize != Constants.ERROR) {
-                //get cached size
-                if (result.size == -1L) {
-                    result.size =
-                        liveDownloadService.value!!.getFileSizeOfDownloadedTask(result.displayUri)
-                }
-
-                MyApplication.fileInfoCaches[result.displayUri] = result.copy()
-
-                val stopCondition = { newFileName: String ->
-                    !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName) ?: false)
-                }
-                if (!stopCondition(result.name)) {
-                    result.name = Utils.generateNewDownloadFileName(
-                        this@MainActivity,
-                        result.name,
-                        stopCondition
-                    )
                 }
             }
-        }
 
-        override fun onSubscribe(disposable: Disposable) {
-            compositeDisposable.add(disposable)
-        }
-
-        override fun onError(t: Throwable) {
-            hideLoadingAnimation()
-            showWarning(getString(R.string.cannot_resolve_host))
-            t.printStackTrace()
+            override fun onError(t: Throwable) {
+                super.onError(t)
+                hideLoadingAnimation()
+                showWarning(getString(R.string.cannot_resolve_host))
+            }
         }
     }
 }

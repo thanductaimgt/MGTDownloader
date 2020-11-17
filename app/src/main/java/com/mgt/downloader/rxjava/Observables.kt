@@ -2,13 +2,14 @@ package com.mgt.downloader.rxjava
 
 import android.os.Handler
 import android.os.Looper
+import com.mgt.downloader.base.HasDisposable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 
 abstract class Observable {
     abstract val emitter: Emitter
-    var future:Future<*>? = null
-    val childObservables:ArrayList<Observable> = ArrayList()
+    var future: Future<*>? = null
+    val childObservables: ArrayList<Observable> = ArrayList()
 
     fun subscribe(observer: Observer): Disposable {
         emitter.addObserver(observer)
@@ -21,7 +22,7 @@ abstract class Observable {
         return disposable
     }
 
-    fun cancel(){
+    fun cancel() {
         childObservables.forEach { it.cancel() }
         future?.cancel(true)
     }
@@ -80,19 +81,19 @@ class SingleObservable<T> private constructor() : Observable() {
             var result1: T1? = null
             var result2: T2? = null
 
-            class ChildSingleObserver(private val isFirstOfPair:Boolean): SingleObserver<Any> {
-                override fun onSubscribe(disposable: Disposable) {
-                    compositeDisposable.add(disposable)
-                }
-
+            class ChildSingleObserver(private val isFirstOfPair: Boolean) :
+                SingleObserver<Any>(object : HasDisposable {
+                    override val compositeDisposable = compositeDisposable
+                }) {
                 @Suppress("UNCHECKED_CAST")
                 override fun onSuccess(result: Any) {
-                    if(isFirstOfPair){
+                    super.onSuccess(result)
+                    if (isFirstOfPair) {
                         result1 = result as T1?
-                    }else{
+                    } else {
                         result2 = result as T2?
                     }
-                    if(result1!=null&&result2!=null) {
+                    if (result1 != null && result2 != null) {
                         try {
                             val zipResult = biFunction(result1!!, result2!!)
                             zipSingleObservable.emitter.onSuccess(zipResult)
@@ -102,9 +103,11 @@ class SingleObservable<T> private constructor() : Observable() {
                     }
                 }
 
-                override fun onError(throwable: Throwable) {
+                override fun onError(t: Throwable) {
+                    super.onError(t)
+                    // cancel all when 1 of 2 failed
                     compositeDisposable.clear()
-                    zipSingleObservable.emitter.onError(throwable)
+                    zipSingleObservable.emitter.onError(t)
                 }
             }
 
@@ -118,7 +121,7 @@ class SingleObservable<T> private constructor() : Observable() {
             return zipSingleObservable
         }
 
-        fun <T>just(item:T):SingleObservable<T>{
+        fun <T> just(item: T): SingleObservable<T> {
             val newObservable = SingleObservable<T>()
             newObservable.emitter.onSuccess(item)
             return newObservable

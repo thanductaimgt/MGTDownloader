@@ -12,7 +12,7 @@ import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
 
 
-abstract class JsWebExtractor : BaseExtractor {
+abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDisposable) {
     open val waitTime = 5000L
 
     override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
@@ -32,7 +32,7 @@ abstract class JsWebExtractor : BaseExtractor {
                     javaScriptEnabled = true
                     domStorageEnabled = true
                 }
-                addJavascriptInterface(MyJavaScriptInterface(this@JsWebExtractor, onSuccess), "HtmlViewer")
+                addJavascriptInterface(MyJavaScriptInterface(onSuccess), "HtmlViewer")
 
                 webViewClient = object : WebViewClient() {
                     private var loadingFinished = true
@@ -77,7 +77,7 @@ abstract class JsWebExtractor : BaseExtractor {
             }
     }
 
-    private class MyJavaScriptInterface(private val extractor: JsWebExtractor, private val onSuccess: ((html: String) -> Any)?) {
+    private class MyJavaScriptInterface(private val onSuccess: ((html: String) -> Any)?) {
         private var isFirstLoad = true
         private val handler = Handler(Looper.getMainLooper())
         private lateinit var runnable: Runnable

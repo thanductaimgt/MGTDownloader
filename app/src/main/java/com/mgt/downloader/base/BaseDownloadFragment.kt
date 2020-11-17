@@ -16,7 +16,7 @@ import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener,
+abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
     View.OnLongClickListener,
     ContainsSelectableList {
     abstract val adapter: BaseDownloadAdapter
@@ -28,7 +28,6 @@ abstract class BaseDownloadListFragment : Fragment(), View.OnClickListener,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initView()
 
-//        observeDownloadTasks()
         (activity!! as MainActivity).liveDownloadService.observe(
             viewLifecycleOwner,
             { downloadService ->

@@ -5,11 +5,13 @@ import com.mgt.downloader.MyApplication
 import com.mgt.downloader.data_model.ExtractFields
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObserver
-import com.mgt.downloader.utils.*
-import kotlin.text.format
+import com.mgt.downloader.utils.Constants
+import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.utils.findValue
+import com.mgt.downloader.utils.unescapeHtml
 
-interface BaseExtractor {
-    fun extract(url: String, observer: SingleObserver<FilePreviewInfo>)
+abstract class Extractor(protected val hasDisposable: HasDisposable) {
+    abstract fun extract(url: String, observer: SingleObserver<FilePreviewInfo>)
 
     companion object {
         fun getRemoteExtractFields(extractorName: String): ExtractFields {

@@ -17,7 +17,7 @@ import com.mgt.downloader.utils.Utils
 import com.mgt.downloader.utils.smartLoad
 
 abstract class BaseDownloadAdapter(
-    val fragment: BaseDownloadListFragment,
+    val fragment: BaseDownloadFragment,
     downloadTaskDiffUtil: DownloadTaskDiffUtil
 ) :
     ListAdapter<DownloadTask, BaseDownloadAdapter.DownloadBaseHolder>(

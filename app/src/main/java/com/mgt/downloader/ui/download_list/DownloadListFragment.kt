@@ -10,14 +10,12 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Observer
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.base.ContainsSelectableList
 import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.utils.TAG
 import kotlinx.android.synthetic.main.dialog_download_list.*
-import kotlinx.android.synthetic.main.dialog_download_list.view.*
 
 
 class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
@@ -60,18 +58,18 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initView(view)
+        initView()
 
-        MyApplication.liveConnection.observe(viewLifecycleOwner, { isConnected->
-            if(isConnected){
+        MyApplication.liveConnection.observe(viewLifecycleOwner, { isConnected ->
+            if (isConnected) {
                 networkStateTextView.visibility = View.GONE
-            }else{
+            } else {
                 networkStateTextView.visibility = View.VISIBLE
             }
         })
     }
 
-    private fun initView(view: View) {
+    private fun initView() {
         // dialog full screen
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
@@ -80,17 +78,15 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
             childFragmentManager
         )
 
-        view.apply {
-            viewPager.apply {
-                adapter = this@DownloadListFragment.adapter
-                offscreenPageLimit = 3
-            }
-            tabLayout.setupWithViewPager(viewPager)
-
-            titleTextViewBottomSheetLayout.setOnClickListener(this@DownloadListFragment)
-
-            settingsImgView.setOnClickListener(this@DownloadListFragment)
+        viewPager.apply {
+            adapter = this@DownloadListFragment.adapter
+            offscreenPageLimit = 3
         }
+        tabLayout.setupWithViewPager(viewPager)
+
+        titleTextViewBottomSheetLayout.setOnClickListener(this@DownloadListFragment)
+
+        settingsImgView.setOnClickListener(this@DownloadListFragment)
     }
 
     fun show() {
@@ -100,7 +96,7 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
     override fun onClick(p0: View?) {
         when (p0!!.id) {
             R.id.titleTextViewBottomSheetLayout -> dismiss()
-            R.id.settingsImgView->(activity as MainActivity).showSettingsDialog()
+            R.id.settingsImgView -> (activity as MainActivity).showSettingsDialog()
         }
     }
 }

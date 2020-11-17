@@ -60,4 +60,6 @@ object Constants {
     private const val API_BASE_URL = "http://dontpad.com/tdtai/mgtdownloader"
     const val API_GENERAL_HEADERS = "$API_BASE_URL/requestheaders"
     const val API_EXTRACT_FIELDS = "$API_BASE_URL/extractfields/%s"
+
+    const val USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
 }

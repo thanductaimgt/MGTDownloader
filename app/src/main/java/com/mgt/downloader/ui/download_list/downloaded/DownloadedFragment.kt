@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.fragment_downloaded.selectAllImgView
 import kotlinx.android.synthetic.main.fragment_downloaded.selectCountTextView
 import kotlinx.android.synthetic.main.fragment_downloaded.selectLayout
 import com.mgt.downloader.R
-import com.mgt.downloader.base.BaseDownloadListFragment
+import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.ui.view_file.ViewFileDialog
@@ -28,9 +28,10 @@ import com.mgt.downloader.utils.Constants
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.TAG
 import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.utils.logD
 
 
-class DownloadedFragment : BaseDownloadListFragment() {
+class DownloadedFragment : BaseDownloadFragment() {
     override lateinit var adapter: DownloadedAdapter
 
     override fun onCreateView(
@@ -64,7 +65,7 @@ class DownloadedFragment : BaseDownloadListFragment() {
     }
 
     override fun initView() {
-        Utils.log(TAG, "initView")
+        logD(TAG, "initView")
         adapter = DownloadedAdapter(
             this,
             DownloadTaskDiffUtil()

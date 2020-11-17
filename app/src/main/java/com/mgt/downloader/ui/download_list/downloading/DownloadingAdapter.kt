@@ -6,14 +6,14 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_downloading.view.*
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadAdapter
-import com.mgt.downloader.base.BaseDownloadListFragment
+import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.Utils
 
 
 class DownloadingAdapter(
-    fragment: BaseDownloadListFragment,
+    fragment: BaseDownloadFragment,
     downloadTaskDiffUtil: DownloadTaskDiffUtil
 ) :
     BaseDownloadAdapter(

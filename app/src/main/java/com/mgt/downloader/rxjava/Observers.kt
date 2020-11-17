@@ -1,21 +1,43 @@
 package com.mgt.downloader.rxjava
 
-interface Observer {
-    fun onSubscribe(disposable: Disposable)
-    fun onError(t: Throwable){
+import androidx.annotation.CallSuper
+import com.mgt.downloader.base.HasDisposable
+
+abstract class Observer(protected val hasDisposable: HasDisposable) {
+    protected lateinit var disposable: Disposable
+
+    @CallSuper
+    open fun onSubscribe(disposable: Disposable) {
+        this.disposable = disposable
+        hasDisposable.compositeDisposable.add(disposable)
+    }
+
+    @CallSuper
+    open fun onError(t: Throwable) {
         t.printStackTrace()
+        hasDisposable.compositeDisposable.remove(disposable)
     }
 }
 
-interface StreamObserver<T>:Observer{
-    fun onNext(item:T?)
-    fun onComplete()
+abstract class StreamObserver<T>(hasDisposable: HasDisposable) : Observer(hasDisposable) {
+    abstract fun onNext(item: T?)
+
+    @CallSuper
+    open fun onComplete() {
+        hasDisposable.compositeDisposable.remove(disposable)
+    }
 }
 
-interface CompletableObserver:Observer {
-    fun onComplete()
+abstract class CompletableObserver(hasDisposable: HasDisposable) : Observer(hasDisposable) {
+    @CallSuper
+    open fun onComplete() {
+        hasDisposable.compositeDisposable.remove(disposable)
+    }
 }
 
-interface SingleObserver<T>:Observer {
-    fun onSuccess(result:T)
+abstract class SingleObserver<T>(hasDisposable: HasDisposable) : Observer(hasDisposable) {
+    @CallSuper
+    open fun onSuccess(result: T) {
+        hasDisposable.compositeDisposable.remove(disposable)
+    }
 }
