@@ -1,6 +1,9 @@
 package com.mgt.downloader.extractor
 
+import android.graphics.Bitmap
 import android.webkit.CookieManager
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.base.HasDisposable
 import com.mgt.downloader.base.HttpPostMultipart
@@ -59,7 +62,7 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
         return with(HttpPostMultipart("https://snaptik.app/action.php", "utf-8", headers)) {
             addFormField("url", url)
             finish()
-        }
+        }.also { logD(TAG, "getSnaptikWebContent, url: $url") }
     }
 
     private fun getFilePreviewInfo(
@@ -101,6 +104,29 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
                 ),
                 isMultipartSupported = isMultipartSupported
             )
+        }
+    }
+
+    override val webViewClient = object : WebViewClient() {
+        override fun shouldOverrideUrlLoading(
+            view: WebView,
+            urlNewString: String?
+        ): Boolean {
+            return false
+        }
+
+        override fun onPageStarted(view: WebView?, url: String?, facIcon: Bitmap?) {
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+//            Handler(Looper.getMainLooper()).postDelayed(
+//                {
+            view?.loadUrl(
+                "javascript:window.HtmlViewer.onLoaded" +
+                        "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
+            ) ?: logE(TAG, "webView is null !!!")
+//                }, 500
+//            )
         }
     }
 

@@ -14,6 +14,7 @@ import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.webkit.URLUtil
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -262,6 +263,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         fileNameTextView.setOnClickListener(this)
         viewFileInfoImgView.setOnClickListener(this)
         settingsImgView.setOnClickListener(this)
+
+        MainActivity.webView = webView
+    }
+
+    companion object {
+        lateinit var webView: WebView
     }
 
     private fun showFilePreview(filePreviewInfo: FilePreviewInfo) {
