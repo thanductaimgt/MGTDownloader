@@ -14,7 +14,7 @@ import com.mgt.downloader.base.HasDisposable
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
-import com.mgt.downloader.extractor.ExtractorManager
+import com.mgt.downloader.factory.ExtractorFactory
 import com.mgt.downloader.helper.LongObject
 import com.mgt.downloader.helper.StopThreadThrowable
 import com.mgt.downloader.rxjava.*
@@ -272,7 +272,7 @@ class DownloadService : Service(), HasDisposable {
     }
 
     private fun getDownloadUrl(url: String, onComplete: (downloadUrl: String) -> Unit) {
-        ExtractorManager.create(this, url).extract(url, object : SingleObserver<FilePreviewInfo>(this) {
+        ExtractorFactory.create(this, url).extract(url, object : SingleObserver<FilePreviewInfo>(this) {
             override fun onSuccess(result: FilePreviewInfo) {
                 super.onSuccess(result)
                 onComplete(result.downloadUri)

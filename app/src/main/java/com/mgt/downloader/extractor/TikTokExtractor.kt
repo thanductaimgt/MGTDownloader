@@ -4,34 +4,39 @@ import android.graphics.Bitmap
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.mgt.downloader.ExtractContentManager
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.base.HasDisposable
 import com.mgt.downloader.base.HttpPostMultipart
 import com.mgt.downloader.base.WebJsExtractor
-import com.mgt.downloader.data_model.ExtractFields
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
-import com.mgt.downloader.utils.*
+import com.mgt.downloader.utils.Constants
+import com.mgt.downloader.utils.TAG
+import com.mgt.downloader.utils.logD
+import com.mgt.downloader.utils.logE
 
 class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable) {
+    override val extractorName = "tiktok"
+
     override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
         SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
             getSnaptikWebContent(url)
         }.subscribe(object : SingleObserver<String>(hasDisposable) {
             override fun onSuccess(result: String) {
                 super.onSuccess(result)
-                if (!result.contains("download server 01", true)) {
-                    getJsWebContent(SNAPTIK_URL) {
+                if (ExtractContentManager.isTarget(url, result)) {
+                    SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
+                        extract(url, result)
+                    }.subscribe(observer)
+                } else {
+                    getJsWebContent(WEB_URL) {
                         SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
                             val webContent = getSnaptikWebContent(url)
                             extract(url, webContent)
                         }.subscribe(observer)
                     }
-                } else {
-                    SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
-                        extract(url, result)
-                    }.subscribe(observer)
                 }
             }
 
@@ -42,69 +47,15 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
         })
     }
 
-    override fun extract(url: String, webContent: String): FilePreviewInfo {
-        return try {
-            logD(TAG, remoteExtractFields.toString())
-            getFilePreviewInfo(url, webContent, remoteExtractFields)
-        } catch (t: Throwable) {
-            logE(TAG, "parse remote fields fail")
-            logE(TAG, "webContent: $webContent")
-            t.printStackTrace()
-            getFilePreviewInfo(url, webContent, localExtractFields)
-        }
-    }
-
     private fun getSnaptikWebContent(url: String): String {
         val headers = hashMapOf(
             "User-Agent" to Constants.USER_AGENT,
-            "cookie" to CookieManager.getInstance().getCookie(SNAPTIK_URL)
+            "cookie" to CookieManager.getInstance().getCookie(WEB_URL)
         )
-        return with(HttpPostMultipart("https://snaptik.app/action.php", "utf-8", headers)) {
+        return with(HttpPostMultipart(API_URL, "utf-8", headers)) {
             addFormField("url", url)
             finish()
         }.also { logD(TAG, "getSnaptikWebContent, url: $url") }
-    }
-
-    private fun getFilePreviewInfo(
-        url: String,
-        webContent: String,
-        extractFields: ExtractFields
-    ): FilePreviewInfo {
-        extractFields.apply {
-            val fileName =
-                "${webContent.findValue(title.prefix, title.postfix, title.default)}.mp4"
-            val thumbUrl =
-                webContent.findValue(thumbUrl.prefix, thumbUrl.postfix, thumbUrl.default)
-            val downloadUrl = webContent.findValue(
-                downloadUrl.prefix,
-                downloadUrl.postfix,
-                downloadUrl.default
-            )!!
-
-            val width =
-                webContent.findValue(width.prefix, width.postfix, width.default)?.toInt() ?: 1
-            val height =
-                webContent.findValue(height.prefix, height.postfix, height.default)?.toInt()
-                    ?: 1
-
-            val fileSize = Utils.getFileSize(downloadUrl)
-            val isMultipartSupported = Utils.isMultipartSupported(downloadUrl)
-
-            return FilePreviewInfo(
-                fileName,
-                url,
-                downloadUrl,
-                fileSize,
-                -1,
-                -1,
-                thumbUri = thumbUrl,
-                thumbRatio = Utils.getFormatRatio(
-                    width,
-                    height
-                ),
-                isMultipartSupported = isMultipartSupported
-            )
-        }
     }
 
     override val webViewClient = object : WebViewClient() {
@@ -119,30 +70,15 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
         }
 
         override fun onPageFinished(view: WebView?, url: String?) {
-//            Handler(Looper.getMainLooper()).postDelayed(
-//                {
             view?.loadUrl(
                 "javascript:window.HtmlViewer.onLoaded" +
                         "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
             ) ?: logE(TAG, "webView is null !!!")
-//                }, 500
-//            )
         }
     }
 
     companion object {
-        private const val EXTRACTOR_NAME = "tiktok"
-        private const val SNAPTIK_URL = "https://snaptik.app/vn"
-
-        val localExtractFields: ExtractFields by lazy {
-            getLocalExtractFields(
-                EXTRACTOR_NAME
-            )
-        }
-        val remoteExtractFields: ExtractFields by lazy {
-            getRemoteExtractFields(
-                EXTRACTOR_NAME
-            )
-        }
+        private const val WEB_URL = "https://snaptik.app/vn"
+        private const val API_URL = "https://snaptik.app/action.php"
     }
 }

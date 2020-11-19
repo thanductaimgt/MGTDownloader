@@ -23,8 +23,6 @@ abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDispo
         }
     }
 
-    abstract fun extract(url: String, webContent: String): FilePreviewInfo
-
     protected fun getJsWebContent(url: String, onSuccess: ((html: String) -> Any)?) {
         MainActivity.webView
 //        WebView(MyApplication.appContext)

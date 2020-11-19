@@ -1,30 +1,72 @@
 package com.mgt.downloader.base
 
-import com.google.gson.Gson
-import com.mgt.downloader.MyApplication
+import com.mgt.downloader.ExtractFieldsManager
 import com.mgt.downloader.data_model.ExtractFields
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObserver
-import com.mgt.downloader.utils.Constants
-import com.mgt.downloader.utils.Utils
-import com.mgt.downloader.utils.findValue
-import com.mgt.downloader.utils.unescapeHtml
+import com.mgt.downloader.utils.*
 
 abstract class Extractor(protected val hasDisposable: HasDisposable) {
+    open val extractorName = "base"
+
     abstract fun extract(url: String, observer: SingleObserver<FilePreviewInfo>)
 
-    companion object {
-        fun getRemoteExtractFields(extractorName: String): ExtractFields {
-            val content = Utils.getContent(Constants.API_EXTRACT_FIELDS.format(extractorName))
-            val json = content.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
-
-            return Gson().fromJson(json, ExtractFields::class.java)
+    protected open fun extract(url: String, webContent: String): FilePreviewInfo {
+        return try {
+            ExtractFieldsManager.getRemoteExtractFields(extractorName).let {
+                logD(TAG, it.toString())
+                getFilePreviewInfo(url, webContent, it)
+            }
+        } catch (t: Throwable) {
+            logE(TAG, "parse remote fields fail")
+            logE(TAG, "webContent: $webContent")
+            t.printStackTrace()
+            ExtractFieldsManager.getLocalExtractFields(extractorName).let {
+                logD(TAG, it.toString())
+                getFilePreviewInfo(url, webContent, it)
+            }
         }
+    }
 
-        fun getLocalExtractFields(extractorName: String): ExtractFields {
-            val json =
-                Utils.getContent(MyApplication.appContext.assets.open("extractfields/$extractorName.json"))
-            return Gson().fromJson(json, ExtractFields::class.java)
+    private fun getFilePreviewInfo(
+        url: String,
+        webContent: String,
+        extractFields: ExtractFields
+    ): FilePreviewInfo {
+        extractFields.apply {
+            val fileName =
+                "${webContent.findValue(title.prefix, title.postfix, title.default)}.mp4"
+            val thumbUrl =
+                webContent.findValue(thumbUrl.prefix, thumbUrl.postfix, thumbUrl.default)
+            val downloadUrl = webContent.findValue(
+                downloadUrl.prefix,
+                downloadUrl.postfix,
+                downloadUrl.default
+            )!!
+
+            val width =
+                webContent.findValue(width.prefix, width.postfix, width.default)?.toInt() ?: 1
+            val height =
+                webContent.findValue(height.prefix, height.postfix, height.default)?.toInt()
+                    ?: 1
+
+            val fileSize = Utils.getFileSize(downloadUrl)
+            val isMultipartSupported = Utils.isMultipartSupported(downloadUrl)
+
+            return FilePreviewInfo(
+                fileName,
+                url,
+                downloadUrl,
+                fileSize,
+                -1,
+                -1,
+                thumbUri = thumbUrl,
+                thumbRatio = Utils.getFormatRatio(
+                    width,
+                    height
+                ),
+                isMultipartSupported = isMultipartSupported
+            )
         }
     }
 }

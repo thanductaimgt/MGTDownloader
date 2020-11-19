@@ -13,22 +13,17 @@ import androidx.core.content.FileProvider
 import androidx.core.view.get
 import androidx.core.view.isNotEmpty
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.fragment_downloaded.*
-import kotlinx.android.synthetic.main.fragment_downloaded.discardAllImgView
-import kotlinx.android.synthetic.main.fragment_downloaded.recyclerView
-import kotlinx.android.synthetic.main.fragment_downloaded.selectAllImgView
-import kotlinx.android.synthetic.main.fragment_downloaded.selectCountTextView
-import kotlinx.android.synthetic.main.fragment_downloaded.selectLayout
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
+import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.ui.view_file.ViewFileDialog
 import com.mgt.downloader.utils.Constants
-import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.TAG
 import com.mgt.downloader.utils.Utils
 import com.mgt.downloader.utils.logD
+import kotlinx.android.synthetic.main.fragment_downloaded.*
 
 
 class DownloadedFragment : BaseDownloadFragment() {
@@ -50,16 +45,14 @@ class DownloadedFragment : BaseDownloadFragment() {
                 .sortedWith(compareBy({ it.startTime }, { it.fileName }))
                 .reversed()
         ) {
-            view!!.apply {
-                if (recyclerView.isNotEmpty()) {
-                    // save index and top position
-                    val layoutManager =
-                        (recyclerView.layoutManager as LinearLayoutManager)
-                    val index = layoutManager.findFirstVisibleItemPosition()
-                    val firstView = recyclerView[0]
-                    val top = firstView.top - recyclerView.paddingTop
-                    layoutManager.scrollToPositionWithOffset(index, top)
-                }
+            if (recyclerView.isNotEmpty()) {
+                // save index and top position
+                val layoutManager =
+                    (recyclerView.layoutManager as LinearLayoutManager)
+                val index = layoutManager.findFirstVisibleItemPosition()
+                val firstView = recyclerView[0]
+                val top = firstView.top - recyclerView.paddingTop
+                layoutManager.scrollToPositionWithOffset(index, top)
             }
         }
     }

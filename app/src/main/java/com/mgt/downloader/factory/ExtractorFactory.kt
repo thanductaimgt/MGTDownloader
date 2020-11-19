@@ -1,10 +1,11 @@
-package com.mgt.downloader.extractor
+package com.mgt.downloader.factory
 
 import com.mgt.downloader.base.Extractor
 import com.mgt.downloader.base.HasDisposable
+import com.mgt.downloader.extractor.*
 import com.mgt.downloader.utils.Utils
 
-object ExtractorManager {
+object ExtractorFactory {
     fun create(hasDisposable: HasDisposable, url:String):Extractor{
         return when {
             Utils.isTikTokUrl(url) -> {

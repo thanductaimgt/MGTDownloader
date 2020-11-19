@@ -1,0 +1,22 @@
+:authority:www.getfvid.com
+:method:POST
+:path:/vi/downloader
+:scheme:https
+accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+accept-encoding:gzip, deflate, br
+accept-language:vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7,fr-FR;q=0.6,fr;q=0.5
+cache-control:max-age=0
+content-length:67
+content-type:application/x-www-form-urlencoded
+cookie:__cfduid=d2254ed1321c370be803a01edd17cfe2a1605798110; _ga=GA1.2.500980724.1605798113; _gid=GA1.2.1923484981.1605798113; __atssc=google%3B1; XSRF-TOKEN=eyJpdiI6IndrQk1hODErY25kTU5sa0RYa3M1NEE9PSIsInZhbHVlIjoiOXU4OGRVMVJIRCs3RVJXTlhDcHQrSHM2YjhsS1phb3hXWVRpR0lhVlBHUDJTYWY4SlwvOFwvbWhDMmdhTWtqWDUzMlRUeXhDXC9jaCsydEpwWmpLUTF2Rmc9PSIsIm1hYyI6IjEwMjkzZjQyNjczNWJhYzliNzg2YTc1NTg0M2Q3NTgxNjZmZjk2Yzk4ODg4NDY2MTAzZTE2ZGQ1ZWQ1NmQzNGUifQ%3D%3D; laravel_session=eyJpdiI6IkRxXC9zOXhLV2dHSEkxQm44dkZ0U3ZnPT0iLCJ2YWx1ZSI6IlU4b05OOE1jQ1M3cUpDZEZrTVR5ZlJ2SjFVMlpUb3hqQVh1Z0VrdTMweldZXC9QUkdFOUhXQUo5UDNYdktjVEJCNm8rYW96c29IWDl6cDVjSGFIZEFLdz09IiwibWFjIjoiODdmZGViOTUwMTJlNzFkZTNlY2VhZTNjNDkzZTA5NjAxNjE0M2Y1OGU5MDQ4MjFkNDA4Mzk3MGE3ZWIzNDFlNyJ9; __cf_bm=20361c68425322f76af8e0c105be3911d143b72b-1605800922-1800-ASaIOcrnu4isuKxml2f6VNugrNIfXRMwJ/xkWgApYVoosAh0uWG2d0ssATu1ZyueX+SIqkpcRwXJj8WaFz/XiZU=; _gat=1; __atuvc=7%7C47; __atuvs=5fb688e18b6973aa006
+origin:https://www.getfvid.com
+referer:https://www.getfvid.com/vi
+sec-fetch-dest:document
+sec-fetch-mode:navigate
+sec-fetch-site:same-origin
+sec-fetch-user:?1
+upgrade-insecure-requests:1
+user-agent:Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) coc_coc_browser/90.0.148 Chrome/84.0.4147.148 Safari/537.36
+
+https://fb.watch/1SkrZV9O5q/
+https://www.facebook.com/watch/?v=287811565894746

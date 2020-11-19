@@ -35,7 +35,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
                 this.downloadService?.liveDownloadTasks?.observe(
                     viewLifecycleOwner,
                     { downloadTasks ->
-                        onDownloadListChange(downloadTasks)
+                        this.view?.let { onDownloadListChange(downloadTasks)}
                     })
             })
     }

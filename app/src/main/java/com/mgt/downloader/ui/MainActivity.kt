@@ -488,6 +488,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     val filePreviewInfoObserver by lazy {
         object : SingleObserver<FilePreviewInfo>(viewModel) {
             override fun onSuccess(result: FilePreviewInfo) {
+                logD(TAG, "FilePreviewInfo: $result")
                 super.onSuccess(result)
                 result.name = result.name.replace('/', '|')
 

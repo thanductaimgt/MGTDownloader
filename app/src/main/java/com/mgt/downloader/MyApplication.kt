@@ -54,7 +54,7 @@ class MyApplication : MultiDexApplication() {
         ).apply { allowCoreThreadTimeOut(true) }
 
         fun resetDownloadExecutorService() {
-            boundExecutorService.shutdown()
+            boundExecutorService.shutdownNow()
             initDownloadExecutorService()
         }
 
