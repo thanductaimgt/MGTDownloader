@@ -69,7 +69,7 @@
     <string name="desc_multi_thread_download">Tải nhiều phần của file cùng lúc</string>
     <string name="desc_permission_denied">Không thể tiếp tục khi chưa được cấp quyền</string>
 
-    <string name="cannot_resolve_host">Không thể kết nối đến url\nMẹo: thêm/xóa dấu \'/\' và thử lại</string>
+    <string name="cannot_resolve_host">Không thể kết nối đến url</string>
     <string name="desc_can_not_open_file">Không tìm thấy ứng dụng mở được loại file này</string>
 
     <string name="hint_paste_url">Download URL &#8230;</string>

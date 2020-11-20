@@ -11,7 +11,7 @@ apply plugin: 'kotlin-kapt'
 android {
     signingConfigs {
         release {
-            storeFile file("D:\\MyFolder\\keystore\\boba.jks")
+            storeFile file("E:\\MyFolder\\boba.jks")
             storePassword "tai144708101998"
             keyAlias "keyboba"
             keyPassword "tai144708101998"

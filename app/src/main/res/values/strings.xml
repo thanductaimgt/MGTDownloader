@@ -69,7 +69,7 @@
     <string name="desc_multi_thread_download">Downloading multiple parts concurrently</string>
     <string name="desc_permission_denied">Cannot perform action without permission</string>
 
-    <string name="cannot_resolve_host">Cannot connect to this url\nTips: insert/remove trailing \'/\' and retry</string>
+    <string name="cannot_resolve_host">Cannot connect to this url</string>
     <string name="desc_can_not_open_file">No application can open this file</string>
 
     <string name="hint_paste_url">Paste your URL here</string>

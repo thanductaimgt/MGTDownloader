@@ -15,9 +15,10 @@
             tools:context=".ui.MainActivity">
 
         <FrameLayout
+                app:layout_constraintTop_toTopOf="parent"
                 android:id="@+id/frameLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="100dp"
                 android:visibility="invisible">
 
             <WebView
