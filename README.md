@@ -11,7 +11,7 @@
 ### Installing
 * Clone this repo:
 ```
-git clone https://github.com/thanductaimgt/IDM.git
+git clone https://github.com/thanductaimgt/MGTDownloader.git
 ```
 * Download APK [here](https://play.google.com/store/apps/details?id=com.mgt.downloader)
 
