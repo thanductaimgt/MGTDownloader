@@ -1,11 +1,11 @@
-# IDM - Internet Download Manager
-**An app for downloading files from direct download url or from Facebook, Youtube, TikTok, etc.**
+# MGT Downloader
+**An app for downloading files from direct download url or from Facebook, TikTok, etc.**
 
 ## Features
 * Download and manage files
 * Resume, retry disrupted or failed download tasks efficiently
 * Preview Zip file content at an url and allow downloading only parts of it
-* Support downloading videos from Facebook, Youtube, TikTok, etc
+* Support downloading videos from Facebook, TikTok (no watermark), etc.
 * Allow speeding up download tasks by downloading multiple parts concurrently
 
 ### Installing
@@ -13,7 +13,7 @@
 ```
 git clone https://github.com/thanductaimgt/IDM.git
 ```
-* Download APK [here](app/release/IDM.apk)
+* Download APK [here](https://play.google.com/store/apps/details?id=com.mgt.downloader)
 
 ## Screenshots
 </br>
