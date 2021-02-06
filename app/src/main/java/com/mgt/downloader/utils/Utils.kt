@@ -566,6 +566,14 @@ object Utils {
         }
     }
 
+    /**
+     * dontpad url format: http://dontpad.com{subpath}
+     */
+    fun getDontpadContent(subpath: String): String {
+        val content = getContent("${Constants.DONTPAD_BASE_URL}$subpath")
+        return content.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
+    }
+
     fun hideKeyboard(context: Context, view: View) {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)

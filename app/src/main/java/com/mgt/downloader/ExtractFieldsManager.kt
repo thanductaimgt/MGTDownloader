@@ -30,9 +30,7 @@ object ExtractFieldsManager {
     }
 
     private fun getRemoteExtractFieldsInternal(extractorName: String): ExtractFields {
-        val content = Utils.getContent(Constants.API_EXTRACT_FIELDS.format(extractorName))
-        val json = content.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
-
+        val json = Utils.getDontpadContent(Constants.SUBPATH_EXTRACT_FIELDS.format(extractorName))
         return Gson().fromJson(json, ExtractFields::class.java)
     }
 }

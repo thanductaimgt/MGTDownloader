@@ -99,8 +99,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         })
 
-        val adRequest = AdRequest.Builder().build()
-        adView.loadAd(adRequest)
+//        val adRequest = AdRequest.Builder().build()
+//        adView.loadAd(adRequest)
 
         checkUpdateRequestHeaders()
     }
@@ -118,9 +118,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun getRequestHeaders(): Map<String, String> {
-        val streamMap = Utils.getContent(Constants.API_GENERAL_HEADERS)
-
-        val json = streamMap.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
+        val json = Utils.getDontpadContent(Constants.SUBPATH_GENERAL_HEADERS)
         val mapType = object : TypeToken<Map<String, Any>>() {}.type
         return Gson().fromJson(json, mapType)
     }

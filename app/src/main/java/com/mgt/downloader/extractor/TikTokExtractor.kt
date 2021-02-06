@@ -12,10 +12,7 @@ import com.mgt.downloader.base.WebJsExtractor
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
-import com.mgt.downloader.utils.Constants
-import com.mgt.downloader.utils.TAG
-import com.mgt.downloader.utils.logD
-import com.mgt.downloader.utils.logE
+import com.mgt.downloader.utils.*
 
 class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable) {
     override val extractorName = "tiktok"
@@ -79,6 +76,16 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
 
     companion object {
         private const val WEB_URL = "https://snaptik.app/vn"
-        private const val API_URL = "https://snaptik.app/action.php"
+        private val API_URL by lazy {
+            try {
+                getRemoteApiUrl()
+            } catch (t: Throwable) {
+                "https://snaptik.app/action_2021.php"
+            }
+        }
+
+        private fun getRemoteApiUrl():String{
+            return Utils.getDontpadContent(Constants.SUBPATH_TIKTOK_API)
+        }
     }
 }

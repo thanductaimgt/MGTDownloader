@@ -57,9 +57,11 @@ object Constants {
     const val DOWNLOAD_STATE_CANCEL_OR_FAIL = 1
     const val DOWNLOAD_STATE_INTERRUPT = 2
 
-    private const val API_BASE_URL = "http://dontpad.com/tdtai/mgtdownloader"
-    const val API_GENERAL_HEADERS = "$API_BASE_URL/requestheaders"
-    const val API_EXTRACT_FIELDS = "$API_BASE_URL/extractfields/%s"
+    const val DONTPAD_BASE_URL = "http://dontpad.com"
+    private const val BASE_SUBPATH = "/tdtai/mgtdownloader"
+    const val SUBPATH_GENERAL_HEADERS = "$BASE_SUBPATH/requestheaders"
+    const val SUBPATH_EXTRACT_FIELDS = "$BASE_SUBPATH/extractfields/%s"
+    const val SUBPATH_TIKTOK_API = "$BASE_SUBPATH/api/tiktok"
 
     const val USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
 }
