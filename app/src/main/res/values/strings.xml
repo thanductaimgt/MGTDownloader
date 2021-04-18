@@ -28,7 +28,7 @@
     <string name="desc_cancel">Cancel</string>
     <string name="desc_retry">Retry</string>
     <string name="desc_foreground_title">Download service is running</string>
-    <string name="desc_foreground_content">Touch to view downloading list</string>
+    <string name="desc_foreground_content">Touch to view download list</string>
     <string name="desc_begin_at">Begin:</string>
     <string name="desc_unknown_size">unknown</string>
     <string name="desc_remaining_time">End in</string>

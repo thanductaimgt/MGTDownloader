@@ -1,3 +1,3 @@
 package com.mgt.downloader.helper
 
-class StopThreadThrowable:Throwable()
+class StopThreadThrowable : Throwable()

@@ -11,7 +11,7 @@ class TwitterExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposa
     override fun extract(
         url: String,
         webContent: String
-    ):FilePreviewInfo {
+    ): FilePreviewInfo {
         var data = webContent
 
         var isVideo = true
@@ -30,7 +30,7 @@ class TwitterExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposa
         val width = 473
         val height = 840
 
-        val fileName:String
+        val fileName: String
         if (isVideo) {
             thumbUrl = data.findValue("poster=\"", "\"")
             downloadUrl = data.findValue("src=\"", "\"")

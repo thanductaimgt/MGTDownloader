@@ -21,7 +21,7 @@ class ViewModelFactory private constructor() : ViewModelProvider.Factory {
     companion object {
         private var instance: ViewModelFactory? = null
 
-        fun getInstance(zipPreviewInfo: FilePreviewInfo?=null): ViewModelFactory {
+        fun getInstance(zipPreviewInfo: FilePreviewInfo? = null): ViewModelFactory {
             if (instance == null) {
                 synchronized(ViewModelFactory) {
                     if (instance == null) {
@@ -30,7 +30,7 @@ class ViewModelFactory private constructor() : ViewModelProvider.Factory {
                 }
             }
 
-            zipPreviewInfo?.let { instance!!.zipPreviewInfo =it }
+            zipPreviewInfo?.let { instance!!.zipPreviewInfo = it }
             return instance!!
         }
     }

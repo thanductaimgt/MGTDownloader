@@ -16,17 +16,17 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieDrawable
-import kotlinx.android.synthetic.main.dialog_view_file.view.*
+import com.mgt.downloader.DownloadService
 import com.mgt.downloader.R
-import com.mgt.downloader.ui.MainActivity
-import com.mgt.downloader.factory.ViewModelFactory
+import com.mgt.downloader.base.ContainsSelectableList
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.data_model.ZipNode
-import com.mgt.downloader.DownloadService
-import com.mgt.downloader.base.ContainsSelectableList
+import com.mgt.downloader.factory.ViewModelFactory
+import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.utils.TAG
 import com.mgt.downloader.utils.Utils
+import kotlinx.android.synthetic.main.dialog_view_file.view.*
 import java.sql.Date
 import java.util.*
 
@@ -283,7 +283,7 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
         var fileName = Utils.getFileName(zipNode.entry!!.name)
 
         val stopCondition = { newFileName: String ->
-            !(downloadService?.isFileOrDownloadTaskExist(newFileName)?:false)
+            !(downloadService?.isFileOrDownloadTaskExist(newFileName) ?: false)
         }
 
         if (!stopCondition(fileName)) {

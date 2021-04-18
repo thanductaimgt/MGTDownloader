@@ -12,12 +12,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <include
-            layout="@layout/item_download_base"/>
+        <include layout="@layout/item_download_base" />
 
         <TextView
-                app:layout_constraintVertical_bias="1"
-                tools:visibility="visible"
                 android:id="@+id/storageStateTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -29,48 +26,50 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/timeTextView" />
+                app:layout_constraintTop_toBottomOf="@id/timeTextView"
+                app:layout_constraintVertical_bias="1"
+                tools:visibility="visible" />
 
         <ImageView
-                android:background="?attr/selectableItemBackgroundBorderless"
-                tools:visibility="visible"
-                android:visibility="gone"
                 android:id="@+id/retryImgView"
                 android:layout_width="@dimen/sizeTaskActionButton"
                 android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/desc_retry"
                 android:padding="7dp"
                 android:src="@drawable/retry"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/deleteImgView"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toStartOf="@id/openFileImgView"
-                app:layout_constraintTop_toTopOf="@id/deleteImgView"/>
+                app:layout_constraintTop_toTopOf="@id/deleteImgView"
+                tools:visibility="visible" />
 
         <ImageView
-                android:background="?attr/selectableItemBackgroundBorderless"
                 android:id="@+id/openFileImgView"
                 android:layout_width="@dimen/sizeTaskActionButton"
                 android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/desc_open_file"
                 android:padding="5dp"
                 android:src="@drawable/dir"
                 app:layout_constraintBottom_toBottomOf="@id/deleteImgView"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toStartOf="@id/deleteImgView"
-                app:layout_constraintTop_toTopOf="@id/deleteImgView"/>
+                app:layout_constraintTop_toTopOf="@id/deleteImgView" />
 
         <ImageView
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:layout_constraintTop_toBottomOf="@id/totalSizeTextView"
                 android:id="@+id/deleteImgView"
                 android:layout_width="@dimen/sizeTaskActionButton"
                 android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/desc_delete"
                 android:padding="7dp"
                 android:src="@drawable/delete"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/totalSizeTextView"
                 app:layout_constraintVertical_bias="1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

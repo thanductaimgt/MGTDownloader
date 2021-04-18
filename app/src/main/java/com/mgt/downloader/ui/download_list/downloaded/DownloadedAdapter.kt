@@ -3,13 +3,13 @@ package com.mgt.downloader.ui.download_list.downloaded
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.item_downloaded.view.*
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadAdapter
 import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.Utils
+import kotlinx.android.synthetic.main.item_downloaded.view.*
 
 class DownloadedAdapter(
     fragment: BaseDownloadFragment,
@@ -20,11 +20,13 @@ class DownloadedAdapter(
         downloadTaskDiffUtil
     ) {
     override fun onCreateCurViewHolder(parent: ViewGroup, viewType: Int): DownloadBaseHolder {
-        return DownloadedHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_downloaded, parent, false))
+        return DownloadedHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.item_downloaded, parent, false)
+        )
     }
 
     inner class DownloadedHolder(itemView: View) : DownloadBaseHolder(itemView) {
-        override fun bind(position:Int) {
+        override fun bind(position: Int) {
             super.bind(position)
             val downloadTask = currentList[position]
             itemView.apply {
@@ -58,10 +60,10 @@ class DownloadedAdapter(
 
         override fun onNotSelected(downloadTask: DownloadTask) {
             itemView.apply {
-                if(Utils.isDownloadedFileExist(context, downloadTask)){
+                if (Utils.isDownloadedFileExist(context, downloadTask)) {
                     openFileImgView.visibility = View.VISIBLE
                     retryImgView.visibility = View.GONE
-                }else {
+                } else {
                     openFileImgView.visibility = View.GONE
                     retryImgView.visibility = View.VISIBLE
                 }

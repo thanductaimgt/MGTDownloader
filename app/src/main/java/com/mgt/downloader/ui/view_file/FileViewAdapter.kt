@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_file.view.*
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.ZipNode
 import com.mgt.downloader.utils.Utils
+import kotlinx.android.synthetic.main.item_file.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -52,7 +52,7 @@ class FileViewAdapter(private val fragment: Fragment, private val isLocalFile: B
                         context.getString(R.string.item_count),
                         zipNode.childNodes.size
                     )
-                }else{
+                } else {
                     stroke.visibility = View.GONE
                     itemCountTextView.visibility = View.GONE
                 }
@@ -81,7 +81,8 @@ class FileViewAdapter(private val fragment: Fragment, private val isLocalFile: B
 
                 setOnClickListener(fragment as View.OnClickListener)
 
-                val indexOfZipNode = (fragment as ViewFileDialog).selectedZipNodes.indexOfFirst { it.entry!!.name == zipEntry.name }
+                val indexOfZipNode =
+                    (fragment as ViewFileDialog).selectedZipNodes.indexOfFirst { it.entry!!.name == zipEntry.name }
                 if (indexOfZipNode != -1) {//contains
                     setBackgroundColor(ContextCompat.getColor(context, R.color.selectedBg))
                     downloadImgView.visibility = View.INVISIBLE

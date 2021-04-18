@@ -7,7 +7,7 @@ class CompositeDisposable {
         disposables.add(disposable)
     }
 
-    fun remove(disposable: Disposable){
+    fun remove(disposable: Disposable) {
         disposables.remove(disposable)
     }
 

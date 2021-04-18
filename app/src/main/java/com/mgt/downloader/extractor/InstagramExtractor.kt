@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringEscapeUtils
 
 
 class InstagramExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable) {
-    override fun extract(url: String, webContent: String):FilePreviewInfo {
+    override fun extract(url: String, webContent: String): FilePreviewInfo {
         var data = webContent
         var fileName =
             data.substring("<title>".let { data.indexOf(it) + it.length }).let {

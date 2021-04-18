@@ -2,7 +2,7 @@ package com.mgt.downloader.helper
 
 import com.mgt.downloader.utils.Utils
 
-class LongObject(value:Long) {
+class LongObject(value: Long) {
     var value: Long = value
         set(value) {
             isFormatSizeChange = Utils.getFormatFileSize(

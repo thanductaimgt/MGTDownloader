@@ -34,36 +34,61 @@ abstract class Extractor(protected val hasDisposable: HasDisposable) {
         extractFields: ExtractFields
     ): FilePreviewInfo {
         extractFields.apply {
-            val fileName =
-                "${webContent.findValue(title.prefix, title.postfix, title.default)}.mp4"
-            val thumbUrl =
-                webContent.findValue(thumbUrl.prefix, thumbUrl.postfix, thumbUrl.default)
-            val downloadUrl = webContent.findValue(
+            val targetFileName =
+                "${
+                    webContent.findValue(
+                        title.prefix,
+                        title.postfix,
+                        title.default,
+                        target = title.target,
+                    )
+                }.mp4"
+            val targetThumbUrl =
+                webContent.findValue(
+                    thumbUrl.prefix,
+                    thumbUrl.postfix,
+                    thumbUrl.default,
+                    target = thumbUrl.target,
+                )
+            val targetDownloadUrl = webContent.findValue(
                 downloadUrl.prefix,
                 downloadUrl.postfix,
-                downloadUrl.default
+                downloadUrl.default,
+                target = downloadUrl.target,
             )!!
 
-            val width =
-                webContent.findValue(width.prefix, width.postfix, width.default)?.toInt() ?: 1
-            val height =
-                webContent.findValue(height.prefix, height.postfix, height.default)?.toInt()
+            val targetWidth =
+                webContent.findValue(
+                    width.prefix,
+                    width.postfix,
+                    width.default,
+                    target = width.target,
+                )?.toInt() ?: 1
+            val targetHeight =
+                webContent.findValue(
+                    height.prefix,
+                    height.postfix,
+                    height.default,
+                    target = height.target,
+                )?.toInt()
                     ?: 1
 
-            val fileSize = Utils.getFileSize(downloadUrl)
-            val isMultipartSupported = Utils.isMultipartSupported(downloadUrl)
+            val fileSize = Utils.getFileSize(targetDownloadUrl)
+            val isMultipartSupported = runCatching {
+                Utils.isMultipartSupported(targetDownloadUrl)
+            }.getOrDefault(false)
 
             return FilePreviewInfo(
-                fileName,
+                targetFileName,
                 url,
-                downloadUrl,
+                targetDownloadUrl,
                 fileSize,
                 -1,
                 -1,
-                thumbUri = thumbUrl,
+                thumbUri = targetThumbUrl,
                 thumbRatio = Utils.getFormatRatio(
-                    width,
-                    height
+                    targetWidth,
+                    targetHeight
                 ),
                 isMultipartSupported = isMultipartSupported
             )

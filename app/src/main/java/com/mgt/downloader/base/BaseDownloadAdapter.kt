@@ -7,14 +7,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.item_download_base.view.*
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.Constants
 import com.mgt.downloader.utils.Utils
 import com.mgt.downloader.utils.smartLoad
+import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.item_download_base.view.*
 
 abstract class BaseDownloadAdapter(
     val fragment: BaseDownloadFragment,
@@ -94,8 +94,8 @@ abstract class BaseDownloadAdapter(
                             width = 0
                         }
 
-                    Picasso.get().smartLoad(downloadTask.thumbUrl, fileIconImgView){
-                        if(fileIconImgView.drawable!=null){
+                    Picasso.get().smartLoad(downloadTask.thumbUrl, fileIconImgView) {
+                        if (fileIconImgView.drawable != null) {
                             it.placeholder(fileIconImgView.drawable)
                         }
                     }

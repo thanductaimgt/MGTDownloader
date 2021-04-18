@@ -84,7 +84,7 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
             }
         }
 
-        private fun getRemoteApiUrl():String{
+        private fun getRemoteApiUrl(): String {
             return Utils.getDontpadContent(Constants.SUBPATH_TIKTOK_API)
         }
     }

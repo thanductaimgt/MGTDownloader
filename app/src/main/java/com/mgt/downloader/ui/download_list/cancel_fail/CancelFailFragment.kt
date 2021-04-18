@@ -7,20 +7,15 @@ import android.view.ViewGroup
 import androidx.core.view.get
 import androidx.core.view.isNotEmpty
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.fragment_canceled_or_fail.*
-import kotlinx.android.synthetic.main.fragment_canceled_or_fail.discardAllImgView
-import kotlinx.android.synthetic.main.fragment_canceled_or_fail.recyclerView
-import kotlinx.android.synthetic.main.fragment_canceled_or_fail.selectAllImgView
-import kotlinx.android.synthetic.main.fragment_canceled_or_fail.selectCountTextView
-import kotlinx.android.synthetic.main.fragment_canceled_or_fail.selectLayout
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.TAG
 import com.mgt.downloader.utils.logD
+import kotlinx.android.synthetic.main.fragment_canceled_or_fail.*
 
-class CancelFailFragment : BaseDownloadFragment(){
+class CancelFailFragment : BaseDownloadFragment() {
     override lateinit var adapter: CancelFailAdapter
 
     override fun onCreateView(

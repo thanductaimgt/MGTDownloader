@@ -1,3 +1,3 @@
 package com.mgt.downloader.data_model
 
-class DownloadSize (var value:Long)
+class DownloadSize(var value: Long)

@@ -28,8 +28,8 @@ object Constants {
     const val ERROR = -2
 
     const val MAX_EOCD_AND_COMMENT_SIZE = 0xFFFF + 22
-    const val RELATIVE_OFFSET_LOCAL_HEADER:Short = 0x1447
-    const val LOCAL_FILE_HEADER:Int = 0x04034b50
+    const val RELATIVE_OFFSET_LOCAL_HEADER: Short = 0x1447
+    const val LOCAL_FILE_HEADER: Int = 0x04034b50
 
     // Storage Permissions
     const val REQUEST_PERMISSIONS = 1
@@ -50,8 +50,8 @@ object Constants {
     const val SHARE_PREFERENCES_NAME = "IDM Share Preferences"
 
     const val ONE_KB_IN_B = 1000L
-    const val ONE_MB_IN_B = 1000L*1000
-    const val ONE_GB_IN_B = 1000L*1000*1000
+    const val ONE_MB_IN_B = 1000L * 1000
+    const val ONE_GB_IN_B = 1000L * 1000 * 1000
 
     const val DOWNLOAD_STATE_SUCCESS = 0
     const val DOWNLOAD_STATE_CANCEL_OR_FAIL = 1
@@ -63,5 +63,6 @@ object Constants {
     const val SUBPATH_EXTRACT_FIELDS = "$BASE_SUBPATH/extractfields/%s"
     const val SUBPATH_TIKTOK_API = "$BASE_SUBPATH/api/tiktok"
 
-    const val USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
+    const val USER_AGENT =
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
 }
