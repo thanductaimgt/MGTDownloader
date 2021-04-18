@@ -5,15 +5,14 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
-import com.mgt.downloader.ui.MainActivity
+import com.mgt.downloader.DownloadService
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.DownloadTask
-import com.mgt.downloader.DownloadService
+import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.ui.view_file.ViewFileDialog
 import com.mgt.downloader.utils.Constants
 import com.mgt.downloader.utils.Utils
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
@@ -35,7 +34,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
                 this.downloadService?.liveDownloadTasks?.observe(
                     viewLifecycleOwner,
                     { downloadTasks ->
-                        this.view?.let { onDownloadListChange(downloadTasks)}
+                        this.view?.let { onDownloadListChange(downloadTasks) }
                     })
             })
     }

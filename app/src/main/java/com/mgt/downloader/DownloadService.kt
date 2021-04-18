@@ -272,12 +272,13 @@ class DownloadService : Service(), HasDisposable {
     }
 
     private fun getDownloadUrl(url: String, onComplete: (downloadUrl: String) -> Unit) {
-        ExtractorFactory.create(this, url).extract(url, object : SingleObserver<FilePreviewInfo>(this) {
-            override fun onSuccess(result: FilePreviewInfo) {
-                super.onSuccess(result)
-                onComplete(result.downloadUri)
-            }
-        })
+        ExtractorFactory.create(this, url)
+            .extract(url, object : SingleObserver<FilePreviewInfo>(this) {
+                override fun onSuccess(result: FilePreviewInfo) {
+                    super.onSuccess(result)
+                    onComplete(result.downloadUri)
+                }
+            })
     }
 
     //delete a downloaded, canceled or fail task
@@ -354,8 +355,6 @@ class DownloadService : Service(), HasDisposable {
                 )
                 else -> executeFileDownloadTask(downloadTask, emitter, isResume)
             }
-
-            activeDownloadTaskObservables.remove(downloadTask.fileName)
         }.also {
             // add to list of active download tasks
             activeDownloadTaskObservables[downloadTask.fileName] = it
@@ -1512,6 +1511,8 @@ class DownloadService : Service(), HasDisposable {
                 this@DownloadService,
                 Statistics.SUCCESS_DOWNLOAD_NUM_KEY
             )
+
+            finalize()
         }
 
         //call when downloadTask fail
@@ -1526,6 +1527,15 @@ class DownloadService : Service(), HasDisposable {
                 this@DownloadService,
                 Statistics.CANCEL_OR_FAIL_DOWNLOAD_NUM_KEY
             )
+
+            finalize()
+        }
+
+        private fun finalize() {
+            activeDownloadTaskObservables.remove(fileName)
+            if (!isAnyActiveDownloadTask()) {
+                stopForeground(true)
+            }
         }
     }
 

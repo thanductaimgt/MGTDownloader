@@ -3,13 +3,13 @@ package com.mgt.downloader.ui.download_list.downloading
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.item_downloading.view.*
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadAdapter
 import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.Utils
+import kotlinx.android.synthetic.main.item_downloading.view.*
 
 
 class DownloadingAdapter(
@@ -21,7 +21,9 @@ class DownloadingAdapter(
         downloadTaskDiffUtil
     ) {
     override fun onCreateCurViewHolder(parent: ViewGroup, viewType: Int): DownloadingHolder {
-        return DownloadingHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_downloading, parent, false))
+        return DownloadingHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.item_downloading, parent, false)
+        )
     }
 
     override fun onBindViewHolderChange(
@@ -31,14 +33,14 @@ class DownloadingAdapter(
         payload: Any
     ) {
         holder as DownloadingHolder
-        when(payload){
+        when (payload) {
             DownloadTask.PAYLOAD_PROGRESS -> holder.bindProgress(downloadTask)
             DownloadTask.PAYLOAD_STATE -> holder.bindState(downloadTask)
         }
     }
 
     inner class DownloadingHolder(itemView: View) : DownloadBaseHolder(itemView) {
-        override fun bind(position:Int) {
+        override fun bind(position: Int) {
             super.bind(position)
             val downloadTask = currentList[position]
             bindFileSize(downloadTask)
@@ -57,7 +59,7 @@ class DownloadingAdapter(
                     progressTextView.text = String.format("%d%%", downloadProgress)
                     progressAnimView.progress = downloadProgress / 100f
 
-                    if(downloadTask.downloadedSize != 0L){
+                    if (downloadTask.downloadedSize != 0L) {
                         remainingTimeTextView.text = String.format(
                             "%s %s",
                             context.getString(R.string.desc_remaining_time),
@@ -83,7 +85,8 @@ class DownloadingAdapter(
                     (downloadTask.state == DownloadTask.STATE_PERSISTENT_PAUSED
                             || downloadTask.state == DownloadTask.STATE_TEMPORARY_PAUSE) -> {
                         pauseResumeImgView.setImageResource(R.drawable.resume)
-                        pauseResumeImgView.contentDescription = context!!.getString(R.string.desc_resume)
+                        pauseResumeImgView.contentDescription =
+                            context!!.getString(R.string.desc_resume)
 
 //                        progressAnimView.pauseAnimation()
 
@@ -93,7 +96,8 @@ class DownloadingAdapter(
                     }
                     downloadTask.state == DownloadTask.STATE_DOWNLOADING -> {
                         pauseResumeImgView.setImageResource(R.drawable.pause)
-                        pauseResumeImgView.contentDescription = context!!.getString(R.string.desc_pause)
+                        pauseResumeImgView.contentDescription =
+                            context!!.getString(R.string.desc_pause)
 
                         stateTextView.visibility = View.INVISIBLE
 
@@ -101,7 +105,7 @@ class DownloadingAdapter(
                         if (!downloadTask.isFileSizeKnown()) {
                             progressAnimView.setAnimation(R.raw.progress)
 //                            progressAnimView.resumeAnimation()
-                        }else{
+                        } else {
                             progressAnimView.pauseAnimation()
                         }
                     }

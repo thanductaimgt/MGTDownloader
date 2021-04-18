@@ -21,8 +21,8 @@ data class DownloadTask(
     var zipEntryName: String? = null, // for zip part only
     var isDirectory: Boolean = false,
     var partsDownloadedSize: ArrayList<Long> = ArrayList(), // for multi-thread download
-    var thumbUrl:String?=null,
-    var thumbRatio:String="1:1"
+    var thumbUrl: String? = null,
+    var thumbRatio: String = "1:1"
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,

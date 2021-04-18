@@ -44,7 +44,8 @@ data class ZipNode(
             this
         } else {
             val curRootName = Utils.getPathRoot(path)
-            val newPath = if (path.length > curRootName.length) path.drop(curRootName.length + 1) else ""
+            val newPath =
+                if (path.length > curRootName.length) path.drop(curRootName.length + 1) else ""
             childNodes.forEach {
                 if (Utils.getFileName(it.entry!!.name) == Utils.getFileName(curRootName)) {
                     return it.getNode(newPath)
@@ -56,7 +57,7 @@ data class ZipNode(
 
     companion object {
         //network uri only, not local
-        fun getZipTree(url: String, downloadUrl:String): ZipNode {
+        fun getZipTree(url: String, downloadUrl: String): ZipNode {
             val rootNode = MyApplication.zipTreeCaches[url]
             return if (rootNode != null) {
                 rootNode

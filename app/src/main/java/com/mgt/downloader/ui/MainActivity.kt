@@ -21,7 +21,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.gms.ads.AdRequest
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mgt.downloader.DownloadService

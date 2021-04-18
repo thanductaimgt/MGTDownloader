@@ -11,20 +11,28 @@ class BobaExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable
     override fun extract(
         url: String,
         webContent: String
-    ):FilePreviewInfo {
-        var fileName = webContent.findValue("property=\"og:title\"(.*?)content=\"", "\"", default = "Boba story")
+    ): FilePreviewInfo {
+        var fileName = webContent.findValue(
+            "property=\"og:title\"(.*?)content=\"",
+            "\"",
+            default = "Boba story"
+        )
 
-        val isVideo = webContent.indexOf("<video(.*?)>")!=-1
+        val isVideo = webContent.indexOf("<video(.*?)>") != -1
 
-        val thumbUrl:String?
-        val downloadUrl:String
+        val thumbUrl: String?
+        val downloadUrl: String
 
         if (isVideo) {
             thumbUrl = webContent.findValue("poster=\"", "\"", default = null)
             downloadUrl = webContent.findValue("<source(.*?)src=\"", "\"", default = null)!!
             fileName = "$fileName.mp4"
         } else {
-            downloadUrl = webContent.findValue("style=\"(.*?)background-image:(.*?)url[(]&quot;", "&quot;[)]", null)!!
+            downloadUrl = webContent.findValue(
+                "style=\"(.*?)background-image:(.*?)url[(]&quot;",
+                "&quot;[)]",
+                null
+            )!!
             thumbUrl = downloadUrl
             fileName = "$fileName.jpg"
         }

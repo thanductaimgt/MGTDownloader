@@ -12,8 +12,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <include
-            layout="@layout/item_download_base"/>
+        <include layout="@layout/item_download_base" />
 
         <TextView
                 android:id="@+id/downloadedSizeTitleTextView"
@@ -26,20 +25,20 @@
                 app:layout_constraintTop_toBottomOf="@id/timeTextView" />
 
         <TextView
-                android:layout_marginEnd="8dp"
                 android:id="@+id/downloadedSizeTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@id/urlTextView"
                 app:layout_constraintTop_toTopOf="@id/downloadedSizeTitleTextView"
                 tools:text="1.23 GB" />
 
         <ImageView
-                android:background="?attr/selectableItemBackgroundBorderless"
                 android:id="@+id/retryImgView"
                 android:layout_width="@dimen/sizeTaskActionButton"
                 android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/desc_delete"
                 android:padding="7dp"
                 android:src="@drawable/retry"
@@ -50,10 +49,10 @@
                 app:layout_constraintVertical_bias="1" />
 
         <ImageView
-                android:background="?attr/selectableItemBackgroundBorderless"
                 android:id="@+id/deleteImgView"
                 android:layout_width="@dimen/sizeTaskActionButton"
                 android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/desc_delete"
                 android:padding="7dp"
                 android:src="@drawable/delete"
@@ -64,7 +63,6 @@
                 app:layout_constraintVertical_bias="1" />
 
         <TextView
-                tools:visibility="visible"
                 android:id="@+id/storageStateTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -76,6 +74,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/downloadedSizeTextView" />
+                app:layout_constraintTop_toBottomOf="@id/downloadedSizeTextView"
+                tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

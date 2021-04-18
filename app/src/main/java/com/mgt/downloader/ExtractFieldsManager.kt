@@ -4,17 +4,16 @@ import com.google.gson.Gson
 import com.mgt.downloader.data_model.ExtractFields
 import com.mgt.downloader.utils.Constants
 import com.mgt.downloader.utils.Utils
-import com.mgt.downloader.utils.findValue
-import com.mgt.downloader.utils.unescapeHtml
 
 object ExtractFieldsManager {
     private val localExtractFieldsCache = HashMap<String, ExtractFields>()
     private val remoteExtractFieldsCache = HashMap<String, ExtractFields>()
 
-    fun getLocalExtractFields(extractorName:String):ExtractFields{
-        return localExtractFieldsCache[extractorName]?: getLocalExtractFieldsInternal(extractorName).also {
-            localExtractFieldsCache[extractorName] = it
-        }
+    fun getLocalExtractFields(extractorName: String): ExtractFields {
+        return localExtractFieldsCache[extractorName]
+            ?: getLocalExtractFieldsInternal(extractorName).also {
+                localExtractFieldsCache[extractorName] = it
+            }
     }
 
     private fun getLocalExtractFieldsInternal(extractorName: String): ExtractFields {
@@ -23,8 +22,10 @@ object ExtractFieldsManager {
         return Gson().fromJson(json, ExtractFields::class.java)
     }
 
-    fun getRemoteExtractFields(extractorName:String):ExtractFields{
-        return remoteExtractFieldsCache[extractorName]?: getRemoteExtractFieldsInternal(extractorName).also {
+    fun getRemoteExtractFields(extractorName: String): ExtractFields {
+        return remoteExtractFieldsCache[extractorName] ?: getRemoteExtractFieldsInternal(
+            extractorName
+        ).also {
             remoteExtractFieldsCache[extractorName] = it
         }
     }

@@ -15,11 +15,11 @@
             tools:context=".ui.MainActivity">
 
         <FrameLayout
-                app:layout_constraintTop_toTopOf="parent"
                 android:id="@+id/frameLayout"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:visibility="invisible">
+                android:visibility="invisible"
+                app:layout_constraintTop_toTopOf="parent">
 
             <WebView
                     android:id="@+id/webView"
@@ -366,10 +366,10 @@
                 tools:visibility="visible" />
 
         <com.google.android.gms.ads.AdView
-                android:visibility="gone"
                 android:id="@+id/adView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:adSize="BANNER"
                 app:adUnitId="@string/banner_ad_id"
                 app:layout_constraintBottom_toBottomOf="parent" />

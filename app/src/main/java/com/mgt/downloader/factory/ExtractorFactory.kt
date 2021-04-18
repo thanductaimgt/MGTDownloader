@@ -6,7 +6,7 @@ import com.mgt.downloader.extractor.*
 import com.mgt.downloader.utils.Utils
 
 object ExtractorFactory {
-    fun create(hasDisposable: HasDisposable, url:String):Extractor{
+    fun create(hasDisposable: HasDisposable, url: String): Extractor {
         return when {
             Utils.isTikTokUrl(url) -> {
                 TikTokExtractor(hasDisposable)

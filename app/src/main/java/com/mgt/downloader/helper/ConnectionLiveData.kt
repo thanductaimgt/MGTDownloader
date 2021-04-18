@@ -31,8 +31,9 @@ class ConnectionLiveData(context: Context) : LiveData<Boolean>() {
         }
     }
 
-    @Volatile var isConnected: Boolean = true
-        get() = value?:true
+    @Volatile
+    var isConnected: Boolean = true
+        get() = value ?: true
         private set
 
     override fun onActive() {

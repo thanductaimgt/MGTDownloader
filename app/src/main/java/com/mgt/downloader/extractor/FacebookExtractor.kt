@@ -11,7 +11,7 @@ import com.mgt.downloader.utils.logD
 class FacebookExtractor(hasDisposable: HasDisposable) : WebHtmlExtractor(hasDisposable) {
     override val extractorName = "facebook"
 
-    override fun extract(url: String):FilePreviewInfo {
+    override fun extract(url: String): FilePreviewInfo {
         return extract(url, getTargetWebContent(url))
     }
 
@@ -22,7 +22,7 @@ class FacebookExtractor(hasDisposable: HasDisposable) : WebHtmlExtractor(hasDisp
         }.also { logD(TAG, "getTargetWebContent, url: $url") }
     }
 
-    companion object{
+    companion object {
         private const val API_URL = "https://www.getfvid.com/vi/downloader"
     }
 }

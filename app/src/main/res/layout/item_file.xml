@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/itemRootView"
@@ -9,13 +8,13 @@
         android:background="?attr/selectableItemBackground">
 
     <ImageView
-            android:contentDescription="@string/file"
             android:id="@+id/fileIconImgView"
             android:layout_width="48dp"
             android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
+            android:contentDescription="@string/file"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintStart_toStartOf="parent"
@@ -40,42 +39,42 @@
             tools:text="test-db_master" />
 
     <TextView
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintHorizontal_chainStyle="packed"
             android:id="@+id/fileSizeTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/sizeTextSmall"
             app:layout_constraintBottom_toBottomOf="@id/fileIconImgView"
             app:layout_constraintEnd_toStartOf="@id/stroke"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="@id/fileNameTextView"
             app:layout_constraintTop_toBottomOf="@id/fileNameTextView"
             tools:text="123.45 MB" />
 
     <View
-            android:layout_marginBottom="3dp"
+            android:id="@+id/stroke"
+            android:layout_width="3dp"
+            android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:id="@+id/stroke"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/shape_round"
             app:layout_constraintBottom_toBottomOf="@id/fileSizeTextView"
             app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintStart_toEndOf="@id/fileSizeTextView"
             app:layout_constraintEnd_toStartOf="@id/itemCountTextView"
-            android:background="@drawable/shape_round"
-            android:layout_width="3dp"
-            android:layout_height="0dp"/>
+            app:layout_constraintStart_toEndOf="@id/fileSizeTextView" />
 
     <TextView
-            android:visibility="gone"
-            tools:visibility="visible"
             android:id="@+id/itemCountTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/sizeTextSmall"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/fileSizeTextView"
             app:layout_constraintEnd_toEndOf="@id/fileNameTextView"
             app:layout_constraintStart_toEndOf="@id/stroke"
-            tools:text="3 item" />
+            tools:text="3 item"
+            tools:visibility="visible" />
 
     <ImageView
             android:id="@+id/downloadImgView"

@@ -17,7 +17,7 @@ object Statistics {
 
     @Synchronized
     fun increaseDownloadNum(context: Context, numKey: String) {
-        val newNum = when(numKey){
+        val newNum = when (numKey) {
             SUCCESS_DOWNLOAD_NUM_KEY -> ++successDownloadNum
             else -> ++cancelOrFailDownloadNum
         }

@@ -3,8 +3,8 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
     <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -30,7 +30,6 @@
             tools:src="@drawable/zip" />
 
     <ImageView
-            app:tint="#aaffffff"
             android:id="@+id/playIcon"
             android:layout_width="28dp"
             android:layout_height="0dp"
@@ -41,6 +40,7 @@
             app:layout_constraintEnd_toEndOf="@id/fileIconImgView"
             app:layout_constraintStart_toStartOf="@id/fileIconImgView"
             app:layout_constraintTop_toTopOf="@id/fileIconImgView"
+            app:tint="#aaffffff"
             tools:visibility="visible" />
 
     <TextView

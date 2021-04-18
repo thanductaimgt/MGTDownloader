@@ -12,16 +12,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <include
-            layout="@layout/item_download_base"/>
+        <include layout="@layout/item_download_base" />
 
         <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier2"
-                app:barrierDirection="bottom"
-                android:orientation="horizontal"
-                app:constraint_referenced_ids="fileNameTextView, timeTextView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fileNameTextView, timeTextView" />
 
         <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/progressAnimView"

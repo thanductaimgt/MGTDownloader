@@ -4,26 +4,26 @@ import android.os.Handler
 import android.os.Looper
 
 abstract class Emitter {
-    abstract val observers : HashSet<Observer>
+    abstract val observers: HashSet<Observer>
 
-    fun addObserver(observer: Observer){
+    fun addObserver(observer: Observer) {
         observers.add(observer)
     }
 
-    fun removeObserver(observer: Observer){
+    fun removeObserver(observer: Observer) {
         observers.remove(observer)
     }
 
     fun onError(throwable: Throwable) {
-            Handler(Looper.getMainLooper()).post {
-                observers.forEach {
-                    it.onError(throwable)
-                }
+        Handler(Looper.getMainLooper()).post {
+            observers.forEach {
+                it.onError(throwable)
             }
+        }
     }
 }
 
-class StreamEmitter<T>:Emitter(){
+class StreamEmitter<T> : Emitter() {
     override val observers = HashSet<Observer>()
 
     fun onNext(item: T?) {
@@ -43,7 +43,7 @@ class StreamEmitter<T>:Emitter(){
     }
 }
 
-class SingleEmitter<T>:Emitter(){
+class SingleEmitter<T> : Emitter() {
     override val observers = HashSet<Observer>()
 
     fun onSuccess(item: T) {
@@ -55,7 +55,7 @@ class SingleEmitter<T>:Emitter(){
     }
 }
 
-class CompletableEmitter:Emitter(){
+class CompletableEmitter : Emitter() {
     override val observers = HashSet<Observer>()
 
     fun onComplete() {

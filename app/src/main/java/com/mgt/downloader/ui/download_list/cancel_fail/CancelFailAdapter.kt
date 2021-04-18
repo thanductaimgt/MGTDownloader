@@ -3,13 +3,13 @@ package com.mgt.downloader.ui.download_list.cancel_fail
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.item_cancel_or_fail.view.*
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadAdapter
 import com.mgt.downloader.base.BaseDownloadFragment
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
 import com.mgt.downloader.utils.Utils
+import kotlinx.android.synthetic.main.item_cancel_or_fail.view.*
 
 class CancelFailAdapter(
     fragment: BaseDownloadFragment,
@@ -20,11 +20,13 @@ class CancelFailAdapter(
         downloadTaskDiffUtil
     ) {
     override fun onCreateCurViewHolder(parent: ViewGroup, viewType: Int): DownloadBaseHolder {
-        return CancelFailHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_cancel_or_fail, parent, false))
+        return CancelFailHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.item_cancel_or_fail, parent, false)
+        )
     }
 
     inner class CancelFailHolder(itemView: View) : DownloadBaseHolder(itemView) {
-        override fun bind(position:Int) {
+        override fun bind(position: Int) {
             super.bind(position)
             val downloadTask = currentList[position]
             itemView.apply {

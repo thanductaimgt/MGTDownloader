@@ -2,126 +2,133 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:background="@null"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent">
+        android:background="@null">
+
     <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            app:cardCornerRadius="@dimen/sizeRoundCornerRadiusLayout"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent">
+            app:cardCornerRadius="@dimen/sizeRoundCornerRadiusLayout">
+
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
             <TextView
-                    android:textStyle="bold"
-                    android:textSize="@dimen/sizeTextTitle"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:paddingBottom="8dp"
-                    android:paddingTop="8dp"
                     android:id="@+id/titleTextView"
-                    app:layout_constraintTop_toTopOf="parent"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
                     android:text="@string/desc_change_file_name"
                     android:textAlignment="center"
-            />
-            <View
-                    app:layout_constraintRight_toRightOf="parent"
+                    android:textSize="@dimen/sizeTextTitle"
+                    android:textStyle="bold"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <View
                     android:id="@+id/line"
-                    app:layout_constraintTop_toBottomOf="@id/titleTextView"
                     android:layout_width="0dp"
                     android:layout_height="1dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:background="@color/lightMediumGray"
-            />
-            <TextView
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginLeft="16dp"
-                    android:text="@string/desc_url"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/line"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/titleTextView" />
+
+            <TextView
                     android:id="@+id/urlDescTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"/>
-            <TextView
-                    android:maxLines="2"
-                    android:ellipsize="end"
-                    android:scrollHorizontally="true"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="16dp"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    app:layout_constraintTop_toBottomOf="@id/urlDescTextView"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/desc_url"
+                    android:textStyle="bold"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <TextView
                     android:id="@+id/urlTextView"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginRight="16dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:scrollHorizontally="true"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/urlDescTextView" />
 
             <EditText
-                    android:inputType="text"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:layout_marginTop="16dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:hint="@string/hint_file_name"
-                    android:background="@drawable/shape_edit_text"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    app:layout_constraintTop_toBottomOf="@id/urlTextView"
                     android:id="@+id/nameEditText"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginRight="16dp"
+                    android:background="@drawable/shape_edit_text"
+                    android:hint="@string/hint_file_name"
+                    android:inputType="text"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/urlTextView" />
+
             <TextView
-                    tools:visibility="visible"
-                    android:visibility="gone"
-                    android:textAlignment="center"
+                    android:id="@+id/warningTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
+                    android:layout_marginTop="4dp"
                     android:layout_marginEnd="16dp"
                     android:text="@string/desc_file_name_exists"
-                    android:layout_marginTop="4dp"
-                    android:id="@+id/warningTextView"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-            android:textColor="@color/lightErrorText"
-                      app:layout_constraintEnd_toEndOf="parent"
-                      app:layout_constraintStart_toStartOf="parent"
-                      app:layout_constraintTop_toBottomOf="@id/nameEditText"
-            />
+                    android:textAlignment="center"
+                    android:textColor="@color/lightErrorText"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/nameEditText"
+                    tools:visibility="visible" />
+
             <Button
-                    android:theme="@style/ButtonTheme.Cancel"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginTop="16dp"
                     android:id="@+id/cancelImgView"
-                    app:layout_constraintRight_toLeftOf="@id/downloadButton"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/warningTextView"
-                    android:text="@string/label_cancel_task"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="8dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/label_cancel_task"
+                    android:theme="@style/ButtonTheme.Cancel"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/downloadButton"
+                    app:layout_constraintTop_toBottomOf="@id/warningTextView" />
+
             <Button
-                    android:layout_marginRight="16dp"
-                    android:layout_marginLeft="8dp"
-                    app:layout_constraintLeft_toRightOf="@id/cancelImgView"
                     android:id="@+id/downloadButton"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/cancelImgView"
-                    android:text="@string/label_download"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_marginRight="16dp"
+                    android:text="@string/label_download"
+                    app:layout_constraintLeft_toRightOf="@id/cancelImgView"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/cancelImgView" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </FrameLayout>
