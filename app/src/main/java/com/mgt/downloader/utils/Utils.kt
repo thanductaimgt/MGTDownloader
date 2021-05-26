@@ -747,7 +747,7 @@ fun String.findValue(prefix: String, postfix: String): String {
     }
 }
 
-const val DEFAULT_TARGET = "(.|\n)*?"
+const val DEFAULT_TARGET = """(.|\n)*?"""
 
 /**
  * Only prefix could be regex.
@@ -774,13 +774,19 @@ private fun <T : String?> findValue(
 ): T {
     if (prefix == null || postfix == null) return default
     try {
-        val pattern = Pattern.compile("$prefix(?<target>$target)$postfix")
+        val pattern = Pattern.compile(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                "$prefix(?<target>$target)$postfix"
+            } else {
+                "$prefix($target)$postfix"
+            }
+        )
         val matcher = pattern.matcher(input)
         return if (matcher.find()) {
             var valueEscaped = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 matcher.group("target")
             } else {
-                matcher.group(matcher.groupCount())
+                matcher.group(matcher.groupCount() - 1)
             }!!
             try {
                 if (unescape) {
