@@ -45,9 +45,13 @@ class TikTokExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposab
     }
 
     private fun getSnaptikWebContent(url: String): String {
+        val snaptikCookie = CookieManager.getInstance().getCookie(WEB_URL)
+        val appendedCookie = Utils.getDontpadContent(Constants.SUBPATH_TIKTOK_APPENDED_COOKIE)
+        val cookie = "$snaptikCookie$appendedCookie"
+
         val headers = hashMapOf(
             "User-Agent" to Constants.USER_AGENT,
-            "cookie" to CookieManager.getInstance().getCookie(WEB_URL)
+            "cookie" to cookie
         )
         return with(HttpPostMultipart(API_URL, "utf-8", headers)) {
             addFormField("url", url)

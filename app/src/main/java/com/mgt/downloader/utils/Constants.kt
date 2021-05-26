@@ -62,6 +62,7 @@ object Constants {
     const val SUBPATH_GENERAL_HEADERS = "$BASE_SUBPATH/requestheaders"
     const val SUBPATH_EXTRACT_FIELDS = "$BASE_SUBPATH/extractfields/%s"
     const val SUBPATH_TIKTOK_API = "$BASE_SUBPATH/api/tiktok"
+    const val SUBPATH_TIKTOK_APPENDED_COOKIE = "$BASE_SUBPATH/cookie/tiktok"
 
     const val USER_AGENT =
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"

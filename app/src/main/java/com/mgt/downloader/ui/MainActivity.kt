@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun getRequestHeaders(): Map<String, String> {
         val json = Utils.getDontpadContent(Constants.SUBPATH_GENERAL_HEADERS)
         val mapType = object : TypeToken<Map<String, Any>>() {}.type
-        return Gson().fromJson(json, mapType)
+        return Gson().fromJson(json, mapType) ?: emptyMap()
     }
 
     private fun getStartServiceIntent(): Intent {
