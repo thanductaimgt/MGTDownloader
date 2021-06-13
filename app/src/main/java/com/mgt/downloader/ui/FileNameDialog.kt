@@ -33,6 +33,8 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
         return inflater.inflate(R.layout.dialog_file_name, container, false)
     }
 
@@ -55,9 +57,6 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
     }
 
     private fun initView(view: View) {
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
-
         view.apply {
             urlTextView.text = filePreviewInfo.displayUri
 

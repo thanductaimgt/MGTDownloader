@@ -14,6 +14,9 @@ import com.mgt.downloader.ui.MainActivity
 
 abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDisposable) {
     open val waitTime = 5000L
+    protected val webView
+        get() = MainActivity.webView
+    protected val handler = Handler(Looper.getMainLooper())
 
     override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
         getJsWebContent(url) { webContent ->
@@ -41,7 +44,6 @@ abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDispo
     open val webViewClient = object : WebViewClient() {
         private var loadingFinished = true
         private var redirect = false
-        private val handler = Handler(Looper.getMainLooper())
 
         override fun shouldOverrideUrlLoading(
             view: WebView,

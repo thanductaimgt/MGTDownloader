@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var fileNameDialog: FileNameDialog
     private lateinit var viewFileDialog: ViewFileDialog
     private lateinit var settingsDialog: SettingsDialog
+    private lateinit var alertDialog: AlertDialog
     var liveDownloadService = MutableLiveData<DownloadService>()
     private val serviceConnection = DownloadServiceConnection()
     private lateinit var filePreviewInfo: FilePreviewInfo
@@ -102,6 +103,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //        adView.loadAd(adRequest)
 
         checkUpdateRequestHeaders()
+
+        checkUpdateApp()
     }
 
     private fun checkUpdateRequestHeaders() {
@@ -120,6 +123,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val json = Utils.getDontpadContent(Constants.SUBPATH_GENERAL_HEADERS)
         val mapType = object : TypeToken<Map<String, Any>>() {}.type
         return Gson().fromJson(json, mapType) ?: emptyMap()
+    }
+
+    private fun checkUpdateApp() {
+        SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
+            Utils.getDontpadContent(Constants.SUBPATH_VERSION_CODE).toInt()
+        }.subscribe(getNewestVersionCodeObserver)
     }
 
     private fun getStartServiceIntent(): Intent {
@@ -158,6 +167,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == Constants.REQUEST_PERMISSIONS) {
             if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 afterPermissionRequested?.invoke()
@@ -224,6 +234,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         viewFileDialog =
             ViewFileDialog(supportFragmentManager)
         settingsDialog = SettingsDialog(supportFragmentManager)
+        alertDialog = AlertDialog(supportFragmentManager)
 
         urlEditText.addTextChangedListener(textWatcher)
         val shareUrl = intent.extras?.getString(Intent.EXTRA_TEXT)
@@ -554,6 +565,27 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 super.onError(t)
                 hideLoadingAnimation()
                 showWarning(getString(R.string.cannot_resolve_host))
+            }
+        }
+    }
+
+    private val getNewestVersionCodeObserver by lazy {
+        object : SingleObserver<Int>(viewModel) {
+            override fun onSuccess(result: Int) {
+                super.onSuccess(result)
+                val appVersionCode = Utils.getAppVersionCode()
+                if (appVersionCode < result) {
+                    alertDialog.apply {
+                        title = this@MainActivity.getString(R.string.update_app_title)
+                        description = this@MainActivity.getString(R.string.update_app_description)
+                        positiveButtonText = this@MainActivity.getString(R.string.update)
+                        negativeButtonText = this@MainActivity.getString(R.string.later)
+                        positiveButtonClickListener = {
+                            Utils.navigateToCHPlay(this@MainActivity)
+                        }
+                        show()
+                    }
+                }
             }
         }
     }

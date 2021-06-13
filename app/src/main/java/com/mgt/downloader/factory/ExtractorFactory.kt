@@ -9,7 +9,7 @@ object ExtractorFactory {
     fun create(hasDisposable: HasDisposable, url: String): Extractor {
         return when {
             Utils.isTikTokUrl(url) -> {
-                TikTokExtractor(hasDisposable)
+                TikTokExtractorV2(hasDisposable)
             }
             Utils.isFacebookUrl(url) -> {
                 FacebookExtractor(hasDisposable)

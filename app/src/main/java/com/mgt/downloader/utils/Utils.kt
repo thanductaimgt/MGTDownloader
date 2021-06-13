@@ -1,7 +1,12 @@
 package com.mgt.downloader.utils
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.Log
@@ -10,6 +15,7 @@ import android.view.inputmethod.InputMethodManager
 import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.widget.ImageView
+import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
@@ -694,6 +700,43 @@ object Utils {
     fun isContentUri(localPath: String): Boolean {
         return localPath.startsWith("content://")
     }
+
+    fun getAppVersionCode(): Int {
+        return try {
+            val pInfo: PackageInfo =
+                MyApplication.appContext.packageManager
+                    .getPackageInfo(MyApplication.appContext.packageName, 0)
+            pInfo.versionCode
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            -1
+        }
+    }
+
+    fun navigateToCHPlay(context: Context) {
+        val packageName = context.applicationContext.packageName
+        val uri: Uri = Uri.parse("market://details?id=$packageName")
+        val goToMarket = Intent(Intent.ACTION_VIEW, uri)
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        var flags = Intent.FLAG_ACTIVITY_NO_HISTORY or
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            flags = flags or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+        }
+        goToMarket.addFlags(flags)
+
+        try {
+            context.startActivity(goToMarket)
+        } catch (e: ActivityNotFoundException) {
+            context.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
+                )
+            )
+        }
+    }
 }
 
 val Any.TAG: String
@@ -769,7 +812,7 @@ private fun <T : String?> findValue(
     prefix: String?,
     postfix: String?,
     default: T,
-    unescape: Boolean = true,
+    unescape: Boolean,
     target: String,
 ): T {
     if (prefix == null || postfix == null) return default

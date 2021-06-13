@@ -22,4 +22,8 @@ class MyJavaScriptInterface(private val onSuccess: ((html: String) -> Any)?) {
             onSuccess?.invoke(it)
         }
     }
+
+    @JavascriptInterface
+    fun dummy() {
+    }
 }
