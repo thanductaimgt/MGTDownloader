@@ -449,7 +449,7 @@ class DownloadService : Service(), HasDisposable {
                     output.write(data, 0, count)
 
                     //for statistics
-                    Statistics.increaseTotalDownloadSize(this, count)
+                    Statistics.increaseTotalDownloadSize(count)
 
                     downloadTask.downloadedSize += count
 
@@ -724,7 +724,7 @@ class DownloadService : Service(), HasDisposable {
                         val prevProgress = getProgress()
 
                         //for statistics
-                        Statistics.increaseTotalDownloadSize(this, count)
+                        Statistics.increaseTotalDownloadSize(count)
 
                         downloadedSize += count
                         downloadTask.downloadedSize += count
@@ -912,7 +912,7 @@ class DownloadService : Service(), HasDisposable {
                     output.write(data, 0, count)
 
                     //for statistics
-                    Statistics.increaseTotalDownloadSize(this, count)
+                    Statistics.increaseTotalDownloadSize(count)
 
                     downloadTask.increaseDownloadedSize(count)
 
@@ -1508,7 +1508,6 @@ class DownloadService : Service(), HasDisposable {
 
             //increase success download number
             Statistics.increaseDownloadNum(
-                this@DownloadService,
                 Statistics.SUCCESS_DOWNLOAD_NUM_KEY
             )
 
@@ -1524,7 +1523,6 @@ class DownloadService : Service(), HasDisposable {
 
             //increase cancel-or-fail download number
             Statistics.increaseDownloadNum(
-                this@DownloadService,
                 Statistics.CANCEL_OR_FAIL_DOWNLOAD_NUM_KEY
             )
 

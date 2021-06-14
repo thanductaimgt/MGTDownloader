@@ -2,8 +2,8 @@ package com.mgt.downloader
 
 import com.google.gson.Gson
 import com.mgt.downloader.data_model.ExtractFields
-import com.mgt.downloader.utils.Constants
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.utils.*
+import kotlin.text.format
 
 object ExtractFieldsManager {
     private val localExtractFieldsCache = HashMap<String, ExtractFields>()
@@ -17,9 +17,16 @@ object ExtractFieldsManager {
     }
 
     private fun getLocalExtractFieldsInternal(extractorName: String): ExtractFields {
-        val json =
-            Utils.getContent(MyApplication.appContext.assets.open("extractfields/$extractorName.json"))
-        return Gson().fromJson(json, ExtractFields::class.java)
+        val json = Prefs.get().getString(Prefs.KEY_EXTRACT_FIELDS.format(extractorName), null)
+        return if (json == null) {
+            ExtractFields::class.fromJson(
+                Utils.getContent(MyApplication.appContext.assets.open("extractfields/$extractorName.json"))
+            ).also {
+                updateLocalExtractFields(extractorName, it)
+            }
+        } else {
+            ExtractFields::class.fromJson(json)
+        }
     }
 
     fun getRemoteExtractFields(extractorName: String): ExtractFields {
@@ -33,5 +40,15 @@ object ExtractFieldsManager {
     private fun getRemoteExtractFieldsInternal(extractorName: String): ExtractFields {
         val json = Utils.getDontpadContent(Constants.SUBPATH_EXTRACT_FIELDS.format(extractorName))
         return Gson().fromJson(json, ExtractFields::class.java)
+    }
+
+    fun updateLocalExtractFields(extractorName: String, extractFields: ExtractFields) {
+        Prefs.edit {
+            putString(
+                Prefs.KEY_EXTRACT_FIELDS.format(extractorName),
+                extractFields.toJson()
+            )
+        }
+        localExtractFieldsCache[extractorName] = extractFields
     }
 }

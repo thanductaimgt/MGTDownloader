@@ -4,6 +4,21 @@ import android.os.Handler
 import android.os.Looper
 import android.webkit.JavascriptInterface
 
+class CommonJavaScriptInterface {
+    var onSuccess: ((html: String) -> Any)? = null
+
+    @JavascriptInterface
+    fun onLoaded(html: String?) {
+        html?.let {
+            onSuccess?.invoke(it)
+        }
+    }
+
+    @JavascriptInterface
+    fun dummy() {
+    }
+}
+
 class MyJavaScriptInterface(private val onSuccess: ((html: String) -> Any)?) {
     private var isFirstLoad = true
     private val handler = Handler(Looper.getMainLooper())

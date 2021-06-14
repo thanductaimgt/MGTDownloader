@@ -15,6 +15,7 @@ import android.view.Gravity
 import android.view.View
 import android.webkit.URLUtil
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -26,8 +27,10 @@ import com.google.gson.reflect.TypeToken
 import com.mgt.downloader.DownloadService
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
+import com.mgt.downloader.base.CommonJavaScriptInterface
 import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.data_model.FilePreviewInfo
+import com.mgt.downloader.extractor.TikTokExtractorV2
 import com.mgt.downloader.factory.ViewModelFactory
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
@@ -225,6 +228,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initView() {
+        initWebView()
+
         downloadListDialog =
             DownloadListFragment(
                 supportFragmentManager
@@ -271,12 +276,42 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         fileNameTextView.setOnClickListener(this)
         viewFileInfoImgView.setOnClickListener(this)
         settingsImgView.setOnClickListener(this)
+    }
 
+    private fun initWebView() {
         MainActivity.webView = webView
+            .apply {
+                settings.apply {
+                    javaScriptEnabled = true
+                    domStorageEnabled = true
+                }
+
+                addJavascriptInterface(
+                    MainActivity.jsInterface,
+                    TikTokExtractorV2.JS_INTERFACE_NAME
+                )
+
+                webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView,
+                        urlNewString: String?
+                    ): Boolean {
+                        return false
+                    }
+                }
+            }
+        reloadWebView()
     }
 
     companion object {
         lateinit var webView: WebView
+        var loadWebTime: Long? = null
+        var jsInterface = CommonJavaScriptInterface()
+
+        fun reloadWebView() {
+            webView.loadUrl(TikTokExtractorV2.WEB_URL)
+            loadWebTime = System.currentTimeMillis()
+        }
     }
 
     private fun showFilePreview(filePreviewInfo: FilePreviewInfo) {

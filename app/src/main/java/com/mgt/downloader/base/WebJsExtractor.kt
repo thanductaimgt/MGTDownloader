@@ -27,8 +27,8 @@ abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDispo
     }
 
     protected fun getJsWebContent(url: String, onSuccess: ((html: String) -> Any)?) {
-        MainActivity.webView
-//        WebView(MyApplication.appContext)
+//        MainActivity.webView
+        WebView(MyApplication.appContext)
             .apply {
                 settings.apply {
                     javaScriptEnabled = true

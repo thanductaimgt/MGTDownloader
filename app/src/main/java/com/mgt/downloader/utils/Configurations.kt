@@ -17,29 +17,26 @@ object Configurations {
 
     var maxConcurDownloadNum = DEFAULT_MAX_CONCUR_DOWNLOAD_NUM
     var multiThreadDownloadNum = DEFAULT_MULTI_THREAD_DOWNLOAD_NUM
+        set(value) {
+            field = value
+            Prefs.edit {
+                putInt(
+                    MULTI_THREAD_DOWNLOAD_NUM_KEY,
+                    multiThreadDownloadNum
+                )
+            }
+        }
 
     var requestHeaders: Map<String, String> = HashMap()
 
     fun setMaxConcurDownloadNum(value: Int, mainActivity: MainActivity) {
         maxConcurDownloadNum = value
-        Utils.getSharePreference(mainActivity).edit().apply {
+        Prefs.edit {
             putInt(
                 MAX_CONCUR_DOWNLOAD_NUM_KEY,
                 maxConcurDownloadNum
             )
-            apply()
         }
         mainActivity.applyCurrentConfigs()
-    }
-
-    fun setMultiThreadDownloadNum(value: Int, mainActivity: MainActivity) {
-        multiThreadDownloadNum = value
-        Utils.getSharePreference(mainActivity).edit().apply {
-            putInt(
-                MULTI_THREAD_DOWNLOAD_NUM_KEY,
-                multiThreadDownloadNum
-            )
-            apply()
-        }
     }
 }

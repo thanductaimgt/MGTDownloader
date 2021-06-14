@@ -1,14 +1,13 @@
 package com.mgt.downloader.extractor
 
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import androidx.annotation.WorkerThread
 import com.mgt.downloader.MyApplication
 import com.mgt.downloader.base.HasDisposable
-import com.mgt.downloader.base.MyJavaScriptInterface
 import com.mgt.downloader.base.WebJsExtractor
 import com.mgt.downloader.data_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
+import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.utils.Constants
 import com.mgt.downloader.utils.Utils
 
@@ -20,54 +19,57 @@ class TikTokExtractorV2(hasDisposable: HasDisposable) : WebJsExtractor(hasDispos
             SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
                 extract(url, webContent)
             }.subscribe(observer)
+            MainActivity.jsInterface.onSuccess = null
+            // cannot call on bridge thread, so post on main
+            handler.post { MainActivity.reloadWebView() }
         }
 
-        webView
-            .apply {
-                settings.apply {
-                    javaScriptEnabled = true
-                    domStorageEnabled = true
-                }
-                addJavascriptInterface(
-                    MyJavaScriptInterface(onSuccess),
-                    "HtmlViewer"
-                )
+        SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
+            getJsCode().format(url)
+        }.subscribe(object : SingleObserver<String>(hasDisposable) {
+            override fun onSuccess(result: String) {
+                super.onSuccess(result)
 
-                webViewClient = this@TikTokExtractorV2.webViewClient
-                loadUrl(WEB_URL)
+                MainActivity.jsInterface.onSuccess = onSuccess
+
+                val curTime = System.currentTimeMillis()
+                val delayTimeLoadWeb = (DELAY_LOAD_TIME_WEB - (curTime - (MainActivity.loadWebTime
+                    ?: System.currentTimeMillis()))).coerceAtLeast(0)
+
+                handler.postDelayed({
+                    webView.loadUrl("$result;javascript:window.HtmlViewer.dummy();")
+                    handler.postDelayed({
+                        webView.loadUrl(
+                            "javascript:window.HtmlViewer.onLoaded" +
+                                    "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
+                        )
+                    }, DELAY_LOAD_TIME_URL)
+                }, delayTimeLoadWeb)
             }
-        handler.postDelayed({
-            webView.loadUrl("$JS_CODE;javascript:window.HtmlViewer.dummy();")
-            handler.postDelayed({
-                webView.loadUrl(
-                    "javascript:window.HtmlViewer.onLoaded" +
-                            "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
-                )
-            }, 2000)
-        }, 2000)
+
+            override fun onError(t: Throwable) {
+                super.onError(t)
+                observer.onError(t)
+            }
+        })
     }
 
-    override val webViewClient = object : WebViewClient() {
-        override fun shouldOverrideUrlLoading(
-            view: WebView,
-            urlNewString: String?
-        ): Boolean {
-            return false
+    @WorkerThread
+    private fun getJsCode() =
+        try {
+            getRemoteJsCodeUrl().replace("java:", "javascript:")
+        } catch (t: Throwable) {
+            "javascript:document.getElementById('url').value = '%s';javascript:document.getElementById('submiturl').click()"
         }
+
+    private fun getRemoteJsCodeUrl(): String {
+        return Utils.getDontpadContent(Constants.SUBPATH_TIKTOKV2_JS_CODE)
     }
 
     companion object {
-        private const val WEB_URL = "https://snaptik.app/vn"
-        private val JS_CODE by lazy {
-            try {
-                getRemoteJsCodeUrl()
-            } catch (t: Throwable) {
-                "javascript:document.getElementById('url').value = 'https://vt.tiktok.com/ZSJxoRayP/';javascript:document.getElementById('submiturl').click()"
-            }
-        }
-
-        private fun getRemoteJsCodeUrl(): String {
-            return Utils.getDontpadContent(Constants.SUBPATH_TIKTOKV2_JS_CODE)
-        }
+        private const val DELAY_LOAD_TIME_WEB = 3000L
+        private const val DELAY_LOAD_TIME_URL = 3000L
+        const val JS_INTERFACE_NAME = "HtmlViewer"
+        const val WEB_URL = "https://snaptik.app/vn"
     }
 }

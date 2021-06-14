@@ -27,7 +27,7 @@
                 android:value="ca-app-pub-3298478237408371~6151893158" />
         <service
                 android:name="com.mgt.downloader.DownloadService"
-                android:enabled="true"></service>
+                android:enabled="true" />
 
         <provider
                 android:name="com.mgt.downloader.MyFileProvider"

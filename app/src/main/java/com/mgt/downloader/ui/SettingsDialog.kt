@@ -195,10 +195,10 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
                     requireView().maxConcurDownloadNumSpinner.selectedItem as Int,
                     activity as MainActivity
                 )
-                Configurations.MULTI_THREAD_DOWNLOAD_NUM_KEY -> Configurations.setMultiThreadDownloadNum(
-                    requireView().multiThreadDownloadNumSpinner.selectedItem as Int,
-                    activity as MainActivity
-                )
+                Configurations.MULTI_THREAD_DOWNLOAD_NUM_KEY -> {
+                    Configurations.multiThreadDownloadNum =
+                        requireView().multiThreadDownloadNumSpinner.selectedItem as Int
+                }
             }
         }
     }

@@ -11,6 +11,9 @@
 -keepclassmembers class com.mgt.downloader.base.MyJavaScriptInterface {
    public *;
 }
+-keepclassmembers class com.mgt.downloader.base.CommonJavaScriptInterface {
+   public *;
+}
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.

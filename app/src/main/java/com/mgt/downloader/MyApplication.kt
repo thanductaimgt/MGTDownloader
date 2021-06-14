@@ -11,8 +11,8 @@ import com.mgt.downloader.data_model.ZipNode
 import com.mgt.downloader.helper.ConnectionLiveData
 import com.mgt.downloader.repository.IDMDatabase
 import com.mgt.downloader.utils.Configurations
+import com.mgt.downloader.utils.Prefs
 import com.mgt.downloader.utils.Statistics
-import com.mgt.downloader.utils.Utils
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -27,8 +27,8 @@ class MyApplication : MultiDexApplication() {
 
         liveConnection = ConnectionLiveData(this)
 
-        loadConfigurations(applicationContext)
-        loadStatistics(applicationContext)
+        loadConfigurations()
+        loadStatistics()
         initDownloadExecutorService()
 
         MobileAds.initialize(this)
@@ -68,14 +68,14 @@ class MyApplication : MultiDexApplication() {
             )
         }
 
-        fun loadConfigurations(context: Context) {
+        fun loadConfigurations() {
             Configurations.maxConcurDownloadNum =
-                Utils.getSharePreference(context)
+                Prefs.get()
                     .getInt(Configurations.MAX_CONCUR_DOWNLOAD_NUM_KEY, 4)
         }
 
-        fun loadStatistics(context: Context) {
-            val prefs = Utils.getSharePreference(context)
+        fun loadStatistics() {
+            val prefs = Prefs.get()
 
             Statistics.apply {
                 totalDownloadSize = prefs.getLong(TOTAL_DOWNLOAD_SIZE_KEY, 0)
