@@ -13,19 +13,19 @@ abstract class Extractor(protected val hasDisposable: HasDisposable) {
 
     protected open fun extract(url: String, webContent: String): FilePreviewInfo {
         return try {
-            ExtractFieldsManager.getLocalExtractFields(extractorName).let {
-                logD(TAG, it.toString())
-                getFilePreviewInfo(url, webContent, it)
-            }
-        } catch (t: Throwable) {
-            logE(TAG, "parse local fields fail")
-            logE(TAG, "webContent: $webContent")
-            t.printStackTrace()
             ExtractFieldsManager.getRemoteExtractFields(extractorName).let {
                 logD(TAG, it.toString())
                 val result = getFilePreviewInfo(url, webContent, it)
-                ExtractFieldsManager.updateLocalExtractFields(extractorName, it)
+//                ExtractFieldsManager.updateLocalExtractFields(extractorName, it)
                 result
+            }
+        } catch (t: Throwable) {
+            logE(TAG, "parse remote fields fail")
+            logE(TAG, "webContent: $webContent")
+            t.printStackTrace()
+            ExtractFieldsManager.getLocalExtractFields(extractorName).let {
+                logD(TAG, it.toString())
+                getFilePreviewInfo(url, webContent, it)
             }
         }
     }
