@@ -31,7 +31,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.Inflater
 import java.util.zip.InflaterInputStream
 import java.util.zip.ZipEntry
-import kotlin.collections.HashMap
 import kotlin.math.max
 import kotlin.math.min
 
@@ -89,7 +88,7 @@ class DownloadService : Service(), HasDisposable {
                         this,
                         0,
                         notificationIntent,
-                        PendingIntent.FLAG_ONE_SHOT//PendingIntent.FLAG_UPDATE_CURRENT
+                        PendingIntent.FLAG_ONE_SHOT/*PendingIntent.FLAG_UPDATE_CURRENT*/ or PendingIntent.FLAG_IMMUTABLE
                     )
 
                     val notification = NotificationCompat.Builder(this, Constants.CHANNEL_ID)

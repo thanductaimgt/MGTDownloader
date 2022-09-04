@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:dist="http://schemas.android.com/apk/distribution"
+        xmlns:tools="http://schemas.android.com/tools"
         package="com.mgt.downloader">
 
     <dist:module dist:instant="true" />
 
+    <uses-permission
+            android:name="com.google.android.gms.permission.AD_ID"
+            tools:node="remove" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -31,7 +35,7 @@
 
         <provider
                 android:name="com.mgt.downloader.MyFileProvider"
-                android:authorities="com.mgt.downloader.fileprovider"
+                android:authorities="${applicationId}.fileprovider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data
@@ -40,6 +44,7 @@
         </provider>
 
         <activity
+                android:exported="true"
                 android:name="com.mgt.downloader.ui.MainActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:launchMode="singleTask"

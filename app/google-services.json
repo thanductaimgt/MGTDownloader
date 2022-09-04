@@ -33,6 +33,36 @@
             }
           ]
         }
+      },
+      "admob_app_id": "ca-app-pub-3298478237408371~6151893158"
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:675216657966:android:37d01b8a01673f9e3e59bf",
+        "android_client_info": {
+          "package_name": "com.mgt.downloader.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "675216657966-2pbvh5sshcg00vfmr719asf270ant1r0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl2X4SEJgkXoFm73Sv5-mevmRswU-nx-8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "675216657966-2pbvh5sshcg00vfmr719asf270ant1r0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
       }
     }
   ],

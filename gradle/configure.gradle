@@ -1,0 +1,32 @@
+def deps = [:]
+def support = [:]
+support.coreKtx = 'androidx.core:core-ktx:1.7.0'
+support.appcompat = 'androidx.appcompat:appcompat:1.4.1'
+support.material = 'com.google.android.material:material:1.6.0'
+support.constraintlayout = 'androidx.constraintlayout:constraintlayout:2.1.3'
+//support.preferences = 'androidx.preference:preference-ktx:1.1.1'
+deps.support = support
+
+def circleImageView = 'de.hdodenhof:circleimageview:3.1.0'
+deps.circleImageView = circleImageView
+
+ext.deps = deps
+
+def localProps = new Properties()
+localProps.load(new FileInputStream(rootProject.projectDir.absolutePath + '/local.properties'))
+ext.props = localProps
+
+def getProp(key, defValue = "") {
+    return props.getOrDefault(key, defValue)
+}
+
+ext.getProp = this.&getProp
+
+
+def buildConfig = [:]
+buildConfig.targetSdk = 33
+buildConfig.compileSdk = 33
+buildConfig.minSdkVersion = 19
+buildConfig.versionCode = 25
+buildConfig.versionName = "2.5"
+ext.buildConfig = buildConfig

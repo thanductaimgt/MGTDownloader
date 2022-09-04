@@ -56,7 +56,7 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return object : Dialog(activity!!, theme) {
+        return object : Dialog(requireActivity(), theme) {
             override fun onBackPressed() {
                 if (selectedZipNodes.isEmpty()) {
                     if (curZipNode!!.parentNode != null) {
@@ -82,7 +82,7 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initView(view)
 
-        (activity!! as MainActivity).liveDownloadService.observe(
+        (requireActivity() as MainActivity).liveDownloadService.observe(
             viewLifecycleOwner,
             Observer { downloadService ->
                 this.downloadService = downloadService
@@ -135,19 +135,19 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
             animView.playAnimation()
 
             startDownloadAnimView.addAnimatorListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(p0: Animator?) {
+                override fun onAnimationRepeat(animator: Animator) {
                     startDownloadAnimView.reverseAnimationSpeed()
                 }
 
-                override fun onAnimationEnd(p0: Animator?) {
+                override fun onAnimationEnd(animator: Animator) {
                     startDownloadAnimView.reverseAnimationSpeed()
                     startDownloadAnimView.visibility = View.GONE
                 }
 
-                override fun onAnimationCancel(p0: Animator?) {
+                override fun onAnimationCancel(p0: Animator) {
                 }
 
-                override fun onAnimationStart(p0: Animator?) {
+                override fun onAnimationStart(p0: Animator) {
                 }
             })
 
@@ -161,7 +161,7 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
     override fun onClick(view: View) {
         when (view.id) {
             R.id.itemRootView -> {
-                val position = this.view!!.fileViewRecyclerView.getChildLayoutPosition(view)
+                val position = requireView().fileViewRecyclerView.getChildLayoutPosition(view)
                 if (selectedZipNodes.isEmpty()) {
                     val zipNode = fileViewAdapter.zipNodes[position]
                     if (zipNode.entry!!.isDirectory) {
@@ -172,19 +172,19 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
                 }
             }
             R.id.pathTextView -> {
-                val position = this.view!!.filePathRecyclerView.getChildLayoutPosition(view)
+                val position = requireView().filePathRecyclerView.getChildLayoutPosition(view)
                 val zipNode = filePathAdapter.zipNodes[position]
                 setCurrentNode(zipNode)
             }
             R.id.downloadImgView -> {
                 val position =
-                    this.view!!.fileViewRecyclerView.getChildLayoutPosition(view.parent as View)
+                    requireView().fileViewRecyclerView.getChildLayoutPosition(view.parent as View)
                 val zipNode = fileViewAdapter.zipNodes[position]
                 startDownload(zipNode)
             }
             R.id.fileIconImgView -> {
                 val position =
-                    this.view!!.fileViewRecyclerView.getChildLayoutPosition(view.parent as View)
+                    requireView().fileViewRecyclerView.getChildLayoutPosition(view.parent as View)
                 addOrRemoveSelectedZipNode(position)
             }
             R.id.downloadAllImgView -> {
@@ -209,7 +209,7 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
             when (view.id) {
                 R.id.itemRootView -> {
                     val position =
-                        this.view!!.fileViewRecyclerView.getChildLayoutPosition(view)
+                        requireView().fileViewRecyclerView.getChildLayoutPosition(view)
                     addOrRemoveSelectedZipNode(position)
                     return true
                 }
@@ -287,7 +287,7 @@ class ViewFileDialog(private val fm: FragmentManager) : DialogFragment(),
         }
 
         if (!stopCondition(fileName)) {
-            fileName = Utils.generateNewDownloadFileName(context!!, fileName, stopCondition)
+            fileName = Utils.generateNewDownloadFileName(requireContext(), fileName, stopCondition)
         }
 
         val downloadTask = DownloadTask(

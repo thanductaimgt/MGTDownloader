@@ -1,6 +1,7 @@
 package com.mgt.downloader.utils
 
 import android.Manifest
+import android.os.Build
 
 object Constants {
     const val MESSAGE = "message"
@@ -33,12 +34,14 @@ object Constants {
 
     // Storage Permissions
     const val REQUEST_PERMISSIONS = 1
-    val PERMISSIONS_ID = arrayOf(
-        Manifest.permission.INTERNET,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.ACCESS_NETWORK_STATE
-    )
+    val PERMISSIONS_ID = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+        arrayOf()
+    } else {
+        arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        )
+    }
 
     const val FOREGROUND_ID = 1447
     const val CHANNEL_ID = "1447"
