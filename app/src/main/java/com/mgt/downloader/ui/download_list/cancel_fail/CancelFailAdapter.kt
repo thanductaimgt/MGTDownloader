@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadAdapter
 import com.mgt.downloader.base.BaseDownloadFragment
-import com.mgt.downloader.data_model.DownloadTask
+import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.serialize_model.DownloadTask
 import kotlinx.android.synthetic.main.item_cancel_or_fail.view.*
 
 class CancelFailAdapter(
@@ -31,17 +31,17 @@ class CancelFailAdapter(
             val downloadTask = currentList[position]
             itemView.apply {
                 //bind storage state (file deleted?)
-                if (Utils.isDownloadedFileExist(context, downloadTask)) {
+                if (utils.isDownloadedFileExist(downloadTask)) {
                     storageStateTextView.visibility = View.GONE
                     downloadedSizeTextView.text =
                         if (downloadTask.partsDownloadedSize.isNotEmpty()) {
-                            Utils.getFormatFileSize(downloadTask.downloadedSize)
+                            utils.getFormatFileSize(downloadTask.downloadedSize)
                         } else {
-                            Utils.getFileOrDirSize(context, downloadTask.fileName).let {
+                            utils.getFileOrDirSize(downloadTask.fileName).let {
                                 if (it == -1L) {
                                     context.getString(R.string.desc_unknown_size)
                                 } else {
-                                    Utils.getFormatFileSize(it)
+                                    utils.getFormatFileSize(it)
                                 }
                             }
                         }
@@ -56,25 +56,23 @@ class CancelFailAdapter(
             }
         }
 
+        override fun bindSelectState(downloadTask: DownloadTask, isSelected: Boolean) {
+            itemView.apply {
+                if (isSelected) {
+                    retryImgView.visibility = View.INVISIBLE
+                    deleteImgView.visibility = View.INVISIBLE
+                } else {
+                    retryImgView.visibility = View.VISIBLE
+                    deleteImgView.visibility = View.VISIBLE
+                }
+            }
+        }
+
         override fun bindListeners() {
             super.bindListeners()
             itemView.apply {
                 retryImgView.setOnClickListener(fragment as View.OnClickListener)
                 deleteImgView.setOnClickListener(fragment as View.OnClickListener)
-            }
-        }
-
-        override fun onSelected(downloadTask: DownloadTask) {
-            itemView.apply {
-                retryImgView.visibility = View.INVISIBLE
-                deleteImgView.visibility = View.INVISIBLE
-            }
-        }
-
-        override fun onNotSelected(downloadTask: DownloadTask) {
-            itemView.apply {
-                retryImgView.visibility = View.VISIBLE
-                deleteImgView.visibility = View.VISIBLE
             }
         }
     }

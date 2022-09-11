@@ -2,25 +2,30 @@ package com.mgt.downloader.factory
 
 import com.mgt.downloader.base.Extractor
 import com.mgt.downloader.base.HasDisposable
+import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.extractor.*
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.extractor.tiktok.TikTokExtractorV2
+import com.mgt.downloader.serialize_model.ExtractorConfig
 
-object ExtractorFactory {
-    fun create(hasDisposable: HasDisposable, url: String): Extractor {
+class ExtractorProvider {
+    fun provideExtractor(
+        hasDisposable: HasDisposable,
+        url: String
+    ): Extractor<out ExtractorConfig> {
         return when {
-            Utils.isTikTokUrl(url) -> {
+            utils.isTikTokUrl(url) -> {
                 TikTokExtractorV2(hasDisposable)
             }
-            Utils.isFacebookUrl(url) -> {
+            utils.isFacebookUrl(url) -> {
                 FacebookExtractor(hasDisposable)
             }
-            Utils.isBobaUrl(url) -> {
+            utils.isBobaUrl(url) -> {
                 BobaExtractor(hasDisposable)
             }
-            Utils.isTwitterUrl(url) -> {
+            utils.isTwitterUrl(url) -> {
                 TwitterExtractor(hasDisposable)
             }
-            Utils.isInstaUrl(url) -> {
+            utils.isInstaUrl(url) -> {
                 InstagramExtractor(hasDisposable)
             }
             else -> {

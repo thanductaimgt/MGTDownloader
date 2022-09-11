@@ -11,14 +11,21 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
 import com.mgt.downloader.base.HasDisposable
-import com.mgt.downloader.data_model.DownloadTask
-import com.mgt.downloader.data_model.FilePreviewInfo
-import com.mgt.downloader.data_model.ZipNode
-import com.mgt.downloader.factory.ExtractorFactory
+import com.mgt.downloader.di.DI.boundExecutorService
+import com.mgt.downloader.di.DI.database
+import com.mgt.downloader.di.DI.downloadConfig
+import com.mgt.downloader.di.DI.extractorProvider
+import com.mgt.downloader.di.DI.liveConnection
+import com.mgt.downloader.di.DI.statistics
+import com.mgt.downloader.di.DI.unboundExecutorService
+import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.helper.LongObject
 import com.mgt.downloader.helper.StopThreadThrowable
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
+import com.mgt.downloader.nonserialize_model.ZipNode
 import com.mgt.downloader.rxjava.*
 import com.mgt.downloader.rxjava.Observable
+import com.mgt.downloader.serialize_model.DownloadTask
 import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.utils.*
 import java.io.*
@@ -64,8 +71,8 @@ class DownloadService : Service(), HasDisposable {
 //                GetDownloadTasksObserver()
 //            )
 
-        SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
-            MyApplication.database.downloadTaskDao().getAllTasks()
+        SingleObservable.fromCallable(unboundExecutorService) {
+            database.downloadTaskDao().getAllTasks()
         }.subscribe(GetDownloadTasksObserver())
     }
 
@@ -136,18 +143,18 @@ class DownloadService : Service(), HasDisposable {
     fun pauseDownloadTask(fileName: String) {
         //set this download task state to STATE_TEMPORARY_PAUSE so that when downloading, worker will check and pause it
         //also notify observers
-        liveDownloadTasks.value = liveDownloadTasks.value!!.apply {
-            get(fileName)!!.state = DownloadTask.STATE_TEMPORARY_PAUSE
+        liveDownloadTasks.value = liveDownloadTasks.value?.apply {
+            get(fileName)?.state = DownloadTask.STATE_TEMPORARY_PAUSE
         }
     }
 
     fun onReconnect() {
-        val tasksToResume = liveDownloadTasks.value!!.values.filter {
+        val tasksToResume = (liveDownloadTasks.value ?: return).values.filter {
             it.state == DownloadTask.STATE_DOWNLOADING
         }.sortedWith(compareBy({ it.startTime }, { it.fileName }))
 
-        val tasksToResumeFirst = tasksToResume.take(Configurations.maxConcurDownloadNum)
-        val tasksToResumeLater = tasksToResume.drop(Configurations.maxConcurDownloadNum)
+        val tasksToResumeFirst = tasksToResume.take(downloadConfig.maxConcurDownloadNum)
+        val tasksToResumeLater = tasksToResume.drop(downloadConfig.maxConcurDownloadNum)
 
         tasksToResumeFirst.forEach { resumeDownloadTask(it.fileName) }
         Handler(Looper.getMainLooper()).postDelayed(
@@ -158,31 +165,31 @@ class DownloadService : Service(), HasDisposable {
 
     //save all tasks to db with paused state, clear download tasks list
     fun onDisconnect() {
-        val tasksToSave = activeDownloadTaskObservables.keys.map {
-            liveDownloadTasks.value!![it]!!.copy()
-                .apply { state = DownloadTask.STATE_PERSISTENT_PAUSED }
+        val tasksToSave = activeDownloadTaskObservables.keys.mapNotNull {
+            liveDownloadTasks.value?.get(it)?.copy()
+                ?.apply { state = DownloadTask.STATE_PERSISTENT_PAUSED }
         }
 
-        CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
-            MyApplication.database.downloadTaskDao()
+        CompletableObservable.fromCallable(unboundExecutorService) {
+            database.downloadTaskDao()
                 .insertDownloadTasks(tasksToSave)
         }.subscribe(InsertDownloadTasksObserver(tasksToSave))
 
         activeDownloadTaskObservables.clear()
 
-        MyApplication.resetDownloadExecutorService()
+        App.resetDownloadExecutorService()
     }
 
     //resume a paused download task
     fun resumeDownloadTask(fileName: String) {
         //set this download task state to STATE_DOWNLOADING so that when downloading, worker will check and resume it instantly
         //also notify observers
-        liveDownloadTasks.value = liveDownloadTasks.value!!.apply {
-            get(fileName)!!.state = DownloadTask.STATE_DOWNLOADING
+        liveDownloadTasks.value = liveDownloadTasks.value?.apply {
+            get(fileName)?.state = DownloadTask.STATE_DOWNLOADING
         }
 
         //if no thread for this task is running...
-        if (!activeDownloadTaskObservables.keys.any { it == fileName } && MyApplication.liveConnection.isConnected) {
+        if (!activeDownloadTaskObservables.keys.any { it == fileName } && liveConnection.isConnected) {
             //load download task from database and resume slowly (open connection again, additional time for skipping to leaved point)
             //handle result with a GetDownloadTaskObserver
 //            Single.fromCallable {
@@ -195,8 +202,8 @@ class DownloadService : Service(), HasDisposable {
 //                        executeDownloadTask(downloadTask, true)
 //                    }
 //                )
-            SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
-                MyApplication.database.downloadTaskDao().getDownloadTask(fileName)
+            SingleObservable.fromCallable(unboundExecutorService) {
+                database.downloadTaskDao().getDownloadTask(fileName)
             }.subscribe(
                 GetDownloadTaskObserver(fileName) { downloadTask ->
                     executeDownloadTask(downloadTask, true)
@@ -207,44 +214,45 @@ class DownloadService : Service(), HasDisposable {
 
     //cancel a pause or running download task
     fun cancelDownloadTask(fileName: String) {
-        val taskToBeCanceled: DownloadTask
+        liveDownloadTasks.value?.get(fileName)?.let { taskToBeCanceled ->
 
-        //Set this download task state to STATE_CANCEL_OR_FAIL so that when in STATE_TEMPORARY_PAUSE,
-        //worker will check and cancel it
-        //Also notify observers
-        liveDownloadTasks.value = liveDownloadTasks.value!!.apply {
-            taskToBeCanceled = get(fileName)!!.apply { state = DownloadTask.STATE_CANCEL_OR_FAIL }
-        }
+            //Set this download task state to STATE_CANCEL_OR_FAIL so that when in STATE_TEMPORARY_PAUSE,
+            //worker will check and cancel it
+            //Also notify observers
+            taskToBeCanceled.state = DownloadTask.STATE_CANCEL_OR_FAIL
+            liveDownloadTasks.value = liveDownloadTasks.value
 
-        //insert or update download task in database
+            //insert or update download task in database
 //        Completable.fromCallable {
 //            IDMApplication.database.downloadTaskDao().insertDownloadTask(taskToBeCanceled)
 //        }
 //            .subscribeOn(Schedulers.io())
 //            .observeOn(AndroidSchedulers.mainThread())
 //            .subscribe(InsertDownloadTaskObserver(taskToBeCanceled))
-        CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
-            MyApplication.database.downloadTaskDao().insertDownloadTask(taskToBeCanceled)
-        }.subscribe(InsertDownloadTaskObserver(taskToBeCanceled))
+            CompletableObservable.fromCallable(unboundExecutorService) {
+                database.downloadTaskDao().insertDownloadTask(taskToBeCanceled)
+            }.subscribe(InsertDownloadTaskObserver(taskToBeCanceled))
+        }
     }
 
     //retry a canceled or fail download task
     fun retryDownloadTask(taskName: String) {
-        val downloadTask = liveDownloadTasks.value!![taskName]!!
+        liveDownloadTasks.value?.get(taskName)?.let { downloadTask ->
 
-        // downloadUrl may be expired so regenerate it
-        if (downloadTask.displayUrl != downloadTask.downloadUrl) {
-            liveDownloadTasks.value = liveDownloadTasks.value!!.apply {
-                put(
-                    downloadTask.fileName,
-                    downloadTask.apply { state = DownloadTask.STATE_DOWNLOADING })
-            }
+            // downloadUrl may be expired so regenerate it
+            if (downloadTask.displayUrl != downloadTask.downloadUrl) {
+                liveDownloadTasks.value = liveDownloadTasks.value?.apply {
+                    put(
+                        downloadTask.fileName,
+                        downloadTask.apply { state = DownloadTask.STATE_DOWNLOADING })
+                }
 
-            getDownloadUrl(downloadTask.displayUrl) { downloadUrl ->
-                retryDownloadTaskInternal(downloadTask.apply { this.downloadUrl = downloadUrl })
+                getDownloadUrl(downloadTask.displayUrl) { downloadUrl ->
+                    retryDownloadTaskInternal(downloadTask.apply { this.downloadUrl = downloadUrl })
+                }
+            } else {
+                retryDownloadTaskInternal(downloadTask)
             }
-        } else {
-            retryDownloadTaskInternal(downloadTask)
         }
     }
 
@@ -257,12 +265,12 @@ class DownloadService : Service(), HasDisposable {
                 elapsedTime = 0
             ).apply {
                 if (downloadTask.partsDownloadedSize.isNotEmpty()) {
-                    if (Utils.isDownloadedFileExist(this@DownloadService, downloadTask)) {
+                    if (utils.isDownloadedFileExist(downloadTask)) {
                         downloadedSize = downloadTask.downloadedSize
                         partsDownloadedSize = downloadTask.partsDownloadedSize
                     } else {
                         partsDownloadedSize =
-                            Utils.getBlankArrayList(downloadTask.partsDownloadedSize.size)
+                            utils.getBlankArrayList(downloadTask.partsDownloadedSize.size)
                     }
                 }
             },
@@ -271,7 +279,7 @@ class DownloadService : Service(), HasDisposable {
     }
 
     private fun getDownloadUrl(url: String, onComplete: (downloadUrl: String) -> Unit) {
-        ExtractorFactory.create(this, url)
+        extractorProvider.provideExtractor(this, url)
             .extract(url, object : SingleObserver<FilePreviewInfo>(this) {
                 override fun onSuccess(result: FilePreviewInfo) {
                     super.onSuccess(result)
@@ -287,7 +295,7 @@ class DownloadService : Service(), HasDisposable {
     ) {
         //Delete download task from liveData
         //Also notify observers
-        liveDownloadTasks.value = liveDownloadTasks.value!!.apply {
+        liveDownloadTasks.value = liveDownloadTasks.value?.apply {
             remove(fileName)
         }
 
@@ -298,8 +306,8 @@ class DownloadService : Service(), HasDisposable {
 //            .subscribeOn(Schedulers.io())
 //            .observeOn(AndroidSchedulers.mainThread())
 //            .subscribe(DeleteDownloadTaskObserver(fileName, callback))
-        CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
-            MyApplication.database.downloadTaskDao().deleteDownloadTask(fileName)
+        CompletableObservable.fromCallable(unboundExecutorService) {
+            database.downloadTaskDao().deleteDownloadTask(fileName)
         }.subscribe(DeleteDownloadTaskObserver(fileName, callback))
     }
 
@@ -308,8 +316,8 @@ class DownloadService : Service(), HasDisposable {
         fileName: String,
         callback: ((isSuccess: Boolean) -> Unit)? = null
     ) {
-        CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
-            Utils.deleteFileOrDir(this, fileName)
+        CompletableObservable.fromCallable(unboundExecutorService) {
+            utils.deleteFileOrDir(this, fileName)
         }.subscribe(DeleteFileOrDirObserver(fileName, callback))
     }
 
@@ -317,7 +325,7 @@ class DownloadService : Service(), HasDisposable {
     fun executeDownloadTask(downloadTask: DownloadTask, isResume: Boolean) {
         //add download task to list, set state = STATE_DOWNLOADING
         //also notify observers
-        liveDownloadTasks.value = liveDownloadTasks.value!!.apply {
+        liveDownloadTasks.value = liveDownloadTasks.value?.apply {
             put(
                 downloadTask.fileName,
                 downloadTask.apply { state = DownloadTask.STATE_DOWNLOADING })
@@ -339,11 +347,11 @@ class DownloadService : Service(), HasDisposable {
 //            .observeOn(AndroidSchedulers.mainThread())
 //            .subscribe(InsertDownloadTaskObserver(taskToSave))
 
-        CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
-            MyApplication.database.downloadTaskDao().insertDownloadTask(taskToSave)
+        CompletableObservable.fromCallable(unboundExecutorService) {
+            database.downloadTaskDao().insertDownloadTask(taskToSave)
         }.subscribe(InsertDownloadTaskObserver(taskToSave))
 
-        StreamObservable.create<DownloadTask>(MyApplication.boundExecutorService) { emitter ->
+        StreamObservable.create<DownloadTask>(boundExecutorService) { emitter ->
             when {
                 downloadTask.zipEntryName != null -> // case: download a part of zip
                     executeZipPartDownloadTask(downloadTask, emitter, isResume)
@@ -384,7 +392,7 @@ class DownloadService : Service(), HasDisposable {
         var connection: HttpURLConnection? = null
         try {
             //resume case
-            val file = Utils.getFile(this, downloadTask.fileName)
+            val file = utils.getDownloadFile(downloadTask.fileName)
             if (isResume && file.exists() && file.isFile
                 && (file.length() < downloadTask.totalSize || downloadTask.totalSize == -1L)
             ) {
@@ -392,7 +400,7 @@ class DownloadService : Service(), HasDisposable {
                 emitter.onNext(null)
             }
 
-            connection = Utils.openConnection(downloadTask.downloadUrl, downloadTask.downloadedSize)
+            connection = utils.openConnection(downloadTask.downloadUrl, downloadTask.downloadedSize)
 
             logD(TAG, "readTimeout: ${connection.readTimeout}")
 
@@ -419,7 +427,7 @@ class DownloadService : Service(), HasDisposable {
                 val getProgress =
                     if (downloadTask.isFileSizeKnown()) {
                         {
-                            Utils.getPercentage(
+                            utils.getPercentage(
                                 downloadTask.downloadedSize,
                                 downloadTask.totalSize
                             ).toLong()
@@ -432,7 +440,7 @@ class DownloadService : Service(), HasDisposable {
                     { prevProgress: Long, curProgress: Long -> prevProgress != curProgress }
                 } else {
                     { prevSize: Long, curSize: Long ->
-                        Utils.isSizeChangeSignificantly(
+                        utils.isSizeChangeSignificantly(
                             prevSize,
                             curSize
                         )
@@ -448,7 +456,7 @@ class DownloadService : Service(), HasDisposable {
                     output.write(data, 0, count)
 
                     //for statistics
-                    Statistics.increaseTotalDownloadSize(count)
+                    statistics.increaseTotalDownloadSize(count)
 
                     downloadTask.downloadedSize += count
 
@@ -473,7 +481,7 @@ class DownloadService : Service(), HasDisposable {
                     try {
                         count = input.read(data)
                     } catch (e: Throwable) {
-                        e.printStackTrace()
+                        recordNonFatalException(e)
                         return
                     }
                 }
@@ -484,13 +492,13 @@ class DownloadService : Service(), HasDisposable {
             setImageDownloadTaskThumb(downloadTask)
             downloadTask.state = DownloadTask.STATE_SUCCESS
             emitter.onComplete()
-            MyApplication.database.downloadTaskDao().insertDownloadTask(downloadTask)
+            database.downloadTaskDao().insertDownloadTask(downloadTask)
         } catch (e: StopThreadThrowable) {
             return
         } catch (e: Throwable) {
             downloadTask.state = DownloadTask.STATE_CANCEL_OR_FAIL
             emitter.onError(e)
-            MyApplication.database.downloadTaskDao().insertDownloadTask(downloadTask)
+            database.downloadTaskDao().insertDownloadTask(downloadTask)
         } finally {
             logD(TAG, "finally block")
 
@@ -543,17 +551,21 @@ class DownloadService : Service(), HasDisposable {
         isResume: Boolean
     ) {
         val rootNode = ZipNode.getZipTree(downloadTask.displayUrl, downloadTask.downloadUrl)
-        val nodeToDownload = rootNode.getNode(downloadTask.zipEntryName!!)
+        val nodeToDownload = rootNode.getNode(downloadTask.zipEntryName ?: return)
 
 //        downloadTask.totalSize = nodeToDownload.size
 
         try {
+            val downloadDirPath = utils.getDownloadDirPath()
+                ?: throw RuntimeException("Can not get download dir path")
+
             val isConnectionLost = executeZipPartDownloadTaskInternal(
                 downloadTask,
                 emitter,
                 isResume,
                 nodeToDownload,
-                downloadTask.downloadedSize
+                downloadTask.downloadedSize,
+                downloadDirPath
             )
             if (isConnectionLost) {
                 return
@@ -563,11 +575,11 @@ class DownloadService : Service(), HasDisposable {
             }
             downloadTask.state = DownloadTask.STATE_SUCCESS
             emitter.onComplete()
-            MyApplication.database.downloadTaskDao().insertDownloadTask(downloadTask)
+            database.downloadTaskDao().insertDownloadTask(downloadTask)
         } catch (throwable: Throwable) {
             downloadTask.state = DownloadTask.STATE_CANCEL_OR_FAIL
             emitter.onError(throwable)
-            MyApplication.database.downloadTaskDao().insertDownloadTask(downloadTask)
+            database.downloadTaskDao().insertDownloadTask(downloadTask)
         }
     }
 
@@ -578,19 +590,19 @@ class DownloadService : Service(), HasDisposable {
         isResume: Boolean,
         zipNode: ZipNode,
         curDownloadedBytes: Long,
-        parentPath: String = Utils.getDownloadDirPath(this)
+        parentPath: String
     ): Boolean {// return true if connection lost while downloading this zipNode or any of its child, false else
         if (zipNode.size <= curDownloadedBytes) {
             return false
         } else {
             // if top level dir, use downloadTask.fileName
-            val fileName = if (parentPath == Utils.getDownloadDirPath(this))
+            val fileName = if (parentPath == utils.getDownloadDirPath())
                 downloadTask.fileName
-            else Utils.getFileName(
-                zipNode.entry!!.name
+            else utils.getFileName(
+                zipNode.entry?.name.orEmpty()
             )
 
-            if (zipNode.entry!!.isDirectory) {
+            if (zipNode.entry?.isDirectory == true) {
                 val curDirPath =
                     "$parentPath${File.separator}$fileName"
 
@@ -611,8 +623,8 @@ class DownloadService : Service(), HasDisposable {
                 }
             } else {
                 val localHeaderRelativeOffsetExtra =
-                    Utils.getExtraBytes(
-                        zipNode.entry!!.extra,
+                    utils.getExtraBytes(
+                        zipNode.entry?.extra ?: ByteArray(0),
                         Constants.RELATIVE_OFFSET_LOCAL_HEADER
                     )
                 val localHeaderRelativeOffset = ByteBuffer
@@ -627,7 +639,7 @@ class DownloadService : Service(), HasDisposable {
 //                    //resume case
                     var downloadedSize = 0L
                     val curFile =
-                        File("${parentPath}${File.separator}${Utils.getFileName(zipNode.entry!!.name)}")
+                        File("${parentPath}${File.separator}${utils.getFileName(zipNode.entry?.name.orEmpty())}")
                     if (isResume && curFile.exists() && curFile.isFile) {
                         downloadedSize = curFile.length()
                         downloadTask.downloadedSize += downloadedSize - curDownloadedBytes
@@ -636,7 +648,7 @@ class DownloadService : Service(), HasDisposable {
                         }
                     }
 
-                    connection = Utils.openConnection(
+                    connection = utils.openConnection(
                         downloadTask.downloadUrl,
                         localHeaderRelativeOffset.toLong()
                     )
@@ -651,7 +663,7 @@ class DownloadService : Service(), HasDisposable {
 
                     val wrapped = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
 
-                    if (!Utils.isHeader(data.copyOfRange(0, 4), Constants.LOCAL_FILE_HEADER)) {
+                    if (!utils.isHeader(data.copyOfRange(0, 4), Constants.LOCAL_FILE_HEADER)) {
                         throw Throwable("Not a local file header")
                     }
 
@@ -663,10 +675,10 @@ class DownloadService : Service(), HasDisposable {
                         inputStream.apply { skip((fileNameLength + extraFieldLength).toLong()) }
                             .let {
                                 // if use DEFLATED compression
-                                if (zipNode.entry!!.method == ZipEntry.DEFLATED)
+                                if (zipNode.entry?.method == ZipEntry.DEFLATED)
                                     InflaterInputStream(inputStream, Inflater(true))
                                 else
-                                    inputStream!!
+                                    it
                             } //skip to downloadedSize, while skipping check if user press pause and handle
                             .also {
                                 downloadTask.elapsedTime += System.currentTimeMillis() - prevTime
@@ -694,7 +706,7 @@ class DownloadService : Service(), HasDisposable {
                     val getProgress =
                         if (downloadTask.isFileSizeKnown()) {
                             {
-                                Utils.getPercentage(
+                                utils.getPercentage(
                                     downloadTask.downloadedSize,
                                     downloadTask.totalSize
                                 ).toLong()
@@ -707,7 +719,7 @@ class DownloadService : Service(), HasDisposable {
                         { prevProgress: Long, curProgress: Long -> prevProgress != curProgress }
                     } else {
                         { prevSize: Long, curSize: Long ->
-                            Utils.isSizeChangeSignificantly(
+                            utils.isSizeChangeSignificantly(
                                 prevSize,
                                 curSize
                             )
@@ -717,13 +729,13 @@ class DownloadService : Service(), HasDisposable {
                     //
 
                     count = inputStream.read(data)
-                    while (downloadedSize < zipNode.entry!!.size && count != -1) {
+                    while (downloadedSize < (zipNode.entry?.size ?: 0L) && count != -1) {
                         outputStream.write(data, 0, count)
 
                         val prevProgress = getProgress()
 
                         //for statistics
-                        Statistics.increaseTotalDownloadSize(count)
+                        statistics.increaseTotalDownloadSize(count)
 
                         downloadedSize += count
                         downloadTask.downloadedSize += count
@@ -800,7 +812,7 @@ class DownloadService : Service(), HasDisposable {
             LongObject(downloadTask.downloadedSize)
 
         for (threadIndex in 0 until moreWorkThreadNum) {
-            CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
+            CompletableObservable.fromCallable(unboundExecutorService) {
                 val startPosition = threadIndex * moreWorkDownloadSize
                 executeMultiThreadFileDownloadTaskInternal(
                     downloadTask,
@@ -814,7 +826,7 @@ class DownloadService : Service(), HasDisposable {
             }
         }
         for (threadIndex in 0 until lessWorkThreadNum) {
-            CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
+            CompletableObservable.fromCallable(unboundExecutorService) {
                 val startPosition =
                     moreWorkThreadNum * moreWorkDownloadSize + threadIndex * lessWorkDownloadSize
                 executeMultiThreadFileDownloadTaskInternal(
@@ -865,14 +877,14 @@ class DownloadService : Service(), HasDisposable {
                 emitter.onError(Throwable("download fail"))
             }
 
-            MyApplication.database.downloadTaskDao().insertDownloadTask(downloadTask)
+            database.downloadTaskDao().insertDownloadTask(downloadTask)
         }
     }
 
     private fun setImageDownloadTaskThumb(downloadTask: DownloadTask) {
-        val fileExtension = Utils.getFileExtension(downloadTask.fileName)
+        val fileExtension = utils.getFileExtension(downloadTask.fileName)
         if (fileExtension == "png" || fileExtension == "jpg" || fileExtension == "gif" || fileExtension == "jpeg") {
-            downloadTask.thumbUrl = Utils.getFilePath(this, downloadTask.fileName)
+            downloadTask.thumbUrl = utils.getDownloadFilePath(downloadTask.fileName)
         }
     }
 
@@ -898,11 +910,11 @@ class DownloadService : Service(), HasDisposable {
             val continuePosition =
                 startPosition + downloadTask.partsDownloadedSize[threadIndex]
 
-            connection = Utils.openConnection(downloadTask.downloadUrl, continuePosition)
+            connection = utils.openConnection(downloadTask.downloadUrl, continuePosition)
 
             if (connection.responseCode != Constants.HTTP_RANGE_NOT_SATISFIABLE) {
                 input = connection.inputStream
-                output = RandomAccessFile(Utils.getFilePath(this, downloadTask.fileName), "rw")
+                output = RandomAccessFile(utils.getDownloadFilePath(downloadTask.fileName), "rw")
                 output.seek(continuePosition)
                 val data = ByteArray(4096)
 
@@ -911,18 +923,18 @@ class DownloadService : Service(), HasDisposable {
                     output.write(data, 0, count)
 
                     //for statistics
-                    Statistics.increaseTotalDownloadSize(count)
+                    statistics.increaseTotalDownloadSize(count)
 
                     downloadTask.increaseDownloadedSize(count)
 
                     //dispatch update only when percentage or file size format string change
                     synchronized(lastDownloadedSize) {
-                        val lastPublishedProgress = Utils.getPercentage(
+                        val lastPublishedProgress = utils.getPercentage(
                             lastDownloadedSize.value,
                             downloadTask.totalSize
                         ).toLong()
 
-                        val curProgress = Utils.getPercentage(
+                        val curProgress = utils.getPercentage(
                             downloadTask.downloadedSize,
                             downloadTask.totalSize
                         ).toLong()
@@ -954,7 +966,7 @@ class DownloadService : Service(), HasDisposable {
                     try {
                         count = input.read(data)
                     } catch (e: Throwable) {
-                        e.printStackTrace()
+                        recordNonFatalException(e)
                         return
                     }
                 }
@@ -965,7 +977,7 @@ class DownloadService : Service(), HasDisposable {
             onComplete(Constants.DOWNLOAD_STATE_INTERRUPT)
         } catch (e: Throwable) {
             logD(TAG, "thread $threadIndex error")
-            e.printStackTrace()
+            recordNonFatalException(e)
             onComplete(Constants.DOWNLOAD_STATE_CANCEL_OR_FAIL)
         } finally {
             logD(TAG, "thread $threadIndex finally block: $downloadTask")
@@ -1260,8 +1272,8 @@ class DownloadService : Service(), HasDisposable {
                     val taskToSave =
                         downloadTask.copy().apply { state = DownloadTask.STATE_PERSISTENT_PAUSED }
 
-                    CompletableObservable.fromCallable(MyApplication.unboundExecutorService) {
-                        MyApplication.database.downloadTaskDao().insertDownloadTask(taskToSave)
+                    CompletableObservable.fromCallable(unboundExecutorService) {
+                        database.downloadTaskDao().insertDownloadTask(taskToSave)
                     }.subscribe(InsertDownloadTaskObserver(taskToSave))
 
                     while (downloadTask.state == DownloadTask.STATE_TEMPORARY_PAUSE) {
@@ -1287,7 +1299,7 @@ class DownloadService : Service(), HasDisposable {
     }
 
     private fun getDownloadQueue(): Queue<Runnable> {
-        return MyApplication.boundExecutorService.queue
+        return boundExecutorService.queue
     }
 
     fun isAnyActiveDownloadTask(): Boolean {
@@ -1295,12 +1307,12 @@ class DownloadService : Service(), HasDisposable {
     }
 
     fun isFileOrDownloadTaskExist(fileName: String): Boolean {
-        return Utils.getFile(this, fileName)
-            .exists() || liveDownloadTasks.value!!.values.any { it.fileName == fileName }
+        return utils.getDownloadFile(fileName)
+            .exists() || liveDownloadTasks.value?.values?.any { it.fileName == fileName } == true
     }
 
     fun getFileSizeOfDownloadedTask(url: String): Long {
-        liveDownloadTasks.value!!.values.forEach {
+        liveDownloadTasks.value?.values?.forEach {
             if (it.displayUrl == url) {
                 return it.totalSize
             }
@@ -1325,7 +1337,7 @@ class DownloadService : Service(), HasDisposable {
                         if (state == DownloadTask.STATE_TEMPORARY_PAUSE) {
                             state = DownloadTask.STATE_PERSISTENT_PAUSED
                         }
-                        Utils.getFileOrDirSize(this@DownloadService, fileName).let { size ->
+                        utils.getFileOrDirSize(fileName).let { size ->
                             if (size != -1L) {
                                 downloadedSize = size
                             }
@@ -1492,7 +1504,7 @@ class DownloadService : Service(), HasDisposable {
         override fun onNext(item: DownloadTask?) {
             logD(TAG, "onNext: $item")
             if (item != null) {
-                liveDownloadTasks.value = liveDownloadTasks.value!!.apply { set(fileName, item) }
+                liveDownloadTasks.value = liveDownloadTasks.value?.apply { set(fileName, item) }
             } else {
                 liveDownloadTasks.value = liveDownloadTasks.value
             }
@@ -1506,9 +1518,7 @@ class DownloadService : Service(), HasDisposable {
             liveDownloadTasks.value = liveDownloadTasks.value
 
             //increase success download number
-            Statistics.increaseDownloadNum(
-                Statistics.SUCCESS_DOWNLOAD_NUM_KEY
-            )
+            statistics.increaseSuccessDownloadNum()
 
             finalize()
         }
@@ -1521,9 +1531,7 @@ class DownloadService : Service(), HasDisposable {
             liveDownloadTasks.value = liveDownloadTasks.value
 
             //increase cancel-or-fail download number
-            Statistics.increaseDownloadNum(
-                Statistics.CANCEL_OR_FAIL_DOWNLOAD_NUM_KEY
-            )
+            statistics.increaseCanceledOrFailDownloadNum()
 
             finalize()
         }

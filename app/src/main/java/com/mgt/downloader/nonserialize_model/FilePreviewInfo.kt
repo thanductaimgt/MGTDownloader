@@ -1,4 +1,4 @@
-package com.mgt.downloader.data_model
+package com.mgt.downloader.nonserialize_model
 
 data class FilePreviewInfo(
     var name: String,

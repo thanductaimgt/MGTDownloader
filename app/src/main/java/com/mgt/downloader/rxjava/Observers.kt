@@ -2,6 +2,7 @@ package com.mgt.downloader.rxjava
 
 import androidx.annotation.CallSuper
 import com.mgt.downloader.base.HasDisposable
+import com.mgt.downloader.utils.recordNonFatalException
 
 abstract class Observer(protected val hasDisposable: HasDisposable) {
     private lateinit var disposable: Disposable
@@ -14,7 +15,7 @@ abstract class Observer(protected val hasDisposable: HasDisposable) {
 
     @CallSuper
     open fun onError(t: Throwable) {
-        t.printStackTrace()
+        recordNonFatalException(t)
         removeDisposable()
     }
 

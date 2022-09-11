@@ -7,36 +7,35 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import com.mgt.downloader.DownloadService
 import com.mgt.downloader.R
-import com.mgt.downloader.data_model.DownloadTask
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.serialize_model.DownloadTask
 import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.ui.view_file.ViewFileDialog
 import com.mgt.downloader.utils.Constants
-import com.mgt.downloader.utils.Utils
 import java.util.*
-import kotlin.collections.HashSet
 
 abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
     View.OnLongClickListener,
     ContainsSelectableList {
     abstract val adapter: BaseDownloadAdapter
     protected var downloadService: DownloadService? = null
-    protected lateinit var viewFileDialog: ViewFileDialog
+    protected val viewFileDialog by lazy { ViewFileDialog() }
     var selectedDownloadTasks = LinkedList<DownloadTask>()
     var expandedDownloadTasksName = HashSet<String>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initView()
 
-        (activity!! as MainActivity).liveDownloadService.observe(
-            viewLifecycleOwner,
-            { downloadService ->
-                this.downloadService = downloadService
-                this.downloadService?.liveDownloadTasks?.observe(
-                    viewLifecycleOwner,
-                    { downloadTasks ->
-                        this.view?.let { onDownloadListChange(downloadTasks) }
-                    })
-            })
+        (requireActivity() as MainActivity).liveDownloadService.observe(
+            viewLifecycleOwner
+        ) { downloadService ->
+            this.downloadService = downloadService
+            this.downloadService?.liveDownloadTasks?.observe(
+                viewLifecycleOwner
+            ) { downloadTasks ->
+                this.view?.let { onDownloadListChange(downloadTasks) }
+            }
+        }
     }
 
     abstract fun initView()
@@ -98,7 +97,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
 
     protected fun displayPopupMenu(view: View, downloadTasks: List<DownloadTask>) {
         //Creating the instance of PopupMenu
-        val popupMenu = PopupMenu(context!!, view)
+        val popupMenu = PopupMenu(requireContext(), view)
 
         popupMenu.menu.add(
             0,
@@ -107,7 +106,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
             getString(R.string.label_delete_from_list)
         )
         //check file existence, if exist add two more options
-        if (downloadTasks.any { Utils.isDownloadedFileExist(context!!, it) }) {
+        if (downloadTasks.any { utils.isDownloadedFileExist(it) }) {
             popupMenu.menu.add(
                 0,
                 Constants.MENU_ITEM_DELETE_FROM_STORAGE,
@@ -155,7 +154,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
                 if (!isCurDeleteSuccess) {
                     if (!isToasted) {
                         Toast.makeText(
-                            context!!, getString(R.string.desc_can_not_delete_item),
+                            requireContext(), getString(R.string.desc_can_not_delete_item),
                             Toast.LENGTH_SHORT
                         ).show()
                         isToasted = true
@@ -168,7 +167,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
                 if (count == total) {
                     if (areAllDeleteSuccess) {
                         Toast.makeText(
-                            context!!, getString(R.string.desc_deleted),
+                            requireContext(), getString(R.string.desc_deleted),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -190,7 +189,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
                 if (!isCurDeleteSuccess) {
                     if (!isToasted) {
                         Toast.makeText(
-                            context!!, getString(R.string.desc_can_not_delete_file),
+                            requireContext(), getString(R.string.desc_can_not_delete_file),
                             Toast.LENGTH_SHORT
                         ).show()
                         isToasted = true
@@ -203,7 +202,7 @@ abstract class BaseDownloadFragment : Fragment(), View.OnClickListener,
                 if (count == total) {
                     if (areAllDeleteSuccess) {
                         Toast.makeText(
-                            context!!, getString(R.string.desc_deleted),
+                            requireContext(), getString(R.string.desc_deleted),
                             Toast.LENGTH_SHORT
                         ).show()
                     }

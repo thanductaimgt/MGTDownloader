@@ -14,7 +14,7 @@ import com.mgt.downloader.utils.TAG
 import kotlinx.android.synthetic.main.dialog_alert.*
 
 
-class AlertDialog(private val fm: FragmentManager) : DialogFragment(),
+class AlertDialog : DialogFragment(),
     View.OnClickListener {
     var title: String? = null
     var description: String? = null
@@ -55,12 +55,12 @@ class AlertDialog(private val fm: FragmentManager) : DialogFragment(),
         negativeButton.setOnClickListener(this)
     }
 
-    fun show() {
-        show(fm, TAG)
+    fun show(fragmentManager: FragmentManager) {
+        show(fragmentManager, TAG)
     }
 
     override fun onClick(p0: View?) {
-        when (p0!!.id) {
+        when (p0?.id) {
             R.id.positiveButton -> {
                 positiveButtonClickListener?.invoke()
                 dismiss()

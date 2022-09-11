@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadAdapter
 import com.mgt.downloader.base.BaseDownloadFragment
-import com.mgt.downloader.data_model.DownloadTask
+import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.serialize_model.DownloadTask
 import kotlinx.android.synthetic.main.item_downloading.view.*
 
 
@@ -51,7 +51,7 @@ class DownloadingAdapter(
         fun bindProgress(downloadTask: DownloadTask) {
             itemView.apply {
                 if (downloadTask.isFileSizeKnown()) {
-                    val downloadProgress = Utils.getPercentage(
+                    val downloadProgress = utils.getPercentage(
                         downloadTask.downloadedSize,
                         downloadTask.totalSize
                     ).toInt()
@@ -63,9 +63,9 @@ class DownloadingAdapter(
                         remainingTimeTextView.text = String.format(
                             "%s %s",
                             context.getString(R.string.desc_remaining_time),
-                            Utils.getFormatTimeDiff(
+                            utils.getFormatTimeDiff(
                                 context,
-                                Utils.getDownloadRemainingTimeInMilli(
+                                utils.getDownloadRemainingTimeInMilli(
                                     downloadTask.elapsedTime,
                                     downloadTask.totalSize,
                                     downloadTask.downloadedSize
@@ -74,7 +74,7 @@ class DownloadingAdapter(
                         )
                     }
                 } else {
-                    progressTextView.text = Utils.getFormatFileSize(downloadTask.downloadedSize)
+                    progressTextView.text = utils.getFormatFileSize(downloadTask.downloadedSize)
                 }
             }
         }
@@ -86,7 +86,7 @@ class DownloadingAdapter(
                             || downloadTask.state == DownloadTask.STATE_TEMPORARY_PAUSE) -> {
                         pauseResumeImgView.setImageResource(R.drawable.resume)
                         pauseResumeImgView.contentDescription =
-                            context!!.getString(R.string.desc_resume)
+                            context.getString(R.string.desc_resume)
 
 //                        progressAnimView.pauseAnimation()
 
@@ -97,7 +97,7 @@ class DownloadingAdapter(
                     downloadTask.state == DownloadTask.STATE_DOWNLOADING -> {
                         pauseResumeImgView.setImageResource(R.drawable.pause)
                         pauseResumeImgView.contentDescription =
-                            context!!.getString(R.string.desc_pause)
+                            context.getString(R.string.desc_pause)
 
                         stateTextView.visibility = View.INVISIBLE
 
@@ -135,25 +135,23 @@ class DownloadingAdapter(
             }
         }
 
+        override fun bindSelectState(downloadTask: DownloadTask, isSelected: Boolean) {
+            itemView.apply {
+                if (isSelected) {
+                    pauseResumeImgView.visibility = View.INVISIBLE
+                    cancelImgView.visibility = View.INVISIBLE
+                } else {
+                    pauseResumeImgView.visibility = View.VISIBLE
+                    cancelImgView.visibility = View.VISIBLE
+                }
+            }
+        }
+
         override fun bindListeners() {
             super.bindListeners()
             itemView.apply {
                 pauseResumeImgView.setOnClickListener(fragment as View.OnClickListener)
                 cancelImgView.setOnClickListener(fragment as View.OnClickListener)
-            }
-        }
-
-        override fun onSelected(downloadTask: DownloadTask) {
-            itemView.apply {
-                pauseResumeImgView.visibility = View.INVISIBLE
-                cancelImgView.visibility = View.INVISIBLE
-            }
-        }
-
-        override fun onNotSelected(downloadTask: DownloadTask) {
-            itemView.apply {
-                pauseResumeImgView.visibility = View.VISIBLE
-                cancelImgView.visibility = View.VISIBLE
             }
         }
     }

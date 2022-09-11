@@ -1,4 +1,4 @@
-package com.mgt.downloader.data_model
+package com.mgt.downloader.serialize_model
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -25,9 +25,9 @@ data class DownloadTask(
     var thumbRatio: String = "1:1"
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
+        parcel.readString().orEmpty(),
+        parcel.readString().orEmpty(),
+        parcel.readString().orEmpty(),
         parcel.readLong(),
         parcel.readLong(),
         parcel.readInt(),
@@ -37,7 +37,7 @@ data class DownloadTask(
         parcel.readByte() != 0.toByte(),
         parcel.readSerializable() as ArrayList<Long>,
         parcel.readString(),
-        parcel.readString()!!
+        parcel.readString() ?: "1:1"
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

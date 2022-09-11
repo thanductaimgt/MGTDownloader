@@ -8,10 +8,10 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.mgt.downloader.R
-import com.mgt.downloader.data_model.DownloadTask
+import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
+import com.mgt.downloader.serialize_model.DownloadTask
 import com.mgt.downloader.utils.Constants
-import com.mgt.downloader.utils.Utils
 import com.mgt.downloader.utils.smartLoad
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_download_base.view.*
@@ -68,11 +68,11 @@ abstract class BaseDownloadAdapter(
             val downloadTask = currentList[position]
             itemView.apply {
                 urlTextView.text = downloadTask.displayUrl
-                timeTextView.text = Utils.getFormatTimeDiffTillNow(context, downloadTask.startTime)
+                timeTextView.text = utils.getFormatTimeDiffTillNow(context, downloadTask.startTime)
 
                 //bind file size
                 if (downloadTask.isFileSizeKnown()) {
-                    totalSizeTextView.text = Utils.getFormatFileSize(downloadTask.totalSize)
+                    totalSizeTextView.text = utils.getFormatFileSize(downloadTask.totalSize)
                 } else {
                     totalSizeTextView.text = context.getString(R.string.desc_unknown_size)
                 }
@@ -86,7 +86,7 @@ abstract class BaseDownloadAdapter(
         private fun bindFilePreview(downloadTask: DownloadTask) {
             itemView.apply {
                 val fileExtension =
-                    if (downloadTask.isDirectory) "dir" else Utils.getFileExtension(downloadTask.fileName)
+                    if (downloadTask.isDirectory) "dir" else utils.getFileExtension(downloadTask.fileName)
 
                 if (downloadTask.thumbUrl != null) {
                     fileIconImgView.layoutParams =
@@ -109,7 +109,7 @@ abstract class BaseDownloadAdapter(
                                 .toInt()
                         }
 
-                    val placeholderResId = Utils.getResIdFromFileExtension(
+                    val placeholderResId = utils.getResIdFromFileExtension(
                         context,
                         fileExtension
                     )
@@ -131,16 +131,15 @@ abstract class BaseDownloadAdapter(
                     fragment.selectedDownloadTasks.indexOfFirst { it.fileName == downloadTask.fileName }
                 if (indexOfDownloadTask != -1) {//contains
                     setCardBackgroundColor(ContextCompat.getColor(context, R.color.selectedBg))
-                    onSelected(downloadTask)
+                    bindSelectState(downloadTask, true)
                 } else {
                     setCardBackgroundColor(ContextCompat.getColor(context, android.R.color.white))
-                    onNotSelected(downloadTask)
+                    bindSelectState(downloadTask, false)
                 }
             }
         }
 
-        open fun onSelected(downloadTask: DownloadTask) {}
-        open fun onNotSelected(downloadTask: DownloadTask) {}
+        abstract fun bindSelectState(downloadTask: DownloadTask, isSelected: Boolean)
 
         fun bindExpandState(downloadTask: DownloadTask) {
             itemView.apply {
@@ -165,7 +164,7 @@ abstract class BaseDownloadAdapter(
 
                     fileIconImgView.layoutParams =
                         (fileIconImgView.layoutParams as ConstraintLayout.LayoutParams).apply {
-                            dimensionRatio = if (Utils.isSmallerRatio(
+                            dimensionRatio = if (utils.isSmallerRatio(
                                     "1:1",
                                     downloadTask.thumbRatio
                                 )

@@ -1,7 +1,7 @@
-package com.mgt.downloader.data_model
+package com.mgt.downloader.nonserialize_model
 
-import com.mgt.downloader.MyApplication
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.App
+import com.mgt.downloader.di.DI.utils
 import java.util.zip.ZipEntry
 
 data class ZipNode(
@@ -11,20 +11,16 @@ data class ZipNode(
     var childNodes: ArrayList<ZipNode> = ArrayList(),
     var size: Long = 0
 ) : NullableZipNode {
-    fun insertEntry(entry: ZipEntry, level: Int): ZipNode {
+    fun insertEntry(entry: ZipEntry, level: Int): ZipNode? {
         return if (level > this.level) {
             ZipNode(entry, this, level).also { childNodes.add(it) }
         } else {
-            parentNode!!.insertEntry(entry, level)
+            parentNode?.insertEntry(entry, level)
         }
     }
 
     fun getPath(): ArrayList<ZipNode> {
-        return if (parentNode == null) {
-            ArrayList()
-        } else {
-            parentNode!!.getPath()
-        }.apply { add(this@ZipNode) }
+        return (parentNode?.getPath() ?: arrayListOf()).apply { add(this@ZipNode) }
     }
 
     fun initNodesSize(): Long {
@@ -43,11 +39,11 @@ data class ZipNode(
         return if (path == "") {
             this
         } else {
-            val curRootName = Utils.getPathRoot(path)
+            val curRootName = utils.getPathRoot(path)
             val newPath =
                 if (path.length > curRootName.length) path.drop(curRootName.length + 1) else ""
             childNodes.forEach {
-                if (Utils.getFileName(it.entry!!.name) == Utils.getFileName(curRootName)) {
+                if (utils.getFileName(it.entry?.name.orEmpty()) == utils.getFileName(curRootName)) {
                     return it.getNode(newPath)
                 }
             }
@@ -58,15 +54,15 @@ data class ZipNode(
     companion object {
         //network uri only, not local
         fun getZipTree(url: String, downloadUrl: String): ZipNode {
-            val rootNode = MyApplication.zipTreeCaches[url]
+            val rootNode = App.zipTreeCaches[url]
             return if (rootNode != null) {
                 rootNode
             } else {
-                val pair = Utils.getZipCentralDirInfo(url)
+                val pair = utils.getZipCentralDirInfo(url)
                 val centralDirOffset = pair.first
                 val centralDirSize = pair.second
 
-                val fileName = Utils.getFileName(url, "zip")
+                val fileName = utils.getFileName(url, "zip")
 
                 val filePreviewInfo = FilePreviewInfo(
                     fileName,
@@ -80,23 +76,23 @@ data class ZipNode(
         }
 
         fun getZipTree(zipPreviewInfo: FilePreviewInfo): ZipNode {
-            val rootNode = MyApplication.zipTreeCaches[zipPreviewInfo.displayUri]
+            val rootNode = App.zipTreeCaches[zipPreviewInfo.displayUri]
             return if (rootNode != null) {
                 rootNode
             } else {
-                val zipEntries = Utils.getZipEntries(zipPreviewInfo)
+                val zipEntries = utils.getZipEntries(zipPreviewInfo)
                 parseZipTree(zipEntries)
             }
         }
 
         private fun parseZipTree(zipEntries: List<ZipEntry>): ZipNode {
             val rootNode = ZipNode()
-            var lastInsertedNode = rootNode
+            var lastInsertedNode: ZipNode? = rootNode
 
             zipEntries.forEach { zipEntry ->
-                lastInsertedNode = lastInsertedNode.insertEntry(
+                lastInsertedNode = lastInsertedNode?.insertEntry(
                     zipEntry,
-                    Utils.getPathLevel(zipEntry.name)
+                    utils.getPathLevel(zipEntry.name)
                 )
             }
             return rootNode.apply { initNodesSize() }

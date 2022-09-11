@@ -317,7 +317,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/shape_round_top_corners_with_stroke"
-                app:layout_constraintBottom_toTopOf="@id/adView"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/startDownloadAnimView"
                 app:layout_constraintVertical_bias="1">
 
@@ -364,13 +364,35 @@
                 app:lottie_repeatCount="1"
                 tools:visibility="visible" />
 
-        <com.google.android.gms.ads.AdView
-                android:id="@+id/adView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:adSize="BANNER"
-                app:adUnitId="@string/banner_ad_id"
-                app:layout_constraintBottom_toBottomOf="parent" />
+        <LinearLayout
+                android:id="@+id/switchEnvLayout"
+                android:gravity="end"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toTopOf="@id/showDownloadListLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            <ImageView
+                    android:src="@drawable/settings"
+                    android:id="@+id/switchEnvButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp" />
+
+            <TextView
+                    android:id="@+id/envTextView"
+                    android:layout_marginTop="4dp"
+                    tools:text="live"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+        </LinearLayout>
+        <!--        <com.google.android.gms.ads.AdView-->
+        <!--                android:id="@+id/adView"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:visibility="gone"-->
+        <!--                app:adSize="BANNER"-->
+        <!--                app:adUnitId="@string/banner_ad_id"-->
+        <!--                app:layout_constraintBottom_toBottomOf="parent" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

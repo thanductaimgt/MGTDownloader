@@ -1,128 +1,3 @@
-//apply plugin: 'com.android.application'
-//
-//apply plugin: 'com.google.gms.google-services'
-//apply plugin: 'com.google.firebase.crashlytics'
-//
-//apply plugin: 'kotlin-android'
-//
-//apply plugin: 'kotlin-android-extensions'
-//apply plugin: 'kotlin-kapt'
-//
-//android {
-//    signingConfigs {
-//        release {
-//            storeFile file(getProp("signConfigs.storeFile"))
-//            storePassword getProp("signConfigs.storePassword")
-//            keyAlias getProp("signConfigs.keyAlias")
-//            keyPassword getProp("signConfigs.keyPassword")
-//        }
-//    }
-//    compileSdkVersion 33
-//    buildToolsVersion "30.0.3"
-//    defaultConfig {
-//        applicationId "com.mgt.downloader"
-//        minSdkVersion 19
-//        targetSdkVersion 33
-//        versionCode 24
-//        versionName "2.4"
-//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-//        multiDexEnabled true
-//    }
-//    buildTypes {
-//        release {
-//            resValue 'string', 'banner_ad_id', '"ca-app-pub-3298478237408371/6890259756"'
-//
-//            signingConfig signingConfigs.release
-//
-//            debuggable false
-//            minifyEnabled true
-//            shrinkResources false
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-//        }
-//        debug {
-//            resValue 'string', 'banner_ad_id', '"ca-app-pub-3940256099942544/6300978111"'
-//        }
-//    }
-//    compileOptions {
-//        sourceCompatibility = '1.8'
-//        targetCompatibility = '1.8'
-//    }
-//    kotlinOptions {
-//        jvmTarget = "1.8"
-//    }
-////    packagingOptions {
-////        exclude 'META-INF/DEPENDENCIES'
-////        exclude 'META-INF/LICENSE'
-////        exclude 'META-INF/LICENSE.txt'
-////        exclude 'META-INF/license.txt'
-////        exclude 'META-INF/NOTICE'
-////        exclude 'META-INF/NOTICE.txt'
-////        exclude 'META-INF/notice.txt'
-////        exclude 'META-INF/ASL2.0'
-////        exclude 'META-INF/versions/9'
-////        exclude("META-INF/*.kotlin_module")
-////    }
-//}
-//
-//dependencies {
-//    implementation fileTree(dir: 'libs', include: ['*.jar'])
-//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-//    implementation 'androidx.appcompat:appcompat:1.3.0'
-//    implementation 'androidx.core:core-ktx:1.5.0'
-//    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-//
-//    //lottie
-//    implementation "com.airbnb.android:lottie:3.4.4"
-//
-//    //material design
-//    implementation "com.google.android.material:material:1.3.0"
-//
-//    //room
-//    def room_version = "2.3.0"
-//    implementation "androidx.room:room-runtime:$room_version"
-//    kapt "androidx.room:room-compiler:$room_version"
-//
-////    // rx java2
-////    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
-////    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-////    implementation "androidx.room:room-rxjava2:$room_version"
-//
-//    //live data
-//    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-//
-//    //view model
-//    def lifecycle_version = "2.4.0-alpha01"
-//    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-//
-//    //gson
-//
-//    //picasso
-//
-//    //round corners imageview
-//    implementation 'com.makeramen:roundedimageview:2.3.0'
-//
-//    // https://mvnrepository.com/artifact/commons-lang/commons-lang
-//    implementation 'commons-lang:commons-lang:2.6'
-//
-//    //multiDex
-//    implementation 'com.android.support:multidex:1.0.3'
-//
-//    //firebase
-////    implementation 'com.google.firebase:firebase-analytics:18.0.0'
-////    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
-//
-//    //admob
-//    implementation 'com.google.android.gms:play-services-ads-lite:20.1.0'
-//
-//    // gg play
-//    implementation 'com.google.android.play:core-ktx:1.8.1'
-//
-//    //anno
-//    implementation 'com.android.support:support-annotations:28.0.0'
-//}
-
-////////
-
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -153,6 +28,11 @@ android {
         setProperty("archivesBaseName", "mgtdownloader-${versionName}")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        resValue "string", "BASE_URL_MANAGEMENT_TEST", getProp("baseUrl.managementTest")
+        resValue "string", "BASE_URL_MANAGEMENT_LIVE", getProp("baseUrl.managementLive")
+
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -189,6 +69,10 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    lintOptions {
+        disable 'NullSafeMutableLiveData'
+    }
     //    packagingOptions {
 //        exclude 'META-INF/DEPENDENCIES'
 //        exclude 'META-INF/LICENSE'
@@ -217,6 +101,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     def lifecycle_version = "2.5.0-beta01"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.fragment:fragment-ktx:1.4.1"
 
     def room_version = "2.4.2"
     implementation "androidx.room:room-runtime:$room_version"
@@ -232,14 +117,15 @@ dependencies {
 
     implementation 'com.android.support:multidex:1.0.3'
 
-//    // Import the Firebase BoM
-//    implementation platform('com.google.firebase:firebase-bom:30.3.1')
-//    // Add the dependency for the Firebase SDK for Google Analytics
-//    // When using the BoM, don't specify versions in Firebase dependencies
-//    implementation 'com.google.firebase:firebase-analytics-ktx'
-//    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:30.4.1')
+    // Add the dependency for the Firebase SDK for Google Analytics
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+//    implementation 'com.google.firebase:firebase-config-ktx'
 
-    implementation 'com.google.android.gms:play-services-ads-lite:20.1.0'
+//    implementation 'com.google.android.gms:play-services-ads-lite:20.1.0'
 
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
@@ -249,4 +135,6 @@ dependencies {
 
     // fix lib pending intent no immutable flag
     implementation 'androidx.work:work-runtime-ktx:2.7.0-alpha02'
+
+    implementation(name: 'livedata', ext: 'aar')
 }

@@ -7,12 +7,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.mgt.downloader.R
-import com.mgt.downloader.data_model.ZipNode
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.nonserialize_model.ZipNode
 import kotlinx.android.synthetic.main.item_file.view.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class FileViewAdapter(private val fragment: Fragment, private val isLocalFile: Boolean) :
@@ -35,14 +34,14 @@ class FileViewAdapter(private val fragment: Fragment, private val isLocalFile: B
     inner class FileViewViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(position: Int) {
             val zipNode = zipNodes[position]
-            val zipEntry = zipNode.entry!!
+            val zipEntry = zipNode.entry ?: return
             itemView.apply {
-                val fileName = Utils.getFileName(zipEntry.name)
+                val fileName = utils.getFileName(zipEntry.name)
                 val fileExtension =
-                    if (zipEntry.isDirectory) "dir" else Utils.getFileExtension(fileName)
+                    if (zipEntry.isDirectory) "dir" else utils.getFileExtension(fileName)
                 fileNameTextView.text = fileName
 
-                val formatSize = Utils.getFormatFileSize(zipNode.size)
+                val formatSize = utils.getFormatFileSize(zipNode.size)
 
                 fileSizeTextView.text = formatSize
                 if (zipEntry.isDirectory) {
@@ -58,7 +57,7 @@ class FileViewAdapter(private val fragment: Fragment, private val isLocalFile: B
                 }
 
                 fileIconImgView.setImageResource(
-                    Utils.getResIdFromFileExtension(
+                    utils.getResIdFromFileExtension(
                         context,
                         fileExtension
                     )
@@ -82,7 +81,7 @@ class FileViewAdapter(private val fragment: Fragment, private val isLocalFile: B
                 setOnClickListener(fragment as View.OnClickListener)
 
                 val indexOfZipNode =
-                    (fragment as ViewFileDialog).selectedZipNodes.indexOfFirst { it.entry!!.name == zipEntry.name }
+                    (fragment as ViewFileDialog).selectedZipNodes.indexOfFirst { it.entry?.name == zipEntry.name }
                 if (indexOfZipNode != -1) {//contains
                     setBackgroundColor(ContextCompat.getColor(context, R.color.selectedBg))
                     downloadImgView.visibility = View.INVISIBLE

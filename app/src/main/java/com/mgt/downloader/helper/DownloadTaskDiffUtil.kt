@@ -1,7 +1,7 @@
 package com.mgt.downloader.helper
 
 import androidx.recyclerview.widget.DiffUtil
-import com.mgt.downloader.data_model.DownloadTask
+import com.mgt.downloader.serialize_model.DownloadTask
 
 class DownloadTaskDiffUtil : DiffUtil.ItemCallback<DownloadTask>() {
     override fun areItemsTheSame(oldItem: DownloadTask, newItem: DownloadTask): Boolean {

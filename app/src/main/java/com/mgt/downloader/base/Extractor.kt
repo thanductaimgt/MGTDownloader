@@ -1,41 +1,36 @@
 package com.mgt.downloader.base
 
-import com.mgt.downloader.ExtractFieldsManager
-import com.mgt.downloader.data_model.ExtractFields
-import com.mgt.downloader.data_model.FilePreviewInfo
+import com.mgt.downloader.di.DI.extractorConfigManager
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.helper.DownloadUrlNotFoundThrowable
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObserver
-import com.mgt.downloader.utils.*
+import com.mgt.downloader.serialize_model.ExtractorConfig
+import com.mgt.downloader.utils.TAG
+import com.mgt.downloader.utils.findValue
+import com.mgt.downloader.utils.logD
+import kotlin.reflect.KClass
 
-abstract class Extractor(protected val hasDisposable: HasDisposable) {
+abstract class Extractor<C : ExtractorConfig>(protected val hasDisposable: HasDisposable) {
     open val extractorName = "base"
+    abstract val extractorConfigClass: KClass<C>
 
     abstract fun extract(url: String, observer: SingleObserver<FilePreviewInfo>)
 
     protected open fun extract(url: String, webContent: String): FilePreviewInfo {
-        return try {
-            ExtractFieldsManager.getRemoteExtractFields(extractorName).let {
-                logD(TAG, it.toString())
-                val result = getFilePreviewInfo(url, webContent, it)
-//                ExtractFieldsManager.updateLocalExtractFields(extractorName, it)
-                result
-            }
-        } catch (t: Throwable) {
-            logE(TAG, "parse remote fields fail")
-            logE(TAG, "webContent: $webContent")
-            t.printStackTrace()
-            ExtractFieldsManager.getLocalExtractFields(extractorName).let {
-                logD(TAG, it.toString())
-                getFilePreviewInfo(url, webContent, it)
-            }
-        }
+        val extractConfig = extractorConfigManager.getConfig(extractorName, extractorConfigClass)
+            ?: throw RuntimeException("No extractFields, extractor $extractorName")
+
+        logD(TAG, extractConfig.toString())
+        return getFilePreviewInfo(url, webContent, extractConfig)
     }
 
     private fun getFilePreviewInfo(
         url: String,
         webContent: String,
-        extractFields: ExtractFields
+        extractConfig: ExtractorConfig
     ): FilePreviewInfo {
-        extractFields.apply {
+        extractConfig.extractFields.apply {
             val targetFileName =
                 "${
                     webContent.findValue(
@@ -57,7 +52,7 @@ abstract class Extractor(protected val hasDisposable: HasDisposable) {
                 downloadUrl.postfix,
                 downloadUrl.default,
                 target = downloadUrl.target,
-            )!!
+            ) ?: throw DownloadUrlNotFoundThrowable()
 
             val targetWidth =
                 webContent.findValue(
@@ -75,9 +70,9 @@ abstract class Extractor(protected val hasDisposable: HasDisposable) {
                 )?.toInt()
                     ?: 1
 
-            val fileSize = Utils.getFileSize(targetDownloadUrl)
+            val fileSize = utils.getFileSize(targetDownloadUrl)
             val isMultipartSupported = runCatching {
-                Utils.isMultipartSupported(targetDownloadUrl)
+                utils.isMultipartSupported(targetDownloadUrl)
             }.getOrDefault(false)
 
             return FilePreviewInfo(
@@ -88,7 +83,7 @@ abstract class Extractor(protected val hasDisposable: HasDisposable) {
                 -1,
                 -1,
                 thumbUri = targetThumbUrl,
-                thumbRatio = Utils.getFormatRatio(
+                thumbRatio = utils.getFormatRatio(
                     targetWidth,
                     targetHeight
                 ),

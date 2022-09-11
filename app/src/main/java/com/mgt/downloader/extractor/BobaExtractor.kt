@@ -2,12 +2,18 @@ package com.mgt.downloader.extractor
 
 import com.mgt.downloader.base.HasDisposable
 import com.mgt.downloader.base.WebJsExtractor
-import com.mgt.downloader.data_model.FilePreviewInfo
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.helper.DownloadUrlNotFoundThrowable
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
+import com.mgt.downloader.serialize_model.ExtractorConfig
 import com.mgt.downloader.utils.findValue
+import kotlin.reflect.KClass
 
 
-class BobaExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable) {
+class BobaExtractor(hasDisposable: HasDisposable) : WebJsExtractor<ExtractorConfig>(hasDisposable) {
+    override val extractorConfigClass: KClass<ExtractorConfig>
+        get() = ExtractorConfig::class
+
     override fun extract(
         url: String,
         webContent: String
@@ -25,14 +31,15 @@ class BobaExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable
 
         if (isVideo) {
             thumbUrl = webContent.findValue("poster=\"", "\"", default = null)
-            downloadUrl = webContent.findValue("<source(.*?)src=\"", "\"", default = null)!!
+            downloadUrl = webContent.findValue("<source(.*?)src=\"", "\"", default = null)
+                ?: throw DownloadUrlNotFoundThrowable()
             fileName = "$fileName.mp4"
         } else {
             downloadUrl = webContent.findValue(
                 "style=\"(.*?)background-image:(.*?)url[(]&quot;",
                 "&quot;[)]",
                 null
-            )!!
+            ) ?: throw DownloadUrlNotFoundThrowable()
             thumbUrl = downloadUrl
             fileName = "$fileName.jpg"
         }
@@ -40,7 +47,7 @@ class BobaExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable
         val width = 473
         val height = 840
 
-        val fileSize = Utils.getFileSize(url)
+        val fileSize = utils.getFileSize(url)
 
         return FilePreviewInfo(
             fileName,
@@ -50,7 +57,7 @@ class BobaExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable
             -1,
             -1,
             thumbUri = thumbUrl,
-            thumbRatio = Utils.getFormatRatio(
+            thumbRatio = utils.getFormatRatio(
                 width,
                 height
             )

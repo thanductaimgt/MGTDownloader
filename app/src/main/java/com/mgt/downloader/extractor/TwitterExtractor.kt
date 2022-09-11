@@ -2,12 +2,18 @@ package com.mgt.downloader.extractor
 
 import com.mgt.downloader.base.HasDisposable
 import com.mgt.downloader.base.WebJsExtractor
-import com.mgt.downloader.data_model.FilePreviewInfo
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
+import com.mgt.downloader.serialize_model.ExtractorConfig
 import com.mgt.downloader.utils.findValue
+import kotlin.reflect.KClass
 
 
-class TwitterExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposable) {
+class TwitterExtractor(hasDisposable: HasDisposable) :
+    WebJsExtractor<ExtractorConfig>(hasDisposable) {
+    override val extractorConfigClass: KClass<ExtractorConfig>
+        get() = ExtractorConfig::class
+
     override fun extract(
         url: String,
         webContent: String
@@ -51,7 +57,7 @@ class TwitterExtractor(hasDisposable: HasDisposable) : WebJsExtractor(hasDisposa
             -1,
             -1,
             thumbUri = thumbUrl,
-            thumbRatio = Utils.getFormatRatio(
+            thumbRatio = utils.getFormatRatio(
                 width,
                 height
             )

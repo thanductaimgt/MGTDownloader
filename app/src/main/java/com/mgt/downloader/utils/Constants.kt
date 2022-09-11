@@ -1,8 +1,5 @@
 package com.mgt.downloader.utils
 
-import android.Manifest
-import android.os.Build
-
 object Constants {
     const val MESSAGE = "message"
     const val OPEN_DOWNLOAD_LIST = "OPEN_DOWNLOAD_LIST"
@@ -34,14 +31,6 @@ object Constants {
 
     // Storage Permissions
     const val REQUEST_PERMISSIONS = 1
-    val PERMISSIONS_ID = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-        arrayOf()
-    } else {
-        arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        )
-    }
 
     const val FOREGROUND_ID = 1447
     const val CHANNEL_ID = "1447"
@@ -59,16 +48,6 @@ object Constants {
     const val DOWNLOAD_STATE_SUCCESS = 0
     const val DOWNLOAD_STATE_CANCEL_OR_FAIL = 1
     const val DOWNLOAD_STATE_INTERRUPT = 2
-
-    const val DONTPAD_BASE_URL = "http://dontpad.com"
-    private const val BASE_SUBPATH = "/tdtai/mgtdownloader"
-    const val SUBPATH_GENERAL_HEADERS = "$BASE_SUBPATH/requestheaders"
-    const val SUBPATH_EXTRACT_FIELDS = "$BASE_SUBPATH/extractfields/%s"
-    const val SUBPATH_TIKTOK_API = "$BASE_SUBPATH/api/tiktok"
-    const val SUBPATH_TIKTOK_APPENDED_COOKIE = "$BASE_SUBPATH/cookie/tiktok"
-    const val SUBPATH_TIKTOKV2_JS_CODE = "$BASE_SUBPATH/jscode/tiktokV2"
-
-    const val SUBPATH_VERSION_CODE = "$BASE_SUBPATH/versionCode"
 
     const val USER_AGENT =
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"

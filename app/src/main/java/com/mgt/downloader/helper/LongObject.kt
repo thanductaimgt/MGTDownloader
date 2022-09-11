@@ -1,13 +1,13 @@
 package com.mgt.downloader.helper
 
-import com.mgt.downloader.utils.Utils
+import com.mgt.downloader.di.DI.utils
 
 class LongObject(value: Long) {
     var value: Long = value
         set(value) {
-            isFormatSizeChange = Utils.getFormatFileSize(
+            isFormatSizeChange = utils.getFormatFileSize(
                 field
-            ) != Utils.getFormatFileSize(value)
+            ) != utils.getFormatFileSize(value)
             field = value
         }
     var isFormatSizeChange: Boolean = true

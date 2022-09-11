@@ -1,6 +1,6 @@
 package com.mgt.downloader.utils
 
-object PerlStringHelper {
+class PerlStringHelper {
     fun unescapePerl(str: String): String {
         /*
      * In contrast to fixing Java's broken regex charclasses,

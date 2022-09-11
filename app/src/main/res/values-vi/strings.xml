@@ -86,8 +86,11 @@
     <string name="thanks_for_rating">Cảm ơn bạn đã dành thời gian để đánh giá ứng dụng</string>
     <string name="path_not_available">Không xác định, vui lòng thử lại sau</string>
 
-    <string name="update_app_title">Đã có phiên bản mới</string>
+    <string name="update_app_title">Đã có phiên bản mới %s</string>
     <string name="update_app_description">Để trải nghiệm các tính năng mới và sửa lỗi, hãy cập nhật ứng dụng</string>
     <string name="update">Cập nhật</string>
     <string name="later">Để sau</string>
+    <string name="share_message">Chia sẻ các file đã tải về</string>
+    <string name="share_fail">Chia sẻ thất bại</string>
+    <string name="share_success">Chia sẻ thành công</string>
 </resources>

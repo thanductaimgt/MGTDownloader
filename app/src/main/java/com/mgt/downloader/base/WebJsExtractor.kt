@@ -5,14 +5,17 @@ import android.os.Handler
 import android.os.Looper
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.mgt.downloader.MyApplication
-import com.mgt.downloader.data_model.FilePreviewInfo
+import com.mgt.downloader.App
+import com.mgt.downloader.di.DI.unboundExecutorService
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObservable
 import com.mgt.downloader.rxjava.SingleObserver
+import com.mgt.downloader.serialize_model.ExtractorConfig
 import com.mgt.downloader.ui.MainActivity
 
 
-abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDisposable) {
+abstract class WebJsExtractor<C : ExtractorConfig>(hasDisposable: HasDisposable) :
+    Extractor<C>(hasDisposable) {
     open val waitTime = 5000L
     protected val webView
         get() = MainActivity.webView
@@ -20,7 +23,7 @@ abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDispo
 
     override fun extract(url: String, observer: SingleObserver<FilePreviewInfo>) {
         getJsWebContent(url) { webContent ->
-            SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
+            SingleObservable.fromCallable(unboundExecutorService) {
                 extract(url, webContent)
             }.subscribe(observer)
         }
@@ -28,7 +31,7 @@ abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDispo
 
     protected fun getJsWebContent(url: String, onSuccess: ((html: String) -> Any)?) {
 //        MainActivity.webView
-        WebView(MyApplication.appContext)
+        WebView(App.instance)
             .apply {
                 settings.apply {
                     javaScriptEnabled = true
@@ -53,7 +56,9 @@ abstract class WebJsExtractor(hasDisposable: HasDisposable) : Extractor(hasDispo
                 redirect = true
             }
             loadingFinished = false
-            view.loadUrl(urlNewString!!)
+            urlNewString?.let {
+                view.loadUrl(urlNewString)
+            }
             return true
         }
 

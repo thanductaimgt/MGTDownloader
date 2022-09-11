@@ -86,8 +86,11 @@
     <string name="thanks_for_rating">Thank you for spending time to rate this app</string>
     <string name="path_not_available">Not available, try again later</string>
 
-    <string name="update_app_title">New version available</string>
+    <string name="update_app_title">New version %s available</string>
     <string name="update_app_description">To benefit from newest features and bugs fix, please update app</string>
     <string name="update">Update</string>
     <string name="later">Later</string>
+    <string name="share_message">Share downloaded files</string>
+    <string name="share_fail">Share fail</string>
+    <string name="share_success">Share successful</string>
 </resources>

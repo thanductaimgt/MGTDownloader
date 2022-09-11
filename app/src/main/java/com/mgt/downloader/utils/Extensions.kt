@@ -3,7 +3,10 @@ package com.mgt.downloader.utils
 import android.os.Build
 import android.util.Log
 import android.widget.ImageView
-import com.google.gson.Gson
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.mgt.downloader.di.DI.gson
+import com.mgt.downloader.di.DI.perlStringHelper
+import com.mgt.downloader.di.DI.utils
 import com.squareup.picasso.*
 import org.apache.commons.lang.StringEscapeUtils
 import java.net.HttpURLConnection
@@ -26,9 +29,9 @@ fun BitSet.toInt(): Int {
 private fun Picasso.loadCompat(url: String?): RequestCreator {
     val doCache: Boolean
     val urlToLoad: String?
-    if (url == null || Utils.isNetworkUri(url) || Utils.isContentUri(url)) {
+    if (url == null || utils.isNetworkUri(url) || utils.isContentUri(url)) {
         urlToLoad = url
-        doCache = url != null && Utils.isNetworkUri(url)
+        doCache = url != null && utils.isNetworkUri(url)
     } else {
         urlToLoad = "file://$url"
         doCache = false
@@ -103,12 +106,12 @@ private fun <T : String?> findValue(
                 matcher.group("target")
             } else {
                 matcher.group(matcher.groupCount() - 1)
-            }!!
+            }
             try {
                 if (unescape) {
-                    valueEscaped = valueEscaped.unescapePerl()
-                    valueEscaped = valueEscaped.unescapeJava()
-                    valueEscaped = valueEscaped.unescapeHtml()
+                    valueEscaped = valueEscaped?.unescapePerl()
+                    valueEscaped = valueEscaped?.unescapeJava()
+                    valueEscaped = valueEscaped?.unescapeHtml()
                 }
                 valueEscaped
             } catch (t: Throwable) {
@@ -118,7 +121,7 @@ private fun <T : String?> findValue(
             default
         } as T
     } catch (t: Throwable) {
-        t.printStackTrace()
+        recordNonFatalException(t)
         return default
     }
 }
@@ -132,7 +135,7 @@ fun String.unescapeHtml(): String {
 }
 
 fun String.unescapePerl(): String {
-    return PerlStringHelper.unescapePerl(this)
+    return perlStringHelper.unescapePerl(this)
 }
 
 fun String.format(vararg args: Any?): String {
@@ -159,7 +162,17 @@ fun logE(tag: String, message: String) {
     }
 }
 
-private val gson by lazy { Gson() }
+fun recordNonFatalException(t: Throwable) {
+    logE("Extensions", "recordNonFatalException")
+    printTrace(t)
+    FirebaseCrashlytics.getInstance().recordException(t)
+}
+
+fun printTrace(t: Throwable) {
+    if (com.mgt.downloader.BuildConfig.DEBUG) {
+        t.printStackTrace()
+    }
+}
 
 fun Any.toJson(): String = gson.toJson(this)
 

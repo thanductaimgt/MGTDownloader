@@ -9,16 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
-import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
 import com.mgt.downloader.base.ContainsSelectableList
+import com.mgt.downloader.di.DI.liveConnection
 import com.mgt.downloader.ui.MainActivity
 import com.mgt.downloader.utils.TAG
 import kotlinx.android.synthetic.main.dialog_download_list.*
 
 
-class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
+class DownloadListFragment : DialogFragment(),
     View.OnClickListener {
     private lateinit var adapter: DownloadPagerAdapter
 
@@ -35,7 +34,7 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return object : Dialog(activity!!, theme) {
+        return object : Dialog(requireActivity(), theme) {
             override fun onBackPressed() {
                 // if there are some selected items, discard all
                 (childFragmentManager.fragments.firstOrNull { it.TAG == adapter.getTag(viewPager.currentItem) } as ContainsSelectableList?)?.let { fragment ->
@@ -60,13 +59,13 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initView()
 
-        MyApplication.liveConnection.observe(viewLifecycleOwner, { isConnected ->
+        liveConnection.observe(viewLifecycleOwner) { isConnected ->
             if (isConnected) {
                 networkStateTextView.visibility = View.GONE
             } else {
                 networkStateTextView.visibility = View.VISIBLE
             }
-        })
+        }
     }
 
     private fun initView() {
@@ -89,12 +88,8 @@ class DownloadListFragment(private val fm: FragmentManager) : DialogFragment(),
         settingsImgView.setOnClickListener(this@DownloadListFragment)
     }
 
-    fun show() {
-        show(fm, TAG)
-    }
-
     override fun onClick(p0: View?) {
-        when (p0!!.id) {
+        when (p0?.id) {
             R.id.titleTextViewBottomSheetLayout -> dismiss()
             R.id.settingsImgView -> (activity as MainActivity).showSettingsDialog()
         }

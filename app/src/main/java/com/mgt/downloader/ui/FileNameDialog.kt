@@ -12,18 +12,17 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Observer
 import com.mgt.downloader.DownloadService
 import com.mgt.downloader.R
-import com.mgt.downloader.data_model.FilePreviewInfo
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
 import com.mgt.downloader.utils.TAG
-import com.mgt.downloader.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_file_name.view.*
 import kotlin.math.max
 
 
-class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
+class FileNameDialog : DialogFragment(),
     View.OnClickListener {
     private lateinit var filePreviewInfo: FilePreviewInfo
     private var downloadService: DownloadService? = null
@@ -41,11 +40,11 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initView(view)
 
-        (activity!! as MainActivity).liveDownloadService.observe(
-            viewLifecycleOwner,
-            Observer { downloadService ->
-                this.downloadService = downloadService
-            })
+        (requireActivity() as MainActivity).liveDownloadService.observe(
+            viewLifecycleOwner
+        ) { downloadService ->
+            this.downloadService = downloadService
+        }
     }
 
     override fun onStart() {
@@ -96,10 +95,10 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
             nameEditText.setOnFocusChangeListener { _, b ->
                 if (b) {
                     nameEditText.post {
-                        Utils.showKeyboard(context, nameEditText)
+                        utils.showKeyboard(context, nameEditText)
                     }
                 } else {
-                    Utils.hideKeyboard(context, this)
+                    utils.hideKeyboard(context, this)
                 }
             }
             nameEditText.requestFocus()
@@ -114,28 +113,30 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
 
     override fun onResume() {
         super.onResume()
-        view!!.nameEditText.setText(filePreviewInfo.name)
-        view!!.nameEditText.setSelection(
-            0,
-            max(
+        view?.apply {
+            nameEditText.setText(filePreviewInfo.name)
+            nameEditText.setSelection(
                 0,
-                filePreviewInfo.name.length - Utils.getFileExtension(filePreviewInfo.name).length.let { if (it > 0) it + 1 else 0 }
+                max(
+                    0,
+                    filePreviewInfo.name.length - utils.getFileExtension(filePreviewInfo.name).length.let { if (it > 0) it + 1 else 0 }
+                )
             )
-        )
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        filePreviewInfo.name = view!!.nameEditText.text.toString()
+        filePreviewInfo.name = view?.nameEditText?.text.toString()
     }
 
-    fun show(filePreviewInfo: FilePreviewInfo) {
+    fun show(fragmentManager: FragmentManager, filePreviewInfo: FilePreviewInfo) {
         this.filePreviewInfo = filePreviewInfo.copy()
-        show(fm, TAG)
+        show(fragmentManager, TAG)
     }
 
     override fun onClick(p0: View?) {
-        when (p0!!.id) {
+        when (p0?.id) {
             R.id.downloadButton -> startDownloadTaskAndDismiss()
             R.id.cancelImgView -> dismiss()
         }
@@ -147,13 +148,13 @@ class FileNameDialog(private val fm: FragmentManager) : DialogFragment(),
 
     private fun startDownloadTaskAndDismiss() {
         (activity as MainActivity).startDownloadTask(filePreviewInfo.apply {
-            name = view!!.nameEditText.text.toString()
+            name = view?.nameEditText?.text.toString()
         })
         dismiss()
     }
 
     override fun onDismiss(dialog: DialogInterface) {
-        Utils.hideKeyboard(context!!, (activity as MainActivity).rootView)
+        utils.hideKeyboard(requireContext(), (activity as MainActivity).rootView)
         super.onDismiss(dialog)
     }
 }

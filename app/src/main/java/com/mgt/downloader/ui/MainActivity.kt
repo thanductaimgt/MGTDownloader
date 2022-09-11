@@ -1,5 +1,6 @@
 package com.mgt.downloader.ui
 
+import android.Manifest
 import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.ComponentName
@@ -7,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.text.Editable
@@ -17,23 +19,26 @@ import android.webkit.URLUtil
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.mgt.downloader.App
+import com.mgt.downloader.BuildConfig
 import com.mgt.downloader.DownloadService
-import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
+import com.mgt.downloader.base.BaseActivity
 import com.mgt.downloader.base.CommonJavaScriptInterface
-import com.mgt.downloader.data_model.DownloadTask
-import com.mgt.downloader.data_model.FilePreviewInfo
-import com.mgt.downloader.extractor.TikTokExtractorV2
-import com.mgt.downloader.factory.ViewModelFactory
-import com.mgt.downloader.rxjava.SingleObservable
+import com.mgt.downloader.di.DI.boundExecutorService
+import com.mgt.downloader.di.DI.config
+import com.mgt.downloader.di.DI.downloadConfig
+import com.mgt.downloader.di.DI.forbiddenZone
+import com.mgt.downloader.di.DI.liveConnection
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.extractor.tiktok.TikTokExtractorV2
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
 import com.mgt.downloader.rxjava.SingleObserver
+import com.mgt.downloader.serialize_model.DownloadTask
 import com.mgt.downloader.ui.download_list.DownloadListFragment
 import com.mgt.downloader.ui.view_file.ViewFileDialog
 import com.mgt.downloader.utils.*
@@ -41,16 +46,20 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 import java.sql.Date
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
-    private lateinit var downloadListDialog: DownloadListFragment
-    private lateinit var fileNameDialog: FileNameDialog
-    private lateinit var viewFileDialog: ViewFileDialog
-    private lateinit var settingsDialog: SettingsDialog
-    private lateinit var alertDialog: AlertDialog
+class MainActivity : BaseActivity(), View.OnClickListener {
+    private val downloadListDialog by lazy { DownloadListFragment() }
+    private val fileNameDialog by lazy { FileNameDialog() }
+    private val viewFileDialog by lazy { ViewFileDialog() }
+    private val settingsDialog by lazy { SettingsDialog() }
+    private val alertDialog by lazy { AlertDialog() }
     var liveDownloadService = MutableLiveData<DownloadService>()
     private val serviceConnection = DownloadServiceConnection()
     private lateinit var filePreviewInfo: FilePreviewInfo
-    private lateinit var viewModel: MainViewModel
+    override val viewModel by viewModels<MainViewModel>()
+
+    private val permissionIds = arrayOf(
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    )
 
     private var afterPermissionRequested: (() -> Any?)? = null
 
@@ -66,6 +75,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 try {
                     downloadListDialog.dismiss()
                 } catch (t: Throwable) {
+                    recordNonFatalException(t)
                 }
             }
         }
@@ -76,62 +86,55 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewModel = ViewModelProvider(this, ViewModelFactory.getInstance()).get(
-            MainViewModel::class.java
-        )
-
         initView()
 
         if (intent.getStringExtra(Constants.MESSAGE) == Constants.OPEN_DOWNLOAD_LIST) {
-            downloadListDialog.show()
+            downloadListDialog.show(supportFragmentManager, downloadListDialog.TAG)
         }
 
         try {
             startService(getStartServiceIntent())
         } catch (t: Throwable) {
-            t.printStackTrace()
+            recordNonFatalException(t)
         }
-
-        MyApplication.liveConnection.observe(this, { isConnected ->
-            if (isConnected) {
-                networkStateTextView.visibility = View.INVISIBLE
-                liveDownloadService.value?.onReconnect()
-            } else {
-                networkStateTextView.visibility = View.VISIBLE
-                liveDownloadService.value?.onDisconnect()
-            }
-        })
 
 //        val adRequest = AdRequest.Builder().build()
 //        adView.loadAd(adRequest)
 
-        checkUpdateRequestHeaders()
-
-        checkUpdateApp()
+        observeData()
     }
 
-    private fun checkUpdateRequestHeaders() {
-        SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
-            getRequestHeaders()
-        }.subscribe(object : SingleObserver<Map<String, String>>(viewModel) {
-            override fun onSuccess(result: Map<String, String>) {
-                logD(TAG, "Obtained headers: $result")
-                super.onSuccess(result)
-                Configurations.requestHeaders = result
+    private fun observeData() {
+        viewModel.apply {
+            liveConnection.observe(this@MainActivity) { isConnected ->
+                if (isConnected) {
+                    networkStateTextView.visibility = View.INVISIBLE
+                    liveDownloadService.value?.onReconnect()
+                } else {
+                    networkStateTextView.visibility = View.VISIBLE
+                    liveDownloadService.value?.onDisconnect()
+                }
             }
-        })
+
+            liveEvent.observe(this@MainActivity) {
+                when (it.type) {
+                    EVENT_SHOW_UPDATE_APP_DIALOG -> showUpdateAppDialog()
+                }
+            }
+        }
     }
 
-    private fun getRequestHeaders(): Map<String, String> {
-        val json = Utils.getDontpadContent(Constants.SUBPATH_GENERAL_HEADERS)
-        val mapType = object : TypeToken<Map<String, Any>>() {}.type
-        return Gson().fromJson(json, mapType) ?: emptyMap()
-    }
-
-    private fun checkUpdateApp() {
-        SingleObservable.fromCallable(MyApplication.unboundExecutorService) {
-            Utils.getDontpadContent(Constants.SUBPATH_VERSION_CODE).toInt()
-        }.subscribe(getNewestVersionCodeObserver)
+    private fun showUpdateAppDialog() {
+        alertDialog.apply {
+            title = this@MainActivity.getString(R.string.update_app_title, config.newestVersionCode)
+            description = this@MainActivity.getString(R.string.update_app_description)
+            positiveButtonText = this@MainActivity.getString(R.string.update)
+            negativeButtonText = this@MainActivity.getString(R.string.later)
+            positiveButtonClickListener = {
+                utils.navigateToCHPlay(this@MainActivity)
+            }
+            show(supportFragmentManager)
+        }
     }
 
     private fun getStartServiceIntent(): Intent {
@@ -139,10 +142,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun requestStoragePermissionsIfNeeded() {
-        if (!hasPermissions(Constants.PERMISSIONS_ID)) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && !hasPermissions(permissionIds)) {
             ActivityCompat.requestPermissions(
                 this,
-                Constants.PERMISSIONS_ID,
+                permissionIds,
                 Constants.REQUEST_PERMISSIONS
             )
         } else {
@@ -230,17 +233,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun initView() {
         initWebView()
 
-        downloadListDialog =
-            DownloadListFragment(
-                supportFragmentManager
-            )
-        fileNameDialog =
-            FileNameDialog(supportFragmentManager)
-        viewFileDialog =
-            ViewFileDialog(supportFragmentManager)
-        settingsDialog = SettingsDialog(supportFragmentManager)
-        alertDialog = AlertDialog(supportFragmentManager)
-
         urlEditText.addTextChangedListener(textWatcher)
         val shareUrl = intent.extras?.getString(Intent.EXTRA_TEXT)
         if (shareUrl != null) {
@@ -276,6 +268,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         fileNameTextView.setOnClickListener(this)
         viewFileInfoImgView.setOnClickListener(this)
         settingsImgView.setOnClickListener(this)
+
+        if (BuildConfig.DEBUG) {
+            switchEnvButton.setOnClickListener {
+                forbiddenZone.switchEnv()
+                utils.restartApp()
+            }
+            switchEnvLayout.visibility = View.VISIBLE
+            envTextView.text = config.getEnv().toString()
+        } else {
+            switchEnvLayout.visibility = View.INVISIBLE
+        }
     }
 
     private fun initWebView() {
@@ -301,17 +304,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
         reloadWebView()
-    }
-
-    companion object {
-        lateinit var webView: WebView
-        var loadWebTime: Long? = null
-        var jsInterface = CommonJavaScriptInterface()
-
-        fun reloadWebView() {
-            webView.loadUrl(TikTokExtractorV2.WEB_URL)
-            loadWebTime = System.currentTimeMillis()
-        }
     }
 
     private fun showFilePreview(filePreviewInfo: FilePreviewInfo) {
@@ -345,9 +337,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
 
             fileIconImgView.setImageResource(
-                Utils.getResIdFromFileExtension(
+                utils.getResIdFromFileExtension(
                     this,
-                    Utils.getFileExtension(filePreviewInfo.name)
+                    utils.getFileExtension(filePreviewInfo.name)
                 )
             )
 
@@ -361,7 +353,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         if (filePreviewInfo.size != -1L) {
             fileSizeTextView.text = String.format(
                 "%s",
-                Utils.getFormatFileSize(filePreviewInfo.size)
+                utils.getFormatFileSize(filePreviewInfo.size)
             )
         } else {
             fileSizeTextView.text =
@@ -412,22 +404,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.downloadButton -> {
                 afterPermissionRequested = {
                     startDownloadTask(filePreviewInfo)
-                    Utils.hideKeyboard(this, rootView)
+                    utils.hideKeyboard(this, rootView)
                 }
                 requestStoragePermissionsIfNeeded()
             }
-            R.id.showDownloadListLayout -> downloadListDialog.show()
-            R.id.editFileNameImgView -> fileNameDialog.show(filePreviewInfo)
-            R.id.fileNameTextView -> fileNameDialog.show(filePreviewInfo)
-            R.id.viewFileInfoImgView -> viewFileDialog.show(filePreviewInfo)
-            R.id.settingsImgView -> settingsDialog.show()
+            R.id.showDownloadListLayout -> downloadListDialog.show(
+                supportFragmentManager,
+                downloadListDialog.TAG
+            )
+            R.id.editFileNameImgView -> fileNameDialog.show(supportFragmentManager, filePreviewInfo)
+            R.id.fileNameTextView -> fileNameDialog.show(supportFragmentManager, filePreviewInfo)
+            R.id.viewFileInfoImgView -> viewFileDialog.show(supportFragmentManager, filePreviewInfo)
+            R.id.settingsImgView -> showSettingsDialog()
             R.id.multiThreadDownloadButton -> {
                 afterPermissionRequested = {
                     startDownloadTask(
                         filePreviewInfo,
-                        Configurations.multiThreadDownloadNum
+                        downloadConfig.multiThreadDownloadNum
                     )
-                    Utils.hideKeyboard(this, rootView)
+                    utils.hideKeyboard(this, rootView)
                 }
                 requestStoragePermissionsIfNeeded()
             }
@@ -441,7 +436,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             downloadUrl = filePreviewInfo.downloadUri,
             startTime = Date(System.currentTimeMillis()),
             totalSize = filePreviewInfo.size,
-            partsDownloadedSize = if (threadNum > 1) Utils.getBlankArrayList(threadNum) else ArrayList(),
+            partsDownloadedSize = if (threadNum > 1) utils.getBlankArrayList(threadNum) else ArrayList(),
             thumbUrl = filePreviewInfo.thumbUri,
             thumbRatio = filePreviewInfo.thumbRatio
         )
@@ -455,7 +450,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     fun startDownloadTask(downloadTask: DownloadTask) {
         logD(TAG, "startDownloadTask")
 
-        liveDownloadService.value!!.executeDownloadTask(downloadTask, false)
+        liveDownloadService.value?.executeDownloadTask(downloadTask, false)
     }
 
     // test_db-master.zip -> test_db-master (1).zip
@@ -464,8 +459,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             val stopCondition = { newFileName: String ->
                 !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName) ?: false)
             }
-            filePreviewInfo.name = Utils.generateNewDownloadFileName(
-                this,
+            filePreviewInfo.name = utils.generateNewDownloadFileName(
                 curFileName,
                 stopCondition
             )
@@ -490,19 +484,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     fun showSettingsDialog() {
-        settingsDialog.show()
+        settingsDialog.show(supportFragmentManager)
     }
 
     fun applyCurrentConfigs() {
         // decrease case
-        if (MyApplication.boundExecutorService.maximumPoolSize > Configurations.maxConcurDownloadNum) {
+        if (boundExecutorService.maximumPoolSize > downloadConfig.maxConcurDownloadNum) {
             liveDownloadService.value?.onDisconnect()
             liveDownloadService.value?.onReconnect()
         } else {
-            MyApplication.boundExecutorService.maximumPoolSize =
-                Configurations.maxConcurDownloadNum
-            MyApplication.boundExecutorService.corePoolSize =
-                Configurations.maxConcurDownloadNum
+            boundExecutorService.maximumPoolSize =
+                downloadConfig.maxConcurDownloadNum
+            boundExecutorService.corePoolSize =
+                downloadConfig.maxConcurDownloadNum
         }
     }
 
@@ -546,18 +540,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         //get cached size
                         if (result.size == -1L) {
                             result.size =
-                                liveDownloadService.value!!.getFileSizeOfDownloadedTask(result.displayUri)
+                                liveDownloadService.value?.getFileSizeOfDownloadedTask(result.displayUri)
+                                    ?: -1L
                         }
 
-                        MyApplication.fileInfoCaches[result.displayUri] = result.copy()
+                        App.fileInfoCaches[result.displayUri] = result.copy()
 
                         val stopCondition = { newFileName: String ->
                             !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName)
                                 ?: false)
                         }
                         if (!stopCondition(result.name)) {
-                            result.name = Utils.generateNewDownloadFileName(
-                                this@MainActivity,
+                            result.name = utils.generateNewDownloadFileName(
                                 result.name,
                                 stopCondition
                             )
@@ -577,18 +571,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     //get cached size
                     if (result.size == -1L) {
                         result.size =
-                            liveDownloadService.value!!.getFileSizeOfDownloadedTask(result.displayUri)
+                            liveDownloadService.value?.getFileSizeOfDownloadedTask(result.displayUri)
+                                ?: -1
                     }
 
-                    MyApplication.fileInfoCaches[result.displayUri] = result.copy()
+                    App.fileInfoCaches[result.displayUri] = result.copy()
 
                     val stopCondition = { newFileName: String ->
                         !(liveDownloadService.value?.isFileOrDownloadTaskExist(newFileName)
                             ?: false)
                     }
                     if (!stopCondition(result.name)) {
-                        result.name = Utils.generateNewDownloadFileName(
-                            this@MainActivity,
+                        result.name = utils.generateNewDownloadFileName(
                             result.name,
                             stopCondition
                         )
@@ -604,24 +598,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private val getNewestVersionCodeObserver by lazy {
-        object : SingleObserver<Int>(viewModel) {
-            override fun onSuccess(result: Int) {
-                super.onSuccess(result)
-                val appVersionCode = Utils.getAppVersionCode()
-                if (appVersionCode < result) {
-                    alertDialog.apply {
-                        title = this@MainActivity.getString(R.string.update_app_title)
-                        description = this@MainActivity.getString(R.string.update_app_description)
-                        positiveButtonText = this@MainActivity.getString(R.string.update)
-                        negativeButtonText = this@MainActivity.getString(R.string.later)
-                        positiveButtonClickListener = {
-                            Utils.navigateToCHPlay(this@MainActivity)
-                        }
-                        show()
-                    }
-                }
-            }
+    companion object {
+        lateinit var webView: WebView
+        var loadWebTime: Long? = null
+        var jsInterface = CommonJavaScriptInterface()
+
+        fun reloadWebView() {
+            webView.loadUrl(TikTokExtractorV2.WEB_URL)
+            loadWebTime = System.currentTimeMillis()
         }
+
+        val EVENT_SHOW_UPDATE_APP_DIALOG = ++baseEvent
     }
 }

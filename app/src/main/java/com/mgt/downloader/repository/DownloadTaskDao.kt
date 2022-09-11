@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mgt.downloader.data_model.DownloadTask
+import com.mgt.downloader.serialize_model.DownloadTask
 
 @Dao
 interface DownloadTaskDao {

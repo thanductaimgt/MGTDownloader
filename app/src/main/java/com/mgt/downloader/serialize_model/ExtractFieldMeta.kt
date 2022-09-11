@@ -1,4 +1,4 @@
-package com.mgt.downloader.data_model
+package com.mgt.downloader.serialize_model
 
 data class ExtractFieldMeta(
     val prefix: String? = null,

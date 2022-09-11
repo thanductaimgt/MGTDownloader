@@ -13,14 +13,13 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.webkit.CookieManager
 import android.webkit.URLUtil
-import com.mgt.downloader.MyApplication
+import com.mgt.downloader.App
 import com.mgt.downloader.R
-import com.mgt.downloader.data_model.DownloadTask
-import com.mgt.downloader.data_model.FilePreviewInfo
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStream
-import java.io.InputStreamReader
+import com.mgt.downloader.di.DI.config
+import com.mgt.downloader.nonserialize_model.FilePreviewInfo
+import com.mgt.downloader.serialize_model.DownloadTask
+import org.json.JSONObject
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.ByteBuffer
@@ -32,16 +31,16 @@ import java.util.regex.Pattern
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import kotlin.collections.ArrayList
+import kotlin.system.exitProcess
 
 
-object Utils {
-    fun getFile(context: Context, fileName: String): File {
-        return File(getFilePath(context, fileName))
+class Utils {
+    fun getDownloadFilePath(fileName: String): String {
+        return getDownloadFile(fileName).path
     }
 
-    fun getFilePath(context: Context, fileName: String): String {
-        return "${getDownloadDirPath(context)}/$fileName"
+    fun getDownloadFile(fileName: String): File {
+        return File(getDownloadDir(), fileName)
     }
 
     fun getFileName(uri: String, fileExtension: String? = null): String {
@@ -90,7 +89,7 @@ object Utils {
                 it.contentLength.toLong()
             }
         } catch (t: Throwable) {
-            t.printStackTrace()
+            recordNonFatalException(t)
             Constants.ERROR.toLong()
         }
     }
@@ -102,8 +101,7 @@ object Utils {
     }
 
     fun deleteFileOrDir(context: Context, localPath: String): Boolean {
-        val absolutePath = "${getDownloadDirPath(context)}${File.separator}$localPath"
-        val file = File(absolutePath)
+        val file = File(getDownloadDir(), localPath)
         if (file.exists()) {
             if (file.isDirectory) {
                 file.list()?.forEach {
@@ -121,13 +119,12 @@ object Utils {
     }
 
     fun generateNewDownloadFileName(
-        context: Context,
         fileName: String,
         stopCondition: (newFileName: String) -> Boolean = { newFileName ->
-            !getFile(context, newFileName).exists()
+            !getDownloadFile(newFileName).exists()
         }
     ): String {
-        var file = getFile(context, fileName)
+        var file = getDownloadFile(fileName)
         val tail = if (file.extension != "") ".${file.extension}" else ""
         var originalNameWithoutExtension = file.nameWithoutExtension
         var originalNameWithoutExtensionAndNumber = originalNameWithoutExtension
@@ -150,7 +147,7 @@ object Utils {
         }
 
         var newFileNameWithoutExtension = "$originalNameWithoutExtensionAndNumber ($newNumber)"
-        file = getFile(context, "$newFileNameWithoutExtension$tail")
+        file = getDownloadFile("$newFileNameWithoutExtension$tail")
 
         while (newNumber > 9 || !stopCondition(file.name)) {
             newNumber++
@@ -167,7 +164,7 @@ object Utils {
             } else {
                 newFileNameWithoutExtension = "$originalNameWithoutExtensionAndNumber ($newNumber)"
             }
-            file = getFile(context, "$newFileNameWithoutExtension$tail")
+            file = getDownloadFile("$newFileNameWithoutExtension$tail")
         }
         return "$newFileNameWithoutExtension$tail"
     }
@@ -181,25 +178,45 @@ object Utils {
         return if (resourceId != 0) resourceId else R.drawable.file
     }
 
-    fun getDownloadDirPath(context: Context): String {
+    fun getDownloadDirPath(): String? {
+        return getDownloadDir()?.path
+    }
+
+    private fun getDownloadDir(): File? {
         return try {
-            val downloadDir = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-                context.getExternalFilesDir(null)!!
+            val child = if (config.getEnv() == Config.Env.LIVE) {
+                "MGT Downloader"
             } else {
-                File("${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)!!.path}/MGT Downloader")
+                "MGT Downloader Test"
             }
+            val downloadDir = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                child
+            )
 
             if (!downloadDir.exists() && !downloadDir.mkdirs()) {
                 throw Throwable("Fail to create directory ${downloadDir.path}")
             }
-            downloadDir.path
+            downloadDir
         } catch (t: Throwable) {
-            context.getString(R.string.path_not_available)
+            return null
         }
     }
 
-    fun isDownloadedFileExist(context: Context, downloadTask: DownloadTask): Boolean {
-        val file = getFile(context, downloadTask.fileName)
+    fun getDownloadDirRelativePath(): String? {
+        return runCatching {
+            getDownloadDir()?.toRelativeString(Environment.getExternalStorageDirectory())
+        }.getOrDefault(getDownloadDirPath())
+    }
+
+    fun getCacheFile(context: Context, fileName: String): File {
+        val name = "cache-${config.getEnv()}"
+        val cacheDir = context.getDir(name, Context.MODE_PRIVATE)
+        return File(cacheDir, fileName)
+    }
+
+    fun isDownloadedFileExist(downloadTask: DownloadTask): Boolean {
+        val file = getDownloadFile(downloadTask.fileName)
         return file.exists() && file.isDirectory == downloadTask.isDirectory
     }
 
@@ -325,7 +342,7 @@ object Utils {
             }
             i++
         }
-        return res!!
+        return res ?: ByteArray(0)
     }
 
     fun isHeader(data: ByteArray, header: Number): Boolean {
@@ -380,7 +397,7 @@ object Utils {
 
             val data = ByteArray(zipPreviewInfo.centralDirSize)
             val buffer = ByteArray(4096)
-            var count = input!!.read(buffer)
+            var count = input?.read(buffer) ?: -1
             var readByteNum = 0
             while (count != -1) {
                 for (i in 0 until count) {
@@ -509,7 +526,7 @@ object Utils {
 
             return Pair(centralDirOffset, centralDirSize)
         } catch (e: Throwable) {
-            e.printStackTrace()
+            recordNonFatalException(e)
             return Pair(Constants.ERROR, Constants.ERROR)
         } finally {
             //close all resources
@@ -537,7 +554,7 @@ object Utils {
                 "Cookie",
                 CookieManager.getInstance().getCookie(url)
             )
-            for (header in Configurations.requestHeaders) {
+            for (header in config.requestHeaders) {
                 addRequestProperty(header.key, header.value)
             }
             readTimeout = timeOut
@@ -553,13 +570,13 @@ object Utils {
         }
     }
 
-    fun getContent(url: String): String {
+    fun readInputStream(url: String): String {
         return openConnection(url).use {
-            getContent(it.inputStream)
+            readInputStream(it.inputStream)
         }
     }
 
-    fun getContent(inputStream: InputStream): String {
+    fun readInputStream(inputStream: InputStream): String {
         val streamMap = StringBuilder()
 
         return BufferedReader(InputStreamReader(inputStream)).use { reader ->
@@ -571,12 +588,19 @@ object Utils {
         }
     }
 
+    fun writeOutputStream(outputStream: OutputStream, content: String) {
+        BufferedWriter(OutputStreamWriter(outputStream)).use { writer ->
+            writer.write(content)
+        }
+    }
+
     /**
      * dontpad url format: http://dontpad.com{subpath}
      */
-    fun getDontpadContent(subpath: String): String {
-        val content = getContent("${Constants.DONTPAD_BASE_URL}$subpath")
-        return content.findValue("<textarea(.*?)>", "</textarea>", "", false).unescapeHtml()
+    fun getDontpadContent(dontpadUrl: String): String {
+        val content = readInputStream("$dontpadUrl.body.json?lastUpdate=0")
+        val contentObj = JSONObject(content)
+        return contentObj.optString("body")
     }
 
     fun hideKeyboard(context: Context, view: View) {
@@ -590,9 +614,9 @@ object Utils {
         imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     }
 
-    fun getFileOrDirSize(context: Context, dirAppLocalPath: String): Long {
+    fun getFileOrDirSize(dirAppLocalPath: String): Long {
         return try {
-            val file = getFile(context, dirAppLocalPath)
+            val file = getDownloadFile(dirAppLocalPath)
             if (file.isDirectory) {
                 getDirSize(file)
             } else {
@@ -600,7 +624,7 @@ object Utils {
             }
         } catch (t: Throwable) {
             logD(TAG, "getFileOrDirSize fail")
-            t.printStackTrace()
+            recordNonFatalException(t)
             -1
         }
     }
@@ -700,11 +724,11 @@ object Utils {
     fun getAppVersionCode(): Int {
         return try {
             val pInfo: PackageInfo =
-                MyApplication.appContext.packageManager
-                    .getPackageInfo(MyApplication.appContext.packageName, 0)
+                App.instance.packageManager
+                    .getPackageInfo(App.instance.packageName, 0)
             pInfo.versionCode
         } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
+            recordNonFatalException(e)
             -1
         }
     }
@@ -732,5 +756,20 @@ object Utils {
                 )
             )
         }
+    }
+
+    fun restartApp() {
+//        val context=app
+//        val mStartActivity = Intent(context, HomeActivity::class.java)
+//        val mPendingIntentId = 123456
+//        val mPendingIntent: PendingIntent = PendingIntent.getActivity(
+//            context,
+//            mPendingIntentId,
+//            mStartActivity,
+//            PendingIntent.FLAG_CANCEL_CURRENT
+//        )
+//        val mgr: AlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent)
+        exitProcess(0)
     }
 }

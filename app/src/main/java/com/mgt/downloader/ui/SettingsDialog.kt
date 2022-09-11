@@ -5,7 +5,6 @@ import android.content.pm.PackageInfo
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,17 +16,19 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.play.core.review.ReviewInfo
 import com.mgt.downloader.BuildConfig
-import com.mgt.downloader.MyApplication
 import com.mgt.downloader.R
-import com.mgt.downloader.utils.Configurations
-import com.mgt.downloader.utils.Statistics
+import com.mgt.downloader.di.DI.downloadConfig
+import com.mgt.downloader.di.DI.reviewManager
+import com.mgt.downloader.di.DI.statistics
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.utils.DownloadConfig
+import com.mgt.downloader.utils.Prefs
 import com.mgt.downloader.utils.TAG
-import com.mgt.downloader.utils.Utils
 import kotlinx.android.synthetic.main.dialog_settings.*
 import kotlinx.android.synthetic.main.dialog_settings.view.*
 
 
-class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
+class SettingsDialog : DialogFragment(),
     View.OnClickListener {
     var selectedMaxConcurDownloadNum: Int = 0
     var selectedMultiThreadDownloadNum: Int = 0
@@ -42,8 +43,10 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
         )
     }
 
-    override fun setupDialog(dialog: Dialog, style: Int) {
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return super.onCreateDialog(savedInstanceState).also {
+            it.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        }
     }
 
     override fun onCreateView(
@@ -58,7 +61,7 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
         initView()
 
         // pre-load reviewInfo
-        MyApplication.reviewManager.requestReviewFlow()
+        reviewManager.requestReviewFlow()
             .addOnCompleteListener { request ->
                 if (request.isSuccessful) {
                     reviewInfo = request.result
@@ -72,19 +75,20 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
 
         initSpinner(
             maxConcurDownloadNumSpinner,
-            Configurations.MAX_CONCUR_DOWNLOAD_NUM_KEY
+            Prefs.MAX_CONCUR_DOWNLOAD_NUM_KEY
         )
         initSpinner(
             multiThreadDownloadNumSpinner,
-            Configurations.MULTI_THREAD_DOWNLOAD_NUM_KEY
+            Prefs.MULTI_THREAD_DOWNLOAD_NUM_KEY
         )
 
-        successDownloadNumTextView.text = Statistics.successDownloadNum.toString()
-        cancelOrFailDownloadNumTextView.text = Statistics.cancelOrFailDownloadNum.toString()
-        totalDownloadNumTextView.text = Statistics.totalDownloadNum.toString()
-        totalDownloadSizeTextView.text = Utils.getFormatFileSize(Statistics.totalDownloadSize)
+        successDownloadNumTextView.text = statistics.successDownloadNum.toString()
+        cancelOrFailDownloadNumTextView.text = statistics.cancelOrFailDownloadNum.toString()
+        totalDownloadNumTextView.text = statistics.totalDownloadNum.toString()
+        totalDownloadSizeTextView.text = utils.getFormatFileSize(statistics.totalDownloadSize)
 
-        pathTextView.text = Utils.getDownloadDirPath(requireContext())
+        pathTextView.text = utils.getDownloadDirRelativePath()
+            ?: getString(R.string.path_not_available)
 
         val pInfo: PackageInfo =
             requireContext().packageManager.getPackageInfo(
@@ -94,8 +98,9 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
         aboutTextView.text =
             String.format(getString(R.string.desc_about_info), pInfo.versionName)
 
-        noteTextView.visibility =
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) View.VISIBLE else View.GONE
+//        noteTextView.visibility =
+//            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) View.VISIBLE else View.GONE
+        noteTextView.visibility = View.GONE
 
         titleLayout.setOnClickListener(this@SettingsDialog)
         applyButton.setOnClickListener(this@SettingsDialog)
@@ -110,13 +115,14 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
             onComplete()
         } else {
             try {
-                val flow =
-                    MyApplication.reviewManager.launchReviewFlow(requireActivity(), reviewInfo!!)
-                flow.addOnCompleteListener {
-                    onComplete()
-                }
+                reviewInfo?.let {
+                    reviewManager.launchReviewFlow(requireActivity(), it)
+                        .addOnCompleteListener {
+                            onComplete()
+                        }
+                } ?: onComplete()
             } catch (t: Throwable) {
-                Utils.navigateToCHPlay(requireContext())
+                utils.navigateToCHPlay(requireContext())
             }
         }
     }
@@ -126,17 +132,17 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
         val curValue: Int
         val defaultValue: Int
         when (key) {
-            Configurations.MAX_CONCUR_DOWNLOAD_NUM_KEY -> {
+            Prefs.MAX_CONCUR_DOWNLOAD_NUM_KEY -> {
                 numbers =
-                    (Configurations.MAX_CONCUR_DOWNLOAD_NUM_LOWER_BOUND..Configurations.MAX_CONCUR_DOWNLOAD_NUM_UPPER_BOUND).toList()
-                curValue = Configurations.maxConcurDownloadNum
-                defaultValue = Configurations.DEFAULT_MAX_CONCUR_DOWNLOAD_NUM
+                    (DownloadConfig.MAX_CONCUR_DOWNLOAD_NUM_LOWER_BOUND..DownloadConfig.MAX_CONCUR_DOWNLOAD_NUM_UPPER_BOUND).toList()
+                curValue = downloadConfig.maxConcurDownloadNum
+                defaultValue = DownloadConfig.DEFAULT_MAX_CONCUR_DOWNLOAD_NUM
             }
             else -> {
                 numbers =
-                    (Configurations.MULTI_THREAD_DOWNLOAD_NUM_LOWER_BOUND..Configurations.MULTI_THREAD_DOWNLOAD_NUM_UPPER_BOUND).toList()
-                curValue = Configurations.multiThreadDownloadNum
-                defaultValue = Configurations.DEFAULT_MULTI_THREAD_DOWNLOAD_NUM
+                    (DownloadConfig.MULTI_THREAD_DOWNLOAD_NUM_LOWER_BOUND..DownloadConfig.MULTI_THREAD_DOWNLOAD_NUM_UPPER_BOUND).toList()
+                curValue = downloadConfig.multiThreadDownloadNum
+                defaultValue = DownloadConfig.DEFAULT_MULTI_THREAD_DOWNLOAD_NUM
             }
         }
 
@@ -182,7 +188,7 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
                 if (reviewInfo != null) {
                     showInAppRatingBottomSheet()
                 } else {
-                    Utils.navigateToCHPlay(requireContext())
+                    utils.navigateToCHPlay(requireContext())
                 }
             }
         }
@@ -191,22 +197,22 @@ class SettingsDialog(private val fm: FragmentManager) : DialogFragment(),
     private fun applyChangedConfigs() {
         changedConfigs.forEach {
             when (it) {
-                Configurations.MAX_CONCUR_DOWNLOAD_NUM_KEY -> Configurations.setMaxConcurDownloadNum(
+                Prefs.MAX_CONCUR_DOWNLOAD_NUM_KEY -> downloadConfig.setMaxConcurDownloadNum(
                     requireView().maxConcurDownloadNumSpinner.selectedItem as Int,
                     activity as MainActivity
                 )
-                Configurations.MULTI_THREAD_DOWNLOAD_NUM_KEY -> {
-                    Configurations.multiThreadDownloadNum =
+                Prefs.MULTI_THREAD_DOWNLOAD_NUM_KEY -> {
+                    downloadConfig.multiThreadDownloadNum =
                         requireView().multiThreadDownloadNumSpinner.selectedItem as Int
                 }
             }
         }
     }
 
-    fun show() {
-        show(fm, TAG)
-        selectedMaxConcurDownloadNum = Configurations.maxConcurDownloadNum
-        selectedMultiThreadDownloadNum = Configurations.multiThreadDownloadNum
+    fun show(fragmentManager: FragmentManager) {
+        show(fragmentManager, TAG)
+        selectedMaxConcurDownloadNum = downloadConfig.maxConcurDownloadNum
+        selectedMultiThreadDownloadNum = downloadConfig.multiThreadDownloadNum
     }
 
     override fun onResume() {

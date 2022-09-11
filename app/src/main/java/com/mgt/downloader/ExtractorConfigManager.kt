@@ -1,0 +1,93 @@
+package com.mgt.downloader
+
+import android.util.Log
+import com.mgt.downloader.di.DI.config
+import com.mgt.downloader.di.DI.gson
+import com.mgt.downloader.di.DI.utils
+import com.mgt.downloader.serialize_model.ExtractorConfig
+import com.mgt.downloader.utils.TAG
+import com.mgt.downloader.utils.fromJson
+import com.mgt.downloader.utils.toJson
+import kotlin.reflect.KClass
+
+class ExtractorConfigManager {
+    private val memCacheExtractorConfig = HashMap<String, ExtractorConfig>()
+
+    fun <T : ExtractorConfig> getConfig(
+        extractorName: String,
+        extractorConfigClass: KClass<T>
+    ): T? {
+        getMemCached(extractorName, extractorConfigClass)?.let {
+            Log.d(TAG, "getExtractorConfig: from mem, value: $it")
+            return it
+        }
+        getFileCache(extractorName, extractorConfigClass)?.let {
+            Log.d(TAG, "getExtractorConfig: from file, value: $it")
+            updateMemCache(extractorName, it)
+            return it
+        }
+        getDefault(extractorName, extractorConfigClass)?.let {
+            Log.d(TAG, "getExtractorConfig: from default, value: $it")
+            updateMemCache(extractorName, it)
+            updateFileCache(extractorName, it)
+            return it
+        }
+        return null
+    }
+
+    fun updateMemCache(extractorName: String, extractorConfig: ExtractorConfig) {
+        memCacheExtractorConfig[extractorName] = extractorConfig
+    }
+
+    fun updateFileCache(extractorName: String, extractorConfig: ExtractorConfig) {
+        runCatching {
+            val cacheFile = utils.getCacheFile(App.instance, "extract_fields/$extractorName")
+            utils.writeOutputStream(cacheFile.outputStream(), extractorConfig.toJson())
+        }
+    }
+
+    private fun <T : ExtractorConfig> getMemCached(
+        extractorName: String,
+        extractorConfigClass: KClass<T>
+    ): T? {
+        return memCacheExtractorConfig[extractorName] as? T
+    }
+
+    private fun <T : ExtractorConfig> getFileCache(
+        extractorName: String,
+        extractorConfigClass: KClass<T>
+    ): T? {
+        return runCatching {
+            val cacheFile = utils.getCacheFile(App.instance, "extractor_config/$extractorName")
+            val cachedConfigString = utils.readInputStream(cacheFile.inputStream())
+            if (cachedConfigString.isEmpty()) {
+                return null
+            }
+            extractorConfigClass.fromJson(cachedConfigString)
+        }.getOrNull()
+    }
+
+    private fun <T : ExtractorConfig> getDefault(
+        extractorName: String,
+        extractorConfigClass: KClass<T>
+    ): T? {
+        return runCatching {
+            extractorConfigClass.fromJson(
+                utils.readInputStream(App.instance.assets.open("extractor_config/$extractorName.json"))
+                    .replace("java:", "javascript:")
+            )
+        }.getOrNull()
+    }
+
+    fun <T : ExtractorConfig> getRemote(
+        extractorName: String,
+        extractorConfigClass: KClass<T>
+    ): T? {
+        return runCatching {
+            val json =
+                utils.getDontpadContent(config.getDontpadExtractorConfigUrl(extractorName))
+                    .replace("java:", "javascript:")
+            gson.fromJson(json, extractorConfigClass.java)
+        }.getOrNull()
+    }
+}

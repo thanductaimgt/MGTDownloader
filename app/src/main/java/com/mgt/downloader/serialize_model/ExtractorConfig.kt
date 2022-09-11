@@ -1,4 +1,8 @@
-package com.mgt.downloader.data_model
+package com.mgt.downloader.serialize_model
+
+open class ExtractorConfig(
+    open val extractFields: ExtractFields,
+)
 
 data class ExtractFields(
     val title: ExtractFieldMeta,

@@ -1,37 +1,29 @@
 package com.mgt.downloader.utils
 
+import com.mgt.downloader.di.DI.prefs
 
-object Statistics {
+
+class Statistics {
     var totalDownloadSize: Long = 0
     var successDownloadNum: Int = 0
     var cancelOrFailDownloadNum: Int = 0
-    var totalDownloadNum: Int = 0
+    val totalDownloadNum: Int
         get() = successDownloadNum + cancelOrFailDownloadNum
-        private set
-
-    const val SUCCESS_DOWNLOAD_NUM_KEY = "SUCCESS_DOWNLOAD_NUM_KEY"
-    const val CANCEL_OR_FAIL_DOWNLOAD_NUM_KEY = "CANCEL_OR_FAIL_DOWNLOAD_NUM_KEY"
-
-    const val TOTAL_DOWNLOAD_SIZE_KEY = "TOTAL_DOWNLOAD_SIZE_KEY"
 
     @Synchronized
-    fun increaseDownloadNum(numKey: String) {
-        val newNum = when (numKey) {
-            SUCCESS_DOWNLOAD_NUM_KEY -> ++successDownloadNum
-            else -> ++cancelOrFailDownloadNum
-        }
+    fun increaseCanceledOrFailDownloadNum() {
+        prefs.setCanceledOrFailDownloadNum(++cancelOrFailDownloadNum)
+    }
 
-        Prefs.edit {
-            putInt(numKey, newNum)
-        }
+    @Synchronized
+    fun increaseSuccessDownloadNum() {
+        prefs.setSuccessDownloadNum(++successDownloadNum)
     }
 
     @Synchronized
     fun increaseTotalDownloadSize(size: Number) {
         totalDownloadSize += size.toLong()
 
-        Prefs.edit {
-            putLong(TOTAL_DOWNLOAD_SIZE_KEY, totalDownloadSize)
-        }
+        prefs.setTotalDownloadSize(totalDownloadSize)
     }
 }

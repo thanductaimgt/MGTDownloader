@@ -1,0 +1,23 @@
+{
+  "extractFields": {
+    "title": {
+      "prefix": "<p(.*?)class=\"card-text\"(.*?)>",
+      "postfix": "</p>",
+      "default": "Facebook video"
+    },
+    "thumbUrl": {
+      "prefix": "<a(.*?)background-image:(.*?)url\\(",
+      "postfix": "\\)"
+    },
+    "downloadUrl": {
+      "prefix": "<div(.*?)class=\"(.*?)btns-download(.*?)\">((.|\n)*?)<a(.*?)href=\"",
+      "postfix": "\""
+    },
+    "width": {
+      "default": "1"
+    },
+    "height": {
+      "default": "1"
+    }
+  }
+}

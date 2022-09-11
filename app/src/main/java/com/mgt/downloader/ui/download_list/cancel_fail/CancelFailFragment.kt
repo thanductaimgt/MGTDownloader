@@ -9,8 +9,8 @@ import androidx.core.view.isNotEmpty
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mgt.downloader.R
 import com.mgt.downloader.base.BaseDownloadFragment
-import com.mgt.downloader.data_model.DownloadTask
 import com.mgt.downloader.helper.DownloadTaskDiffUtil
+import com.mgt.downloader.serialize_model.DownloadTask
 import com.mgt.downloader.utils.TAG
 import com.mgt.downloader.utils.logD
 import kotlinx.android.synthetic.main.fragment_canceled_or_fail.*

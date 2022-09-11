@@ -46,6 +46,21 @@
                 tools:visibility="visible" />
 
         <ImageView
+                android:id="@+id/shareImgView"
+                android:layout_width="@dimen/sizeTaskActionButton"
+                android:layout_height="0dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/desc_retry"
+                android:padding="7dp"
+                android:src="@drawable/share"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/deleteImgView"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toStartOf="@id/retryImgView"
+                app:layout_constraintTop_toTopOf="@id/deleteImgView"
+                tools:visibility="visible" />
+
+        <ImageView
                 android:id="@+id/openFileImgView"
                 android:layout_width="@dimen/sizeTaskActionButton"
                 android:layout_height="0dp"

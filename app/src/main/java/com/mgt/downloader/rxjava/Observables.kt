@@ -93,12 +93,14 @@ class SingleObservable<T> private constructor() : Observable() {
                     } else {
                         result2 = result as T2?
                     }
-                    if (result1 != null && result2 != null) {
-                        try {
-                            val zipResult = biFunction(result1!!, result2!!)
-                            zipSingleObservable.emitter.onSuccess(zipResult)
-                        } catch (t: Throwable) {
-                            onError(t)
+                    result1?.let { r1 ->
+                        result2?.let { r2 ->
+                            try {
+                                val zipResult = biFunction(r1, r2)
+                                zipSingleObservable.emitter.onSuccess(zipResult)
+                            } catch (t: Throwable) {
+                                onError(t)
+                            }
                         }
                     }
                 }
