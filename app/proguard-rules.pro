@@ -17,11 +17,11 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # dismiss the original source file fileName.
-#-renamesourcefileattribute SourceFile
+-renamesourcefileattribute SourceFile
 -keeppackagenames org.jsoup.nodes
 
 ##---------------Begin: proguard configuration for Gson  ----------
