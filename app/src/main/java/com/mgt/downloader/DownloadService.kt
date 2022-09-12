@@ -598,11 +598,9 @@ class DownloadService : Service(), HasDisposable {
             // if top level dir, use downloadTask.fileName
             val fileName = if (parentPath == utils.getDownloadDirPath())
                 downloadTask.fileName
-            else utils.getFileName(
-                zipNode.entry?.name.orEmpty()
-            )
+            else zipNode.name
 
-            if (zipNode.entry?.isDirectory == true) {
+            if (zipNode.isDirectory) {
                 val curDirPath =
                     "$parentPath${File.separator}$fileName"
 
@@ -639,7 +637,7 @@ class DownloadService : Service(), HasDisposable {
 //                    //resume case
                     var downloadedSize = 0L
                     val curFile =
-                        File("${parentPath}${File.separator}${utils.getFileName(zipNode.entry?.name.orEmpty())}")
+                        File("${parentPath}${File.separator}${zipNode.name}")
                     if (isResume && curFile.exists() && curFile.isFile) {
                         downloadedSize = curFile.length()
                         downloadTask.downloadedSize += downloadedSize - curDownloadedBytes

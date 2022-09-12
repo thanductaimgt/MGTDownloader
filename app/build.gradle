@@ -41,7 +41,7 @@ android {
 
             minifyEnabled true
             debuggable false
-            shrinkResources false
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             resValue 'string', 'banner_ad_id', '"ca-app-pub-3298478237408371/6890259756"'

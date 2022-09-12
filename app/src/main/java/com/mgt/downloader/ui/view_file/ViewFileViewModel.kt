@@ -13,13 +13,14 @@ import com.mgt.downloader.rxjava.SingleObserver
 
 
 @SuppressLint("CheckResult")
-class ViewFileViewModel(filePreviewInfo: FilePreviewInfo) : BaseViewModel() {
+class ViewFileViewModel : BaseViewModel() {
     val liveRootNode = MutableLiveData<NullableZipNode>()
+    private val buildZipTreeObserver = BuildZipTreeObserver()
 
-    init {
+    fun buildZipTree(filePreviewInfo: FilePreviewInfo) {
         SingleObservable.fromCallable(unboundExecutorService) {
             ZipNode.getZipTree(filePreviewInfo)
-        }.subscribe(BuildZipTreeObserver())
+        }.subscribe(buildZipTreeObserver)
     }
 
     inner class BuildZipTreeObserver : SingleObserver<ZipNode>(this) {

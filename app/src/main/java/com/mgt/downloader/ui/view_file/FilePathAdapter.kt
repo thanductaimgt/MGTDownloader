@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.mgt.downloader.R
-import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.nonserialize_model.ZipNode
 import kotlinx.android.synthetic.main.item_path.view.*
 
@@ -32,7 +31,7 @@ class FilePathAdapter(private val fragment: Fragment) :
 
     inner class FilePathViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(position: Int) {
-            val fileName = zipNodes[position].entry?.name?.let { utils.getFileName(it) }
+            val fileName = zipNodes[position].name.takeIf { it.isNotEmpty() }
                 ?: fragment.getString(R.string.root)
             itemView.apply {
                 pathTextView.apply {

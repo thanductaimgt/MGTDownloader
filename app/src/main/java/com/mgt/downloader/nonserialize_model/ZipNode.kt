@@ -6,18 +6,15 @@ import java.util.zip.ZipEntry
 
 data class ZipNode(
     var entry: ZipEntry? = null,
-    var parentNode: ZipNode? = null,
-    var level: Int = 0,
-    var childNodes: ArrayList<ZipNode> = ArrayList(),
-    var size: Long = 0
+    var size: Long = 0,
+    var path: String = "",
+    var name: String = "",
 ) : NullableZipNode {
-    fun insertEntry(entry: ZipEntry, level: Int): ZipNode? {
-        return if (level > this.level) {
-            ZipNode(entry, this, level).also { childNodes.add(it) }
-        } else {
-            parentNode?.insertEntry(entry, level)
-        }
-    }
+    var parentNode: ZipNode? = null
+    var childNodes: ArrayList<ZipNode> = ArrayList()
+
+    val isDirectory: Boolean
+        get() = path.endsWith('/')
 
     fun getPath(): ArrayList<ZipNode> {
         return (parentNode?.getPath() ?: arrayListOf()).apply { add(this@ZipNode) }
@@ -43,11 +40,71 @@ data class ZipNode(
             val newPath =
                 if (path.length > curRootName.length) path.drop(curRootName.length + 1) else ""
             childNodes.forEach {
-                if (utils.getFileName(it.entry?.name.orEmpty()) == utils.getFileName(curRootName)) {
+                if (it.name == utils.getFileName(curRootName)) {
                     return it.getNode(newPath)
                 }
             }
             throw Throwable("entry not found")
+        }
+    }
+
+    private fun insertZipEntryInternal(
+        zipEntry: ZipEntry,
+        remPath: String = zipEntry.name,
+    ) {
+        if (remPath.isEmpty()) return
+
+        val preSubPath = remPath.takeWhile { it != '/' }
+        val nextRemPath =
+            remPath.substring((preSubPath.length + 1).coerceAtMost(remPath.length))
+
+        if (preSubPath.isEmpty()) {
+            return insertZipEntryInternal(zipEntry, nextRemPath)
+        }
+
+        var positionToInsert = childNodes.size
+
+        childNodes.forEachIndexed { index, childNode ->
+            if (preSubPath == childNode.name) {
+                childNode.insertZipEntryInternal(zipEntry, nextRemPath)
+                return
+            } else if (preSubPath < childNode.name) {
+                positionToInsert = index
+                return@forEachIndexed
+            }
+        }
+
+        val indexOfSeparator = remPath.indexOf('/')
+        if (indexOfSeparator in 0 until remPath.lastIndex) {
+            val newNodePath = if (parentNode != null) {
+                "$path$preSubPath/"
+            } else {
+                "$preSubPath/"
+            }
+            val newNode = ZipNode(
+                entry = null,
+                size = 0,
+                path = newNodePath,
+                name = preSubPath,
+            ).apply {
+                parentNode = this@ZipNode
+            }
+            childNodes.add(positionToInsert, newNode)
+            newNode.insertZipEntryInternal(zipEntry, nextRemPath)
+        } else {
+            val name = if (zipEntry.isDirectory) {
+                zipEntry.name.dropLast(1).takeLastWhile { it != '/' }
+            } else {
+                zipEntry.name.takeLastWhile { it != '/' }
+            }
+            childNodes.add(ZipNode(
+                entry = zipEntry,
+                size = zipEntry.size,
+                path = zipEntry.name,
+                name = name
+            ).apply {
+                parentNode = this@ZipNode
+            })
         }
     }
 
@@ -80,20 +137,18 @@ data class ZipNode(
             return if (rootNode != null) {
                 rootNode
             } else {
-                val zipEntries = utils.getZipEntries(zipPreviewInfo)
-                parseZipTree(zipEntries)
+                val zipEntries = utils.getZipEntries(zipPreviewInfo).sortedBy { it.name }
+                val res = parseZipTree(zipEntries)
+                App.zipTreeCaches[zipPreviewInfo.displayUri] = res
+                res
             }
         }
 
         private fun parseZipTree(zipEntries: List<ZipEntry>): ZipNode {
-            val rootNode = ZipNode()
-            var lastInsertedNode: ZipNode? = rootNode
+            val rootNode = ZipNode(path = "/")
 
             zipEntries.forEach { zipEntry ->
-                lastInsertedNode = lastInsertedNode?.insertEntry(
-                    zipEntry,
-                    utils.getPathLevel(zipEntry.name)
-                )
+                rootNode.insertZipEntryInternal(zipEntry)
             }
             return rootNode.apply { initNodesSize() }
         }

@@ -336,12 +336,12 @@ class MainActivity : BaseActivity(), View.OnClickListener {
                     height = resources.getDimension(R.dimen.sizeFileExtensionHeight).toInt()
                 }
 
-            fileIconImgView.setImageResource(
-                utils.getResIdFromFileExtension(
-                    this,
-                    utils.getFileExtension(filePreviewInfo.name)
-                )
-            )
+            val iconUrl =
+                utils.getIconUrlFromFileExtension(utils.getFileExtension(filePreviewInfo.name))
+            Picasso.get().smartLoad(iconUrl, fileIconImgView) {
+                it.placeholder(R.drawable.file)
+                it.error(R.drawable.file)
+            }
 
             fileIconImgView.cornerRadius = 0f
 

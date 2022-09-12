@@ -169,13 +169,8 @@ class Utils {
         return "$newFileNameWithoutExtension$tail"
     }
 
-    fun getResIdFromFileExtension(context: Context, fileExtension: String): Int {
-        val resourceId = context.resources.getIdentifier(
-            fileExtension, "drawable",
-            context.packageName
-        )
-
-        return if (resourceId != 0) resourceId else R.drawable.file
+    fun getIconUrlFromFileExtension(fileExtension: String): String {
+        return "${Constants.FIREBASE_HOSTING_BASE_URL}static/$fileExtension.webp"
     }
 
     fun getDownloadDirPath(): String? {

@@ -2,6 +2,7 @@ package com.mgt.downloader.ui.view_file
 
 import android.animation.Animator
 import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -13,9 +14,6 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieDrawable
 import com.mgt.downloader.DownloadService
@@ -23,6 +21,7 @@ import com.mgt.downloader.R
 import com.mgt.downloader.base.ContainsSelectableList
 import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.nonserialize_model.FilePreviewInfo
+import com.mgt.downloader.nonserialize_model.NullZipNode
 import com.mgt.downloader.nonserialize_model.ZipNode
 import com.mgt.downloader.serialize_model.DownloadTask
 import com.mgt.downloader.ui.MainActivity
@@ -36,13 +35,7 @@ class ViewFileDialog : DialogFragment(),
     View.OnClickListener, View.OnLongClickListener,
     ContainsSelectableList {
     private lateinit var filePreviewInfo: FilePreviewInfo
-    private val viewModel by viewModels<ViewFileViewModel> {
-        viewModelFactory {
-            initializer {
-                ViewFileViewModel(filePreviewInfo)
-            }
-        }
-    }
+    private val viewModel by viewModels<ViewFileViewModel>()
     var curZipNode: ZipNode? = null
     private lateinit var fileViewAdapter: FileViewAdapter
     private lateinit var filePathAdapter: FilePathAdapter
@@ -86,21 +79,24 @@ class ViewFileDialog : DialogFragment(),
         initView(view)
 
         (requireActivity() as MainActivity).liveDownloadService.observe(
-            viewLifecycleOwner,
-            Observer { downloadService ->
-                this.downloadService = downloadService
-            })
+            viewLifecycleOwner
+        ) { downloadService ->
+            this.downloadService = downloadService
+        }
 
-        viewModel.liveRootNode.observe(viewLifecycleOwner, Observer {
+        viewModel.liveRootNode.observe(viewLifecycleOwner) {
+            if (it == null) return@observe
+
             this.view?.animView?.cancelAnimation()
             this.view?.animView?.visibility = View.GONE
             if (it is ZipNode) {
                 setCurrentNode(it)
-            } else {
+            } else if (it is NullZipNode) {
                 Toast.makeText(context, getString(R.string.error_occurred), Toast.LENGTH_SHORT)
                     .show()
             }
-        })
+        }
+        viewModel.buildZipTree(filePreviewInfo)
     }
 
     private fun initView(view: View) {
@@ -163,7 +159,7 @@ class ViewFileDialog : DialogFragment(),
                 val position = requireView().fileViewRecyclerView.getChildLayoutPosition(view)
                 if (selectedZipNodes.isEmpty()) {
                     val zipNode = fileViewAdapter.zipNodes[position]
-                    if (zipNode.entry?.isDirectory == true) {
+                    if (zipNode.isDirectory) {
                         setCurrentNode(zipNode)
                     }
                 } else {
@@ -220,7 +216,7 @@ class ViewFileDialog : DialogFragment(),
     private fun addOrRemoveSelectedZipNode(position: Int) {
         val zipNode = fileViewAdapter.zipNodes[position]
         // if selectedZipNodes not contains zipNode ...
-        if (!selectedZipNodes.removeAll { it.entry?.name == zipNode.entry?.name }) {
+        if (!selectedZipNodes.removeAll { it.path == zipNode.path }) {
             selectedZipNodes.add(zipNode)
         }
         updateSelectLayout()
@@ -270,16 +266,7 @@ class ViewFileDialog : DialogFragment(),
     }
 
     private fun startDownload(zipNode: ZipNode) {
-        val filePreviewInfo = FilePreviewInfo(
-            utils.getFileName(zipNode.entry?.name.orEmpty(), "zip"),
-            filePreviewInfo.displayUri,
-            filePreviewInfo.downloadUri,
-            zipNode.size,
-            filePreviewInfo.centralDirOffset,
-            filePreviewInfo.centralDirSize
-        )
-
-        var fileName = utils.getFileName(zipNode.entry?.name.orEmpty())
+        var fileName = zipNode.name
 
         val stopCondition = { newFileName: String ->
             !(downloadService?.isFileOrDownloadTaskExist(newFileName) ?: false)
@@ -295,8 +282,8 @@ class ViewFileDialog : DialogFragment(),
             downloadUrl = filePreviewInfo.downloadUri,
             startTime = Date(System.currentTimeMillis()),
             totalSize = zipNode.size,
-            zipEntryName = zipNode.entry?.name,
-            isDirectory = zipNode.entry?.isDirectory ?: false
+            zipEntryName = zipNode.path,
+            isDirectory = zipNode.isDirectory
         )
 
         (activity as MainActivity).startDownloadTask(downloadTask)
@@ -313,7 +300,7 @@ class ViewFileDialog : DialogFragment(),
 
     fun setCurrentNode(zipNode: ZipNode) {
         curZipNode = zipNode
-        fileViewAdapter.zipNodes = zipNode.childNodes.sortedBy { !(it.entry?.isDirectory ?: false) }
+        fileViewAdapter.zipNodes = zipNode.childNodes.sortedBy { !it.isDirectory }
         fileViewAdapter.notifyDataSetChanged()
         filePathAdapter.setCurrentNode(zipNode)
         filePathAdapter.curPosition?.let { view?.filePathRecyclerView?.scrollToPosition(it) }
@@ -322,5 +309,10 @@ class ViewFileDialog : DialogFragment(),
     fun show(fragmentManager: FragmentManager, zipPreviewInfo: FilePreviewInfo) {
         this.filePreviewInfo = zipPreviewInfo
         show(fragmentManager, TAG)
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        viewModel.liveRootNode.value = null
     }
 }

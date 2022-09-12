@@ -109,12 +109,12 @@ abstract class BaseDownloadAdapter(
                                 .toInt()
                         }
 
-                    val placeholderResId = utils.getResIdFromFileExtension(
-                        context,
-                        fileExtension
-                    )
+                    val iconUrl = utils.getIconUrlFromFileExtension(fileExtension)
 
-                    fileIconImgView.setImageResource(placeholderResId)
+                    Picasso.get().smartLoad(iconUrl, fileIconImgView) {
+                        it.placeholder(R.drawable.file)
+                        it.error(R.drawable.file)
+                    }
 
                     fileIconImgView.cornerRadius = 0f
                 }
