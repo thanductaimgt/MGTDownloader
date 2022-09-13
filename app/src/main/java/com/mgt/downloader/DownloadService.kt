@@ -420,7 +420,7 @@ class DownloadService : Service(), HasDisposable {
                     logD(TAG, "fileLength: ${downloadTask.totalSize}, task: $downloadTask")
 
                     //skip to downloadedSize, while skipping check if user press pause and handle
-                    skipDownloadedBytes(input, downloadTask, emitter)
+                    skipDownloadedBytes(input, downloadTask.downloadedSize, downloadTask, emitter)
                 }
 
                 //helper lambda functions
@@ -511,17 +511,17 @@ class DownloadService : Service(), HasDisposable {
 
     private fun skipDownloadedBytes(
         inputStream: InputStream,
+        downloadedSize: Long,
         downloadTask: DownloadTask,
         emitter: StreamEmitter<DownloadTask>,
         threadIndex: Int = 0
     ): Long {
         var prevTime = System.currentTimeMillis()
 
-        val numBytes = downloadTask.downloadedSize
-        if (numBytes <= 0) {
+        if (downloadedSize <= 0) {
             return 0
         }
-        var n = numBytes.toInt()
+        var n = downloadedSize.toInt()
         val bufLen = min(2048, n)
         val data = ByteArray(bufLen)
         while (n > 0) {
@@ -542,7 +542,7 @@ class DownloadService : Service(), HasDisposable {
 
         downloadTask.elapsedTime += System.currentTimeMillis() - prevTime
 
-        return numBytes - n
+        return downloadedSize - n
     }
 
     private fun executeZipPartDownloadTask(
@@ -589,10 +589,10 @@ class DownloadService : Service(), HasDisposable {
         emitter: StreamEmitter<DownloadTask>,
         isResume: Boolean,
         zipNode: ZipNode,
-        curDownloadedBytes: Long,
+        downloadedBytesFromCurPart: Long,
         parentPath: String
     ): Boolean {// return true if connection lost while downloading this zipNode or any of its child, false else
-        if (zipNode.size <= curDownloadedBytes) {
+        if (zipNode.size <= downloadedBytesFromCurPart) {
             return false
         } else {
             // if top level dir, use downloadTask.fileName
@@ -604,20 +604,20 @@ class DownloadService : Service(), HasDisposable {
                 val curDirPath =
                     "$parentPath${File.separator}$fileName"
 
-                var newCurSize = curDownloadedBytes
+                var downloadedBytesFromNextPart = downloadedBytesFromCurPart
                 zipNode.childNodes.forEach {
                     val isConnectionLost = executeZipPartDownloadTaskInternal(
                         downloadTask,
                         emitter,
                         isResume,
                         it,
-                        newCurSize,
+                        downloadedBytesFromNextPart,
                         curDirPath
                     )
                     if (isConnectionLost) {
                         return true
                     }
-                    newCurSize = max(newCurSize - it.size, 0)
+                    downloadedBytesFromNextPart = max(downloadedBytesFromNextPart - it.size, 0)
                 }
             } else {
                 val localHeaderRelativeOffsetExtra =
@@ -635,12 +635,12 @@ class DownloadService : Service(), HasDisposable {
                 try {
                     var prevTime = System.currentTimeMillis()
 //                    //resume case
-                    var downloadedSize = 0L
+                    var partDownloadedSize = 0L
                     val curFile =
                         File("${parentPath}${File.separator}${zipNode.name}")
                     if (isResume && curFile.exists() && curFile.isFile) {
-                        downloadedSize = curFile.length()
-                        downloadTask.downloadedSize += downloadedSize - curDownloadedBytes
+                        partDownloadedSize = curFile.length()
+                        downloadTask.downloadedSize += partDownloadedSize - downloadedBytesFromCurPart
                         if (curFile.length() == zipNode.size) {
                             return false
                         }
@@ -682,6 +682,7 @@ class DownloadService : Service(), HasDisposable {
                                 downloadTask.elapsedTime += System.currentTimeMillis() - prevTime
                                 skipDownloadedBytes(
                                     it,
+                                    partDownloadedSize,
                                     downloadTask,
                                     emitter
                                 )
@@ -727,7 +728,7 @@ class DownloadService : Service(), HasDisposable {
                     //
 
                     count = inputStream.read(data)
-                    while (downloadedSize < (zipNode.entry?.size ?: 0L) && count != -1) {
+                    while (partDownloadedSize < (zipNode.entry?.size ?: 0L) && count != -1) {
                         outputStream.write(data, 0, count)
 
                         val prevProgress = getProgress()
@@ -735,7 +736,7 @@ class DownloadService : Service(), HasDisposable {
                         //for statistics
                         statistics.increaseTotalDownloadSize(count)
 
-                        downloadedSize += count
+                        partDownloadedSize += count
                         downloadTask.downloadedSize += count
 
                         downloadTask.elapsedTime += System.currentTimeMillis() - prevTime

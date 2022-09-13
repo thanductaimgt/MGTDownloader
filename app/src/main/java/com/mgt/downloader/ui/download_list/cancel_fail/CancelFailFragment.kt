@@ -57,6 +57,7 @@ class CancelFailFragment : BaseDownloadFragment() {
             adapter = this@CancelFailFragment.adapter
             layoutManager = LinearLayoutManager(context)
             setItemViewCacheSize(30)
+            setHasFixedSize(true)
         }
 
         selectAllImgView.setOnClickListener(this)

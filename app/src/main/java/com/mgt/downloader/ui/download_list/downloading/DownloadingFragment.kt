@@ -52,6 +52,7 @@ class DownloadingFragment : BaseDownloadFragment() {
             adapter = this@DownloadingFragment.adapter
             layoutManager = LinearLayoutManager(context)
             setItemViewCacheSize(30)
+            setHasFixedSize(true)
         }
 
         pauseAllImgView.setOnClickListener(this)
