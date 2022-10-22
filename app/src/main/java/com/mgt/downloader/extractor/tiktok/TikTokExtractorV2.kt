@@ -10,7 +10,6 @@ import com.mgt.downloader.rxjava.SingleObserver
 import com.mgt.downloader.serialize_model.ExtractorConfig
 import com.mgt.downloader.serialize_model.TikTokExtractorConfig
 import com.mgt.downloader.ui.MainActivity
-import com.mgt.downloader.utils.recordNonFatalException
 import kotlin.reflect.KClass
 
 class TikTokExtractorV2(hasDisposable: HasDisposable) :
@@ -40,11 +39,6 @@ class TikTokExtractorV2(hasDisposable: HasDisposable) :
                         extractorConfigManager.updateFileCache(extractorName, result)
                         fetchRemoteSuccess = true
                     }
-                }
-
-                override fun onError(t: Throwable) {
-                    super.onError(t)
-                    recordNonFatalException(t)
                 }
             })
         }
@@ -84,8 +78,8 @@ class TikTokExtractorV2(hasDisposable: HasDisposable) :
     }
 
     companion object {
-        private const val DELAY_LOAD_TIME_WEB = 3000L
-        private const val DELAY_LOAD_TIME_URL = 3000L
+        private const val DELAY_LOAD_TIME_WEB = 5000L
+        private const val DELAY_LOAD_TIME_URL = 5000L
         const val JS_INTERFACE_NAME = "HtmlViewer"
         const val WEB_URL = "https://snaptik.app/vn"
 
