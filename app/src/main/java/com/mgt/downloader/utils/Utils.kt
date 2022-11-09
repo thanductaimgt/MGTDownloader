@@ -204,10 +204,16 @@ class Utils {
         }.getOrDefault(getDownloadDirPath())
     }
 
-    fun getCacheFile(context: Context, fileName: String): File {
+    fun getCacheFile(context: Context, parentRelativePath: String, fileName: String): File {
         val name = "cache-${config.getEnv()}"
-        val cacheDir = context.getDir(name, Context.MODE_PRIVATE)
-        return File(cacheDir, fileName)
+        val internalDir = context.getDir(name, Context.MODE_PRIVATE)
+        val parentDir = File(internalDir.path, parentRelativePath)
+        parentDir.mkdirs()
+        val file = File(parentDir.absolutePath, fileName)
+        if (!file.exists()) {
+            file.createNewFile()
+        }
+        return file
     }
 
     fun isDownloadedFileExist(downloadTask: DownloadTask): Boolean {

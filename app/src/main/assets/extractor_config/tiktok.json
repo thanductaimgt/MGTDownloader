@@ -11,9 +11,9 @@
       "target": "https://p16-tiktokcdn-com(.*?)"
     },
     "downloadUrl": {
-      "prefix": "Download Server.*?<a href=\"",
+      "prefix": "href=\"",
       "postfix": "\"",
-      "target": "https://snap(.*?)"
+      "target": "(https://cdn.snaptik.app.*?)"
     },
     "width": {
       "default": "473"
@@ -22,5 +22,5 @@
       "default": "840"
     }
   },
-  "jsCode": "java:document.getElementById('url').value = '%s';java:document.getElementById('submiturl').click()"
+  "jsCode": "java:document.getElementById('url').value = '%s';java:document.getElementsByClassName('btn-go')[0].click();"
 }

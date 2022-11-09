@@ -1,13 +1,10 @@
 package com.mgt.downloader
 
-import android.util.Log
 import com.mgt.downloader.di.DI.config
 import com.mgt.downloader.di.DI.gson
 import com.mgt.downloader.di.DI.utils
 import com.mgt.downloader.serialize_model.ExtractorConfig
-import com.mgt.downloader.utils.TAG
-import com.mgt.downloader.utils.fromJson
-import com.mgt.downloader.utils.toJson
+import com.mgt.downloader.utils.*
 import kotlin.reflect.KClass
 
 class ExtractorConfigManager {
@@ -18,16 +15,16 @@ class ExtractorConfigManager {
         extractorConfigClass: KClass<T>
     ): T? {
         getMemCached(extractorName, extractorConfigClass)?.let {
-            Log.d(TAG, "getExtractorConfig: from mem, value: $it")
+            logD(TAG, "getExtractorConfig: from mem, value: $it")
             return it
         }
         getFileCache(extractorName, extractorConfigClass)?.let {
-            Log.d(TAG, "getExtractorConfig: from file, value: $it")
+            logD(TAG, "getExtractorConfig: from file, value: $it")
             updateMemCache(extractorName, it)
             return it
         }
         getDefault(extractorName, extractorConfigClass)?.let {
-            Log.d(TAG, "getExtractorConfig: from default, value: $it")
+            logD(TAG, "getExtractorConfig: from default, value: $it")
             updateMemCache(extractorName, it)
             updateFileCache(extractorName, it)
             return it
@@ -41,8 +38,10 @@ class ExtractorConfigManager {
 
     fun updateFileCache(extractorName: String, extractorConfig: ExtractorConfig) {
         runCatching {
-            val cacheFile = utils.getCacheFile(App.instance, "extract_fields/$extractorName")
+            val cacheFile = utils.getCacheFile(App.instance, "extractor_config", extractorName)
             utils.writeOutputStream(cacheFile.outputStream(), extractorConfig.toJson())
+        }.onFailure {
+            recordNonFatalException(it)
         }
     }
 
@@ -58,7 +57,7 @@ class ExtractorConfigManager {
         extractorConfigClass: KClass<T>
     ): T? {
         return runCatching {
-            val cacheFile = utils.getCacheFile(App.instance, "extractor_config/$extractorName")
+            val cacheFile = utils.getCacheFile(App.instance, "extractor_config", extractorName)
             val cachedConfigString = utils.readInputStream(cacheFile.inputStream())
             if (cachedConfigString.isEmpty()) {
                 return null

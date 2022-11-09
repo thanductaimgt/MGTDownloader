@@ -276,6 +276,11 @@ class MainActivity : BaseActivity(), View.OnClickListener {
             }
             switchEnvLayout.visibility = View.VISIBLE
             envTextView.text = config.getEnv().toString()
+            jsExButton.setOnClickListener {
+                val expr = "${jsExprEditText.text}javascript:window.HtmlViewer.dummy();"
+                webView.loadUrl(expr)
+                jsExprEditText.text = null
+            }
         } else {
             switchEnvLayout.visibility = View.INVISIBLE
         }

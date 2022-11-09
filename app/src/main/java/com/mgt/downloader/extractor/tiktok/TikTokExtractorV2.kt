@@ -43,45 +43,55 @@ class TikTokExtractorV2(hasDisposable: HasDisposable) :
             })
         }
 
-        SingleObservable.fromCallable(unboundExecutorService) {
-            extractorConfigManager.getConfig(
-                extractorName,
-                TikTokExtractorConfig::class
-            )?.jsCode?.format(url)
-                ?.let { "$it;" } ?: ""
-        }.subscribe(object : SingleObserver<String>(hasDisposable) {
-            override fun onSuccess(result: String) {
-                super.onSuccess(result)
+        val onAfterWaitForRemoteConfig = {
+            SingleObservable.fromCallable(unboundExecutorService) {
+                extractorConfigManager.getConfig(
+                    extractorName,
+                    TikTokExtractorConfig::class
+                )?.jsCode?.format(url)
+                    ?.let { "$it;" } ?: ""
+            }.subscribe(object : SingleObserver<String>(hasDisposable) {
+                override fun onSuccess(result: String) {
+                    super.onSuccess(result)
 
-                MainActivity.jsInterface.onSuccess = onSuccess
+                    MainActivity.jsInterface.onSuccess = onSuccess
 
-                val curTime = System.currentTimeMillis()
-                val delayTimeLoadWeb = (DELAY_LOAD_TIME_WEB - (curTime - (MainActivity.loadWebTime
-                    ?: System.currentTimeMillis()))).coerceAtLeast(0)
+                    val curTime = System.currentTimeMillis()
+                    val delayTimeLoadWeb =
+                        (DELAY_LOAD_TIME_WEB - (curTime - (MainActivity.loadWebTime
+                            ?: System.currentTimeMillis()))).coerceAtLeast(0)
 
-                handler.postDelayed({
-                    webView.loadUrl("${result}javascript:window.HtmlViewer.dummy();")
                     handler.postDelayed({
-                        webView.loadUrl(
-                            "javascript:window.HtmlViewer.onLoaded" +
-                                    "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
-                        )
-                    }, DELAY_LOAD_TIME_URL)
-                }, delayTimeLoadWeb)
-            }
+                        webView.loadUrl("${result}javascript:window.HtmlViewer.dummy();")
+                        handler.postDelayed({
+                            webView.loadUrl(
+                                "javascript:window.HtmlViewer.onLoaded" +
+                                        "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');"
+                            )
+                        }, DELAY_LOAD_TIME_URL)
+                    }, delayTimeLoadWeb)
+                }
 
-            override fun onError(t: Throwable) {
-                super.onError(t)
-                observer.onError(t)
-            }
-        })
+                override fun onError(t: Throwable) {
+                    super.onError(t)
+                    observer.onError(t)
+                }
+            })
+        }
+
+        if (!fetchRemoteSuccess) {
+            handler.postDelayed({ onAfterWaitForRemoteConfig() }, DELAY_LOAD_TIME_REMOTE_CONFIG)
+        } else {
+            onAfterWaitForRemoteConfig()
+        }
     }
 
     companion object {
-        private const val DELAY_LOAD_TIME_WEB = 5000L
-        private const val DELAY_LOAD_TIME_URL = 5000L
+        private const val DELAY_LOAD_TIME_WEB = 3000L
+        private const val DELAY_LOAD_TIME_URL = 3000L
+        private const val DELAY_LOAD_TIME_REMOTE_CONFIG = 2000L
         const val JS_INTERFACE_NAME = "HtmlViewer"
-        const val WEB_URL = "https://snaptik.app/vn"
+        const val WEB_URL = "https://snaptik.app/en"
 
         private var fetchRemoteSuccess = false
     }
