@@ -1,0 +1,1 @@
+javascript:document.getElementById('url').value = '%s';javascript:document.getElementsByClassName('btn-go')[0].click();

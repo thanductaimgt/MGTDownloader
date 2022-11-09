@@ -15,7 +15,8 @@
 git clone https://github.com/thanductaimgt/MGTDownloader.git
 ```
 ### Update `local.properties`
-MGT Downloader use some dynamic configurations from http://dontpad.com API, to be able to change them dynamically.
+MGT Downloader use some dynamic configurations from https://api.dontpad.com API, to be able to
+change them dynamically.
 
 To build project, add these lines in the file `local.properties` in project root directory:
 
@@ -28,9 +29,9 @@ signConfigs.keyPassword=password
 
 # Base API urls to get remote configurations
 # Test env
-baseUrl.managementTest=http://dontpad.com/random/opensource/mgtdownloader/test/
+baseUrl.managementTest=https://api.dontpad.com/random/opensource/mgtdownloader/test/
 # Live env
-baseUrl.managementLive=http://dontpad.com/random/opensource/mgtdownloader/live/
+baseUrl.managementLive=https://api.dontpad.com/random/opensource/mgtdownloader/live/
 ```
 
 ### Use your own management space

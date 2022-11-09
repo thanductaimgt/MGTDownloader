@@ -35,7 +35,7 @@ abstract class StreamObserver<T>(hasDisposable: HasDisposable) : Observer(hasDis
     }
 }
 
-abstract class CompletableObserver(hasDisposable: HasDisposable) : Observer(hasDisposable) {
+open class CompletableObserver(hasDisposable: HasDisposable) : Observer(hasDisposable) {
     @CallSuper
     open fun onComplete() {
         removeDisposable()

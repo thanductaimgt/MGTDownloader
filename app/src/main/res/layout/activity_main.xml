@@ -15,10 +15,10 @@
             tools:context=".ui.MainActivity">
 
         <FrameLayout
-                android:id="@+id/frameLayout"
+                android:id="@+id/webViewContainer"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:visibility="invisible"
+                android:layout_height="500dp"
+                android:visibility="gone"
                 app:layout_constraintTop_toTopOf="parent">
 
             <WebView

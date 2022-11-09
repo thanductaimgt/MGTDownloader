@@ -30,43 +30,43 @@ abstract class Extractor<C : ExtractorConfig>(protected val hasDisposable: HasDi
         webContent: String,
         extractConfig: ExtractorConfig
     ): FilePreviewInfo {
-        extractConfig.extractFields.apply {
+        extractConfig.extractFields?.apply {
             val targetFileName =
                 "${
                     webContent.findValue(
-                        title.prefix,
-                        title.postfix,
-                        title.default,
-                        target = title.target,
+                        title?.prefix,
+                        title?.postfix,
+                        title?.default,
+                        target = title?.target,
                     )
                 }.mp4"
             val targetThumbUrl =
                 webContent.findValue(
-                    thumbUrl.prefix,
-                    thumbUrl.postfix,
-                    thumbUrl.default,
-                    target = thumbUrl.target,
+                    thumbUrl?.prefix,
+                    thumbUrl?.postfix,
+                    thumbUrl?.default,
+                    target = thumbUrl?.target,
                 )
             val targetDownloadUrl = webContent.findValue(
-                downloadUrl.prefix,
-                downloadUrl.postfix,
-                downloadUrl.default,
-                target = downloadUrl.target,
+                downloadUrl?.prefix,
+                downloadUrl?.postfix,
+                downloadUrl?.default,
+                target = downloadUrl?.target,
             ) ?: throw DownloadUrlNotFoundThrowable()
 
             val targetWidth =
                 webContent.findValue(
-                    width.prefix,
-                    width.postfix,
-                    width.default,
-                    target = width.target,
+                    width?.prefix,
+                    width?.postfix,
+                    width?.default,
+                    target = width?.target,
                 )?.toInt() ?: 1
             val targetHeight =
                 webContent.findValue(
-                    height.prefix,
-                    height.postfix,
-                    height.default,
-                    target = height.target,
+                    height?.prefix,
+                    height?.postfix,
+                    height?.default,
+                    target = height?.target,
                 )?.toInt()
                     ?: 1
 
@@ -90,5 +90,6 @@ abstract class Extractor<C : ExtractorConfig>(protected val hasDisposable: HasDi
                 isMultipartSupported = isMultipartSupported
             )
         }
+        throw RuntimeException("extractFields is null, extractConfig=$extractConfig")
     }
 }

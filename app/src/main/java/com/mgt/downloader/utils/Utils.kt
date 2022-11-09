@@ -596,10 +596,10 @@ class Utils {
     }
 
     /**
-     * dontpad url format: http://dontpad.com{subpath}
+     * dontpad API url format: https://api.dontpad.com{subpath}
      */
     fun getDontpadContent(dontpadUrl: String): String {
-        val content = readInputStream("$dontpadUrl.body.json?lastUpdate=0")
+        val content = readInputStream("$dontpadUrl.body.json?lastModified=0")
         val contentObj = JSONObject(content)
         return contentObj.optString("body")
     }

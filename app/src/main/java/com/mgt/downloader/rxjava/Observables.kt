@@ -82,11 +82,11 @@ class SingleObservable<T> private constructor() : Observable() {
             var result2: T2? = null
 
             class ChildSingleObserver(private val isFirstOfPair: Boolean) :
-                SingleObserver<Any>(object : HasDisposable {
+                SingleObserver<Any?>(object : HasDisposable {
                     override val compositeDisposable = compositeDisposable
                 }) {
                 @Suppress("UNCHECKED_CAST")
-                override fun onSuccess(result: Any) {
+                override fun onSuccess(result: Any?) {
                     super.onSuccess(result)
                     if (isFirstOfPair) {
                         result1 = result as T1?

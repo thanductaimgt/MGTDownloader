@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "extractFields": {
     "title": {
       "prefix": "<p><span>",
@@ -22,5 +23,8 @@
       "default": "840"
     }
   },
-  "jsCode": "java:document.getElementById('url').value = '%s';java:document.getElementsByClassName('btn-go')[0].click();"
+  "jsCode": "amF2YXNjcmlwdDpkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgndXJsJykudmFsdWUgPSAnJXMnO2phdmFzY3JpcHQ6ZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnYnRuLWdvJylbMF0uY2xpY2soKTs=",
+  "loadWebWaitTime": 3000,
+  "parseUrlWaitInterval": 3000,
+  "parseUrlFailRetryCount": 3
 }

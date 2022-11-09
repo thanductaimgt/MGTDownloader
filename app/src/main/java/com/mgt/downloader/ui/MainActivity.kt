@@ -281,6 +281,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
                 webView.loadUrl(expr)
                 jsExprEditText.text = null
             }
+            webViewContainer.visibility = View.VISIBLE
         } else {
             switchEnvLayout.visibility = View.INVISIBLE
         }

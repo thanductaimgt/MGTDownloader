@@ -73,7 +73,6 @@ class ExtractorConfigManager {
         return runCatching {
             extractorConfigClass.fromJson(
                 utils.readInputStream(App.instance.assets.open("extractor_config/$extractorName.json"))
-                    .replace("java:", "javascript:")
             )
         }.getOrNull()
     }
@@ -85,7 +84,6 @@ class ExtractorConfigManager {
         return runCatching {
             val json =
                 utils.getDontpadContent(config.getDontpadExtractorConfigUrl(extractorName))
-                    .replace("java:", "javascript:")
             gson.fromJson(json, extractorConfigClass.java)
         }.getOrNull()
     }
