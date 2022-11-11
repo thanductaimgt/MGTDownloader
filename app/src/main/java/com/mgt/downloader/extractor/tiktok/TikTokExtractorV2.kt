@@ -66,11 +66,19 @@ class TikTokExtractorV2(hasDisposable: HasDisposable) :
                 override fun onSuccess(result: TikTokExtractorConfig?) {
                     super.onSuccess(result)
 
-                    val jsCode = result?.jsCode.orEmpty()
-                    val data: ByteArray = Base64.decode(jsCode, Base64.DEFAULT)
-                    val jsCodeDecoded = String(data, StandardCharsets.UTF_8)
-                    val jsCodeTransformed = jsCodeDecoded.format(url).takeIf { it.isNotEmpty() }
-                        ?.let { "$it;" }.orEmpty()
+                    val jsCodeDecoded = runCatching {
+                        val jsCode = result?.jsCode.orEmpty()
+                        val data: ByteArray = Base64.decode(jsCode, Base64.DEFAULT)
+                        String(data, StandardCharsets.UTF_8)
+                    }.getOrDefault(DEFAULT_JS_CODE)
+                    val jsCodeTransformed = jsCodeDecoded.format(url)
+                        .let {
+                            if (it.isNotEmpty() && !it.endsWith(';')) {
+                                "$it;"
+                            } else {
+                                it
+                            }
+                        }
 
                     val loadWebWaitTime = result?.loadWebWaitTime ?: DEFAULT_LOAD_WEB_WAIT_TIME
                     val parseUrlWaitInterval =
@@ -161,6 +169,8 @@ class TikTokExtractorV2(hasDisposable: HasDisposable) :
         private const val DEFAULT_LOAD_WEB_WAIT_TIME = 3000L
         private const val DEFAULT_PARSE_URL_WAIT_INTERVAL = 3000L
         private const val DEFAULT_PARSE_URL_FAIL_RETRY_COUNT = 3
+        private const val DEFAULT_JS_CODE =
+            "javascript:document.getElementById('url').value = '%s';javascript:document.getElementsByClassName('btn-go')[0].click();"
         private const val DELAY_LOAD_TIME_REMOTE_CONFIG = 2000L
         const val JS_INTERFACE_NAME = "HtmlViewer"
         const val WEB_URL = "https://snaptik.app/en"
